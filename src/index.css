@@ -1,0 +1,8 @@
+@import url('./styles/adminStyles/App.css');
+@import url('./styles/userStyles/App.css');
+
+*{
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
