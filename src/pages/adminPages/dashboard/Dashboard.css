@@ -1,0 +1,33 @@
+.admin-layout {
+    display: flex;
+    height: 100vh;
+    font-family: sans-serif;
+  }
+  
+  .sidebar {
+    width: 200px;
+    background-color: #2f3542;
+    color: white;
+    padding: 20px;
+  }
+  
+  .sidebar h2 {
+    margin-bottom: 20px;
+  }
+  
+  .sidebar ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .sidebar li {
+    margin-bottom: 15px;
+    cursor: pointer;
+  }
+  
+  .main-content {
+    flex: 1;
+    padding: 40px;
+    background-color: #f1f2f6;
+  }
+  
