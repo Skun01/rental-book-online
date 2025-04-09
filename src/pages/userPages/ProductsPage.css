@@ -1,0 +1,220 @@
+.products-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    margin-top: 80px;
+  }
+  
+  .products-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .products-header h1 {
+    font-size: 2rem;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+  }
+  
+  .products-header p {
+    color: #6b7280;
+  }
+  
+  .products-container {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 2rem;
+  }
+  
+  .filters-sidebar {
+    background-color: white;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    height: fit-content;
+    position: sticky;
+    top: 80px;
+  }
+  
+  .filter-section {
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 1.5rem;
+  }
+  
+  .filter-section:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  
+  .filter-section h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #1f2937;
+  }
+  
+  .filter-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .filter-option {
+    display: flex;
+    align-items: center;
+  }
+  
+  .filter-option input[type="radio"],
+  .filter-option input[type="checkbox"] {
+    margin-right: 0.5rem;
+    accent-color: #4f46e5;
+  }
+  
+  .price-inputs {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .price-inputs input {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.25rem;
+  }
+  
+  .price-inputs span {
+    color: #6b7280;
+  }
+  
+  .clear-filters-btn {
+    width: 100%;
+    padding: 0.5rem;
+    background-color: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 0.25rem;
+    color: #4b5563;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .clear-filters-btn:hover {
+    background-color: #e5e7eb;
+  }
+  
+  .products-main {
+    flex: 1;
+  }
+  
+  .products-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .products-count {
+    color: #6b7280;
+  }
+  
+  .products-sort {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .products-sort label {
+    color: #6b7280;
+  }
+  
+  .products-sort select {
+    padding: 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.25rem;
+    background-color: white;
+  }
+  
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+  
+  .no-products {
+    text-align: center;
+    padding: 3rem 0;
+    color: #6b7280;
+  }
+  
+  .no-products button {
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background-color: #4f46e5;
+    color: white;
+    border: none;
+    border-radius: 0.25rem;
+    cursor: pointer;
+  }
+  
+  .no-products button:hover {
+    background-color: #4338ca;
+  }
+  
+  /* Loading spinner */
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 60vh;
+  }
+  
+  .loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #e5e7eb;
+    border-top: 4px solid #4f46e5;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* Responsive design */
+  @media (max-width: 1024px) {
+    .products-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .products-container {
+      grid-template-columns: 1fr;
+    }
+    
+    .filters-sidebar {
+      position: static;
+      margin-bottom: 1.5rem;
+    }
+  }
+  
+  @media (max-width: 640px) {
+    .products-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .products-toolbar {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+  }
+  

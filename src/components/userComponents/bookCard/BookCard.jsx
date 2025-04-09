@@ -1,57 +1,41 @@
 "use client"
 
 import { Link } from "react-router-dom"
-// import { useCart } from "../contexts/CartContext"
+import { useCart } from "../../../contexts/CartContext"
+import { ShoppingCart } from "lucide-react"
 import "./BookCard.css"
 
 const BookCard = ({ book }) => {
-//   const { addToCart } = useCart()
+  const { addToCart } = useCart()
 
   const handleAddToCart = (e) => {
     e.preventDefault()
     e.stopPropagation()
-    // addToCart(book)
+    addToCart(book)
   }
 
-  // Calculate discount price if applicable
-  const discountedPrice = book.discount > 0 ? book.price - (book.price * book.discount) / 100 : null
+  const authorName = book.authors && book.authors.length > 0 
+    ? book.authors[0].name 
+    : "Tác giả không xác định"
+
+  const coverImage = book.images && book.images.length > 0 
+    ? book.images.find(img => img.is_cover)?.url 
+    : "/placeholder.svg?height=300&width=200"
 
   return (
-    <Link to={`/book/${book.id}`} className="book-card">
+    <Link to={`/books/${book.id}`} className="book-card">
       <div className="book-image">
-        <img src={book.image || "/placeholder.svg"} alt={book.name} />
-        {book.discount > 0 && <div className="discount-badge">-{book.discount}%</div>}
+        <img src={coverImage || "/placeholder.svg"} alt={book.title} />
       </div>
       <div className="book-info">
-        <h3 className="book-title">{book.name}</h3>
-        <p className="book-author">{book.author}</p>
+        <h3 className="book-title">{book.title}</h3>
+        <p className="book-author">{authorName}</p>
         <div className="book-price">
-          {discountedPrice ? (
-            <>
-              <span className="discounted-price">${discountedPrice.toFixed(2)}</span>
-              <span className="original-price">${book.price.toFixed(2)}</span>
-            </>
-          ) : (
-            <span>${book.price.toFixed(2)}</span>
-          )}
+          <span>Giá thuê: {book.rental_price} VNĐ</span>
         </div>
         <button className="add-to-cart-btn" onClick={handleAddToCart}>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="9" cy="21" r="1"></circle>
-            <circle cx="20" cy="21" r="1"></circle>
-            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-          </svg>
-          Add to Cart
+          <ShoppingCart size={16} />
+          Thêm vào giỏ
         </button>
       </div>
     </Link>
@@ -59,4 +43,3 @@ const BookCard = ({ book }) => {
 }
 
 export default BookCard
-
