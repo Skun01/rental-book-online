@@ -1,4 +1,15 @@
-/* Dashboard.css */
+/* Define CSS custom properties if not defined globally */
+:root {
+  --primary-color: #4f46e5;
+  --primary-hover: #4338ca;
+  --text-color: #1e293b;
+  --light-text: #64748b;
+  --card-bg: #ffffff;
+  --border-color: #e2e8f0;
+  --radius: 0.5rem;
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+
 .dashboard {
   max-width: 1200px;
   margin: 0 auto;
@@ -7,7 +18,7 @@
 }
 
 /* Loading Spinner */
-.loading-container {
+.loadingContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -15,7 +26,7 @@
   height: 60vh;
 }
 
-.loading-spinner {
+.loadingSpinner {
   width: 50px;
   height: 50px;
   border: 4px solid var(--border-color);
@@ -35,7 +46,7 @@
 }
 
 /* Hero Banner */
-.hero-banner {
+.heroBanner {
   position: relative;
   background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
   border-radius: var(--radius);
@@ -46,7 +57,7 @@
   box-shadow: var(--shadow);
 }
 
-.hero-banner::before {
+.heroBanner::before {
   content: "";
   position: absolute;
   top: 0;
@@ -57,26 +68,26 @@
   opacity: 0.1;
 }
 
-.hero-content {
+.heroContent {
   max-width: 600px;
   position: relative;
   z-index: 1;
 }
 
-.hero-content h1 {
+.heroContent h1 {
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 1rem;
   line-height: 1.2;
 }
 
-.hero-content p {
+.heroContent p {
   font-size: 1.2rem;
   margin-bottom: 2rem;
   opacity: 0.9;
 }
 
-.browse-button {
+.browseButton {
   display: inline-block;
   background-color: white;
   color: var(--primary-color);
@@ -87,32 +98,32 @@
   transition: all 0.2s ease;
 }
 
-.browse-button:hover {
+.browseButton:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
 /* Section Styles */
-.book-section,
-.categories-section,
-.how-it-works {
+.bookSection,
+.categoriesSection,
+.howItWorks {
   margin: 3rem 0;
 }
 
-.section-header {
+.sectionHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
 }
 
-.section-header h2 {
+.sectionHeader h2 {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--text-color);
 }
 
-.view-all {
+.viewAll {
   color: var(--primary-color);
   font-weight: 600;
   text-decoration: none;
@@ -121,30 +132,30 @@
   transition: color 0.2s ease;
 }
 
-.view-all:hover {
+.viewAll:hover {
   color: var(--primary-hover);
 }
 
-.view-all::after {
+.viewAll::after {
   content: "→";
   margin-left: 0.5rem;
 }
 
 /* Book Grid */
-.book-grid {
+.bookGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
 }
 
 /* Categories Grid */
-.categories-grid {
+.categoriesGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
 }
 
-.category-card {
+.categoryCard {
   background-color: var(--card-bg);
   border-radius: var(--radius);
   padding: 1.5rem;
@@ -155,43 +166,43 @@
   border: 1px solid var(--border-color);
 }
 
-.category-card:hover {
+.categoryCard:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow);
   border-color: var(--primary-color);
 }
 
-.category-icon {
+.categoryIcon {
   font-size: 2rem;
   margin-bottom: 1rem;
   color: var(--primary-color);
 }
 
-.category-card h3 {
+.categoryCard h3 {
   font-size: 1.1rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
 }
 
-.category-card p {
+.categoryCard p {
   color: var(--light-text);
   font-size: 0.9rem;
 }
 
 /* How It Works Section */
-.how-it-works {
+.howItWorks {
   text-align: center;
   padding: 3rem 0;
 }
 
-.how-it-works h2 {
+.howItWorks h2 {
   font-size: 1.8rem;
   font-weight: 700;
   margin-bottom: 2rem;
   color: var(--text-color);
 }
 
-.steps-container {
+.stepsContainer {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
@@ -210,7 +221,7 @@
   box-shadow: var(--shadow);
 }
 
-.step-icon {
+.stepIcon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -236,7 +247,7 @@
 }
 
 /* Subscription Banner */
-.subscription-banner {
+.subscriptionBanner {
   background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
   border-radius: var(--radius);
   padding: 3rem 2rem;
@@ -246,7 +257,7 @@
   overflow: hidden;
 }
 
-.subscription-banner::before {
+.subscriptionBanner::before {
   content: "";
   position: absolute;
   top: 0;
@@ -257,29 +268,29 @@
   opacity: 0.1;
 }
 
-.subscription-content {
+.subscriptionContent {
   max-width: 500px;
   position: relative;
   z-index: 1;
 }
 
-.subscription-content h2 {
+.subscriptionContent h2 {
   font-size: 1.8rem;
   font-weight: 700;
   margin-bottom: 1rem;
 }
 
-.subscription-content p {
+.subscriptionContent p {
   margin-bottom: 1.5rem;
   opacity: 0.9;
 }
 
-.subscription-form {
+.subscriptionForm {
   display: flex;
   max-width: 400px;
 }
 
-.subscription-form input {
+.subscriptionForm input {
   flex: 1;
   padding: 0.75rem 1rem;
   border: none;
@@ -288,7 +299,7 @@
   font-size: 1rem;
 }
 
-.subscription-form button {
+.subscriptionForm button {
   background-color: var(--text-color);
   color: white;
   border: none;
@@ -299,57 +310,56 @@
   transition: background-color 0.2s ease;
 }
 
-.subscription-form button:hover {
+.subscriptionForm button:hover {
   background-color: black;
 }
 
 /* Responsive Design */
 @media (max-width: 1024px) {
-  .book-grid {
+  .bookGrid {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
 @media (max-width: 768px) {
-  .book-grid {
+  .bookGrid {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .categories-grid {
+  .categoriesGrid {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .steps-container {
+  .stepsContainer {
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
 
-  .hero-content h1 {
+  .heroContent h1 {
     font-size: 2rem;
   }
 }
 
 @media (max-width: 640px) {
-  .book-grid {
+  .bookGrid {
     grid-template-columns: 1fr;
   }
 
-  .categories-grid {
+  .categoriesGrid {
     grid-template-columns: 1fr;
   }
 
-  .subscription-form {
+  .subscriptionForm {
     flex-direction: column;
   }
 
-  .subscription-form input {
+  .subscriptionForm input {
     border-radius: var(--radius);
     margin-bottom: 1rem;
   }
 
-  .subscription-form button {
+  .subscriptionForm button {
     border-radius: var(--radius);
     padding: 0.75rem;
   }
 }
-

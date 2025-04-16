@@ -1,186 +1,207 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Link, useNavigate } from "react-router-dom"
-import { useCart } from "../../contexts/CartContext"
-import "./Cart.css"
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useCart } from "../../contexts/CartContext";
+import { ShoppingCart } from "lucide-react";
+import styles from "./Cart.module.css";
 
 const Cart = () => {
-  const { cart, updateQuantity, removeFromCart, getCartTotal } = useCart()
-  const [loading, setLoading] = useState(true)
-  const navigate = useNavigate()
+  const { cart, updateQuantity, removeFromCart, getCartTotal } = useCart();
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Simulate loading cart data
     setTimeout(() => {
-      setLoading(false)
-    }, 500)
-  }, [])
+      setLoading(false);
+    }, 500);
+  }, []);
 
   const handleQuantityChange = (item, newQuantity) => {
     if (newQuantity > 0 && newQuantity <= item.book.available_quantity) {
-      updateQuantity(item.id, newQuantity)
+      updateQuantity(item.id, newQuantity);
     }
-  }
+  };
 
   const handleRemoveItem = (itemId) => {
-    removeFromCart(itemId)
-  }
+    removeFromCart(itemId);
+  };
 
-  const { rental: rentalTotal, deposit: depositTotal } = getCartTotal()
-  const totalItems = cart.reduce((total, item) => total + item.quantity, 0)
+  const { rental: rentalTotal, deposit: depositTotal } = getCartTotal();
+  const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
 
   const proceedToCheckout = () => {
-    navigate("/checkout")
-  }
+    navigate("/checkout");
+  };
 
   if (loading) {
     return (
-      <div className="cart-container loading">
-        <div className="loading-spinner"></div>
-        <p>Loading your cart...</p>
+      <div className={styles.cartContainerLoading}>
+        <div className={styles.loadingSpinner}></div>
+        <p>Đang tải giỏ hàng...</p>
       </div>
-    )
+    );
   }
 
   if (cart.length === 0) {
     return (
-      <div className="cart-container empty">
-        <div className="empty-cart">
-          <div className="empty-cart-icon">
-            <i className="fas fa-shopping-cart"></i>
+      <div className={styles.cartContainerEmpty}>
+        <div className={styles.emptyCart}>
+          <div className={styles.emptyCartIcon}>
+            <ShoppingCart size={64} />
           </div>
-          <h2>Your cart is empty</h2>
-          <p>Looks like you haven't added any books to your cart yet.</p>
-          <Link to="/books" className="browse-books-button">
-            Browse Books
+          <h2>Giỏ Hàng Trống</h2>
+          <p>Chưa có sách nào trong giỏ hàng của bạn.</p>
+          <Link to="/books" className={styles.browseBooksButton}>
+            Duyệt Sách
           </Link>
         </div>
       </div>
-    )
+    );
   }
 
   return (
-    <div className="cart-container">
-      <h1>Your Cart</h1>
+    <div className={styles.cartContainer}>
+      <h1>Giỏ Hàng</h1>
 
-      <div className="cart-content">
-        <div className="cart-items">
-          <div className="cart-header">
-            <span className="header-product">Product</span>
-            <span className="header-price">Price</span>
-            <span className="header-quantity">Quantity</span>
-            <span className="header-total">Total</span>
+      <div className={styles.cartContent}>
+        <div className={styles.cartItems}>
+          <div className={styles.cartHeader}>
+            <span>Sản Phẩm</span>
+            <span>Giá</span>
+            <span>Số Lượng</span>
+            <span>Tổng</span>
           </div>
 
           {cart.map((item) => {
-            const itemRentalTotal = item.book.rental_price * item.quantity
-            const itemDepositTotal = item.book.deposit_price * item.quantity
+            const itemRentalTotal = item.book.rental_price * item.quantity;
+            const itemDepositTotal = item.book.deposit_price * item.quantity;
 
             return (
-              <div key={item.id} className="cart-item">
-                <div className="item-product">
-                  <div className="item-image">
+              <div key={item.id} className={styles.cartItem}>
+                <div className={styles.itemProduct}>
+                  <div className={styles.itemImage}>
                     <img
-                      src={item.book.images?.find((img) => img.is_cover)?.url || "/placeholder.svg"}
+                      src={
+                        item.book.images?.find((img) => img.is_cover)?.url ||
+                        "/placeholder.svg"
+                      }
                       alt={item.book.title}
                     />
                   </div>
-                  <div className="item-details">
+                  <div className={styles.itemDetails}>
                     <h3>{item.book.title}</h3>
-                    <p className="item-author">by {item.book.authors?.map((author) => author.name).join(", ")}</p>
-                    <button className="remove-button" onClick={() => handleRemoveItem(item.id)}>
-                      Remove
+                    <p className={styles.itemAuthor}>
+                      bởi {item.book.authors?.map((author) => author.name).join(", ")}
+                    </p>
+                    <button
+                      className={styles.removeButton}
+                      onClick={() => handleRemoveItem(item.id)}
+                    >
+                      Xóa
                     </button>
                   </div>
                 </div>
 
-                <div className="item-price">
-                  <div className="price-row">
-                    <span className="price-label">Rental:</span>
-                    <span className="price-value">{item.book.rental_price.toLocaleString()} VND</span>
+                <div className={styles.itemPrice}>
+                  <div className={styles.priceRow}>
+                    <span className={styles.priceLabel}>Thuê:</span>
+                    <span className={styles.priceValue}>
+                      ₫{item.book.rental_price.toLocaleString()}
+                    </span>
                   </div>
-                  <div className="price-row">
-                    <span className="price-label">Deposit:</span>
-                    <span className="price-value">{item.book.deposit_price.toLocaleString()} VND</span>
+                  <div className={styles.priceRow}>
+                    <span className={styles.priceLabel}>Đặt cọc:</span>
+                    <span className={styles.priceValue}>
+                      ₫{item.book.deposit_price.toLocaleString()}
+                    </span>
                   </div>
                 </div>
 
-                <div className="item-quantity">
-                  <div className="quantity-controls">
+                <div className={styles.itemQuantity}>
+                  <div className={styles.quantityControls}>
                     <button
-                      className="quantity-btn"
+                      className={styles.quantityBtn}
                       onClick={() => handleQuantityChange(item, item.quantity - 1)}
                       disabled={item.quantity <= 1}
                     >
                       -
                     </button>
-                    <span className="quantity-value">{item.quantity}</span>
+                    <span className={styles.quantityValue}>{item.quantity}</span>
                     <button
-                      className="quantity-btn"
+                      className={styles.quantityBtn}
                       onClick={() => handleQuantityChange(item, item.quantity + 1)}
                       disabled={item.quantity >= item.book.available_quantity}
                     >
                       +
                     </button>
                   </div>
-                  <span className="availability">{item.book.available_quantity} available</span>
+                  <span className={styles.availability}>
+                    {item.book.available_quantity} còn lại
+                  </span>
                 </div>
 
-                <div className="item-total">
-                  <div className="total-row">
-                    <span className="total-label">Rental:</span>
-                    <span className="total-value">{itemRentalTotal.toLocaleString()} VND</span>
+                <div className={styles.itemTotal}>
+                  <div className={styles.totalRow}>
+                    <span className={styles.totalLabel}>Tổng thuê:</span>
+                    <span className={styles.totalValue}>
+                      ₫{itemRentalTotal.toLocaleString()}
+                    </span>
                   </div>
-                  <div className="total-row">
-                    <span className="total-label">Deposit:</span>
-                    <span className="total-value">{itemDepositTotal.toLocaleString()} VND</span>
+                  <div className={styles.totalRow}>
+                    <span className={styles.totalLabel}>Tổng cọc:</span>
+                    <span className={styles.totalValue}>
+                      ₫{itemDepositTotal.toLocaleString()}
+                    </span>
                   </div>
                 </div>
               </div>
-            )
+            );
           })}
         </div>
 
-        <div className="cart-summary">
-          <h2>Order Summary</h2>
+        <div className={styles.cartSummary}>
+          <h2>Tóm Tắt Đơn Hàng</h2>
 
-          <div className="summary-row">
-            <span>Total Items:</span>
+          <div className={styles.summaryRow}>
+            <span>Tổng số sách:</span>
             <span>{totalItems}</span>
           </div>
 
-          <div className="summary-row">
-            <span>Total Rental Fee:</span>
-            <span>{rentalTotal.toLocaleString()} VND</span>
+          <div className={styles.summaryRow}>
+            <span>Tổng phí thuê:</span>
+            <span>₫{rentalTotal.toLocaleString()}</span>
           </div>
 
-          <div className="summary-row">
-            <span>Total Deposit:</span>
-            <span>{depositTotal.toLocaleString()} VND</span>
+          <div className={styles.summaryRow}>
+            <span>Tổng đặt cọc:</span>
+            <span>₫{depositTotal.toLocaleString()}</span>
           </div>
 
-          <div className="summary-row total">
-            <span>Total Payment:</span>
-            <span>{(rentalTotal + depositTotal).toLocaleString()} VND</span>
+          <div className={styles.summaryRowTotal}>
+            <span>Tổng thanh toán:</span>
+            <span>₫{(rentalTotal + depositTotal).toLocaleString()}</span>
           </div>
 
-          <div className="deposit-note">
-            <p>Note: The deposit amount will be refunded when you return the books in good condition.</p>
+          <div className={styles.depositNote}>
+            <p>
+              Lưu ý: Số tiền đặt cọc sẽ được hoàn lại khi bạn trả sách đúng hạn và
+              trong tình trạng tốt.
+            </p>
           </div>
 
-          <button className="checkout-button" onClick={proceedToCheckout}>
-            Proceed to Checkout
+          <button className={styles.checkoutButton} onClick={proceedToCheckout}>
+            Tiến Hành Thanh Toán
           </button>
 
-          <Link to="/books" className="continue-shopping">
-            Continue Shopping
+          <Link to="/books" className={styles.continueShopping}>
+            Tiếp Tục Mua Sắm
           </Link>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Cart
-
+export default Cart;

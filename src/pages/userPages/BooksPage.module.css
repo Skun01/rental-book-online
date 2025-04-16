@@ -1,32 +1,32 @@
-.books-page {
+.booksPage {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1rem;
   margin-top: 80px;
 }
 
-.books-header {
+.booksHeader {
   text-align: center;
   margin-bottom: 2rem;
 }
 
-.books-header h1 {
+.booksHeader h1 {
   font-size: 2rem;
   color: #1f2937;
   margin-bottom: 0.5rem;
 }
 
-.books-header p {
+.booksHeader p {
   color: #6b7280;
 }
 
-.books-container {
+.booksContainer {
   display: grid;
   grid-template-columns: 250px 1fr;
   gap: 2rem;
 }
 
-.filters-sidebar {
+.filtersSidebar {
   background-color: white;
   border-radius: 0.5rem;
   padding: 1.5rem;
@@ -36,42 +36,42 @@
   top: 80px;
 }
 
-.filter-section {
+.filterSection {
   margin-bottom: 1.5rem;
   border-bottom: 1px solid #e5e7eb;
   padding-bottom: 1.5rem;
 }
 
-.filter-section:last-child {
+.filterSection:last-child {
   border-bottom: none;
   padding-bottom: 0;
 }
 
-.filter-section h3 {
+.filterSection h3 {
   font-size: 1rem;
   font-weight: 600;
   margin-bottom: 1rem;
   color: #1f2937;
 }
 
-.filter-options {
+.filterOptions {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
-.filter-option {
+.filterOption {
   display: flex;
   align-items: center;
 }
 
-.filter-option input[type="radio"],
-.filter-option input[type="checkbox"] {
+.filterOption input[type="radio"],
+.filterOption input[type="checkbox"] {
   margin-right: 0.5rem;
   accent-color: #4f46e5;
 }
 
-.price-inputs {
+.priceInputs {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -79,18 +79,18 @@
   align-items: flex-start;
 }
 
-.price-inputs input {
+.priceInputs input {
   flex: 1;
   padding: 0.5rem;
   border: 1px solid #d1d5db;
   border-radius: 0.25rem;
 }
 
-.price-inputs span {
+.priceInputs span {
   color: #6b7280;
 }
 
-.clear-filters-btn {
+.clearFiltersBtn {
   width: 100%;
   padding: 0.5rem;
   background-color: #f3f4f6;
@@ -102,15 +102,15 @@
   transition: all 0.2s;
 }
 
-.clear-filters-btn:hover {
+.clearFiltersBtn:hover {
   background-color: #e5e7eb;
 }
 
-.books-main {
+.booksMain {
   flex: 1;
 }
 
-.books-toolbar {
+.booksToolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -119,40 +119,45 @@
   border-bottom: 1px solid #e5e7eb;
 }
 
-.books-count {
+.booksCount {
   color: #6b7280;
 }
 
-.books-sort {
+.booksSortSec {
+  display: flex;
+  align-items: center;
+}
+
+.booksSort {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.books-sort label {
+.booksSort label {
   color: #6b7280;
 }
 
-.books-sort select {
+.booksSort select {
   padding: 0.5rem;
   border: 1px solid #d1d5db;
   border-radius: 0.25rem;
   background-color: white;
 }
 
-.books-grid {
+.booksGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
 }
 
-.no-books {
+.noBooks {
   text-align: center;
   padding: 3rem 0;
   color: #6b7280;
 }
 
-.no-books button {
+.noBooks button {
   margin-top: 1rem;
   padding: 0.5rem 1rem;
   background-color: #4f46e5;
@@ -162,12 +167,12 @@
   cursor: pointer;
 }
 
-.no-books button:hover {
+.noBooks button:hover {
   background-color: #4338ca;
 }
 
 /* Loading spinner */
-.loading-container {
+.loadingContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -175,7 +180,7 @@
   height: 60vh;
 }
 
-.loading-spinner {
+.loadingSpinner {
   width: 50px;
   height: 50px;
   border: 4px solid #e5e7eb;
@@ -196,38 +201,38 @@
 
 /* Responsive design */
 @media (max-width: 1024px) {
-  .books-grid {
+  .booksGrid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 768px) {
-  .books-container {
+  .booksContainer {
     grid-template-columns: 1fr;
   }
 
-  .filters-sidebar {
+  .filtersSidebar {
     position: static;
     margin-bottom: 1.5rem;
   }
-  .price-inputs{
-    flex-direction:row;
+
+  .priceInputs {
+    flex-direction: row;
   }
 }
 
-
 @media (max-width: 640px) {
-  .books-grid {
+  .booksGrid {
     grid-template-columns: 1fr;
   }
 
-  .books-toolbar {
+  .booksToolbar {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
   }
-  .price-inputs{
-    flex-direction:row;
+
+  .priceInputs {
+    flex-direction: row;
   }
 }
-

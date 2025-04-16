@@ -1,4 +1,4 @@
-.book-card {
+.bookCard {
   display: flex;
   flex-direction: column;
   border-radius: 0.75rem;
@@ -11,29 +11,29 @@
   color: inherit;
 }
 
-.book-card:hover {
+.bookCard:hover {
   transform: translateY(-4px);
   box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
 }
 
-.book-image {
+.bookImage {
   position: relative;
   aspect-ratio: 2/3;
   overflow: hidden;
 }
 
-.book-image img {
+.bookImage img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.3s ease;
 }
 
-.book-card:hover .book-image img {
+.bookCard:hover .bookImage img {
   transform: scale(1.05);
 }
 
-.out-of-stock-badge {
+.outOfStockBadge {
   position: absolute;
   top: 1rem;
   right: 0;
@@ -46,14 +46,14 @@
   border-bottom-left-radius: 0.25rem;
 }
 
-.book-info {
+.bookInfo {
   display: flex;
   flex-direction: column;
   padding: 1rem;
   flex-grow: 1;
 }
 
-.book-title {
+.bookTitle {
   margin: 0 0 0.5rem 0;
   font-size: 1rem;
   font-weight: 600;
@@ -65,7 +65,7 @@
   color: #333;
 }
 
-.book-author {
+.bookAuthor {
   color: #666;
   font-size: 0.875rem;
   margin: 0 0 0.75rem 0;
@@ -74,19 +74,19 @@
   white-space: nowrap;
 }
 
-.book-price {
+.bookPrice {
   display: flex;
   flex-direction: column;
   margin-bottom: 0.75rem;
 }
 
-.book-price span {
+.bookPrice span {
   font-weight: 600;
   color: #0066cc;
   font-size: 1rem;
 }
 
-.add-to-cart-btn {
+.addToCartBtn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -103,17 +103,17 @@
   margin-top: auto;
 }
 
-.add-to-cart-btn:hover:not(:disabled) {
+.addToCartBtn:hover:not(:disabled) {
   background-color: #0055aa;
 }
 
-.add-to-cart-btn:disabled {
+.addToCartBtn:disabled {
   background-color: #ccc;
   cursor: not-allowed;
   opacity: 0.7;
 }
 
-.add-to-cart-btn svg {
+.addToCartBtn svg {
   width: 1rem;
   height: 1rem;
 }

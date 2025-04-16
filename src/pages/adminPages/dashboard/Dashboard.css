@@ -1,41 +1,12 @@
-/* Reset và style chung */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
 
-body {
-  font-family: 'Roboto', Arial, sans-serif;
-  background-color: #f5f7fa;
-  color: #333;
-  line-height: 1.6;
-}
 
-a {
-  text-decoration: none;
-  color: inherit;
-}
 
-ul {
-  list-style: none;
-}
-
-button {
-  cursor: pointer;
-  background: none;
-  border: none;
-  outline: none;
-}
-
-/* Layout chính */
 .admin-layout {
   display: flex;
   min-height: 100vh;
   position: relative;
 }
 
-/* Sidebar */
 .sidebar {
   width: 260px;
   min-height: 100vh;
@@ -165,7 +136,7 @@ button {
   display: none;
 }
 
-/* Main content */
+
 .main-content {
   flex: 1;
   margin-left: 260px;
@@ -214,7 +185,7 @@ button {
   padding: 20px;
 }
 
-/* Dashboard stats */
+
 .dashboard-stats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -274,7 +245,6 @@ button {
   color: #333;
 }
 
-/* Recent activities */
 .recent-activities {
   background-color: #fff;
   border-radius: 8px;
@@ -334,12 +304,10 @@ button {
   color: #e74c3c;
 }
 
-/* Page content for router outlet */
 .page-content {
   margin-top: 30px;
 }
 
-/* Mobile menu */
 .mobile-menu-overlay {
   position: fixed;
   top: 0;
@@ -398,7 +366,6 @@ button {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
-/* Responsive styles */
 @media screen and (max-width: 1024px) {
   .dashboard-stats {
     grid-template-columns: repeat(2, 1fr);

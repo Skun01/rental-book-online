@@ -1,17 +1,17 @@
-"use client" // Sử dụng phía máy khách
+"use client";
 
-import { useState, useEffect } from "react"
-import { useSearchParams } from "react-router-dom"
-import BookCard from "../../components/userComponents/bookCard/BookCard"
-import { sampleBooks, sampleCategories, sampleAuthors } from "../../sampleData"
-import "./BooksPage.css"
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
+import BookCard from "../../components/userComponents/bookCard/BookCard";
+import { sampleBooks, sampleCategories, sampleAuthors } from "../../sampleData";
+import styles from "./BooksPage.module.css";
 
 const BooksPage = () => {
-  const [searchParams, setSearchParams] = useSearchParams()
-  const [books, setBooks] = useState([])
-  const [categories, setCategories] = useState([])
-  const [authors, setAuthors] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [books, setBooks] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [authors, setAuthors] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [filters, setFilters] = useState({
     category: searchParams.get("category") || "",
     author: searchParams.get("author") || "",
@@ -20,85 +20,97 @@ const BooksPage = () => {
     availability: searchParams.get("availability") || "all",
     search: searchParams.get("search") || "",
     sort: searchParams.get("sort") || "newest",
-  })
+  });
 
   useEffect(() => {
     const loadData = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 500))
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
-      let filteredBooks = [...sampleBooks]
+      let filteredBooks = [...sampleBooks];
 
+      // Search filter
       if (filters.search) {
-        const searchTerm = filters.search.toLowerCase()
+        const searchTerm = filters.search.toLowerCase();
         filteredBooks = filteredBooks.filter(
           (book) =>
             book.title.toLowerCase().includes(searchTerm) ||
-            book.authors.some((author) => author.name.toLowerCase().includes(searchTerm)),
-        )
+            book.authors.some((author) => author.name.toLowerCase().includes(searchTerm))
+        );
       }
 
+      // Category filter
       if (filters.category) {
-        filteredBooks = filteredBooks.filter((book) => book.category_id.toString() === filters.category)
+        filteredBooks = filteredBooks.filter(
+          (book) => book.category_id.toString() === filters.category
+        );
       }
 
+      // Author filter
       if (filters.author) {
         filteredBooks = filteredBooks.filter((book) =>
-          book.authors.some((author) => author.id.toString() === filters.author),
-        )
+          book.authors.some((author) => author.id.toString() === filters.author)
+        );
       }
 
+      // Price filters
       if (filters.minPrice) {
-        filteredBooks = filteredBooks.filter((book) => book.rental_price >= Number.parseFloat(filters.minPrice))
+        filteredBooks = filteredBooks.filter(
+          (book) => book.rental_price >= Number.parseFloat(filters.minPrice)
+        );
       }
-
       if (filters.maxPrice) {
-        filteredBooks = filteredBooks.filter((book) => book.rental_price <= Number.parseFloat(filters.maxPrice))
+        filteredBooks = filteredBooks.filter(
+          (book) => book.rental_price <= Number.parseFloat(filters.maxPrice)
+        );
       }
 
+      // Availability filter
       if (filters.availability === "available") {
-        filteredBooks = filteredBooks.filter((book) => book.available_quantity > 0)
+        filteredBooks = filteredBooks.filter((book) => book.available_quantity > 0);
       }
 
+      // Sorting
       switch (filters.sort) {
         case "newest":
-          filteredBooks.sort((a, b) => new Date(b.create_at) - new Date(a.create_at))
-          break
+          filteredBooks.sort((a, b) => new Date(b.create_at) - new Date(a.create_at));
+          break;
         case "price-low":
-          filteredBooks.sort((a, b) => a.rental_price - b.rental_metadata)
-          break
+          filteredBooks.sort((a, b) => a.rental_price - b.rental_price);
+          break;
         case "price-high":
-          filteredBooks.sort((a, b) => b.rental_price - a.rental_price)
-          break
+          filteredBooks.sort((a, b) => b.rental_price - a.rental_price);
+          break;
         case "title-asc":
-          filteredBooks.sort((a, b) => a.title.localeCompare(b.title))
-          break
+          filteredBooks.sort((a, b) => a.title.localeCompare(b.title));
+          break;
         case "title-desc":
-          filteredBooks.sort((a, b) => b.title.localeCompare(a.title))
-          break
+          filteredBooks.sort((a, b) => b.title.localeCompare(a.title));
+          break;
         default:
-          break
+          break;
       }
 
-      setBooks(filteredBooks)
-      setCategories(sampleCategories)
-      setAuthors(sampleAuthors)
-      setIsLoading(false)
-    }
+      setBooks(filteredBooks);
+      setCategories(sampleCategories);
+      setAuthors(sampleAuthors);
+      setIsLoading(false);
+    };
 
-    loadData()
-  }, [filters])
+    loadData();
+  }, [filters]);
 
   const handleFilterChange = (e) => {
-    const { name, value } = e.target
-    setFilters((prev) => ({ ...prev, [name]: value }))
+    const { name, value } = e.target;
+    setFilters((prev) => ({ ...prev, [name]: value }));
 
+    // Update URL search params
     if (value) {
-      searchParams.set(name, value)
+      searchParams.set(name, value);
     } else {
-      searchParams.delete(name)
+      searchParams.delete(name);
     }
-    setSearchParams(searchParams)
-  }
+    setSearchParams(searchParams);
+  };
 
   const clearFilters = () => {
     setFilters({
@@ -109,32 +121,32 @@ const BooksPage = () => {
       availability: "all",
       search: "",
       sort: "newest",
-    })
-    setSearchParams({})
-  }
+    });
+    setSearchParams({});
+  };
 
   if (isLoading) {
     return (
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingSpinner}></div>
         <p>Đang tải sách...</p>
       </div>
-    )
+    );
   }
 
   return (
-    <div className="books-page">
-      <div className="books-header">
+    <div className={styles.booksPage}>
+      <div className={styles.booksHeader}>
         <h1>Duyệt Sách</h1>
         <p>Khám phá bộ sưu tập sách có sẵn để thuê</p>
       </div>
 
-      <div className="books-container">
-        <aside className="filters-sidebar">
-          <div className="filter-section">
+      <div className={styles.booksContainer}>
+        <aside className={styles.filtersSidebar}>
+          <div className={styles.filterSection}>
             <h3>Thể Loại</h3>
-            <div className="filter-options">
-              <div className="filter-option">
+            <div className={styles.filterOptions}>
+              <div className={styles.filterOption}>
                 <input
                   type="radio"
                   id="all-categories"
@@ -146,7 +158,7 @@ const BooksPage = () => {
                 <label htmlFor="all-categories">Tất Cả Thể Loại</label>
               </div>
               {categories.map((category) => (
-                <div key={category.id} className="filter-option">
+                <div key={category.id} className={styles.filterOption}>
                   <input
                     type="radio"
                     id={`category-${category.id}`}
@@ -161,10 +173,10 @@ const BooksPage = () => {
             </div>
           </div>
 
-          <div className="filter-section">
+          <div className={styles.filterSection}>
             <h3>Tác Giả</h3>
-            <div className="filter-options">
-              <div className="filter-option">
+            <div className={styles.filterOptions}>
+              <div className={styles.filterOption}>
                 <input
                   type="radio"
                   id="all-authors"
@@ -176,7 +188,7 @@ const BooksPage = () => {
                 <label htmlFor="all-authors">Tất Cả Tác Giả</label>
               </div>
               {authors.map((author) => (
-                <div key={author.id} className="filter-option">
+                <div key={author.id} className={styles.filterOption}>
                   <input
                     type="radio"
                     id={`author-${author.id}`}
@@ -191,9 +203,9 @@ const BooksPage = () => {
             </div>
           </div>
 
-          <div className="filter-section">
+          <div className={styles.filterSection}>
             <h3>Khoảng Giá Thuê</h3>
-            <div className="price-inputs">
+            <div className={styles.priceInputs}>
               <input
                 type="number"
                 name="minPrice"
@@ -214,10 +226,10 @@ const BooksPage = () => {
             </div>
           </div>
 
-          <div className="filter-section">
+          <div className={styles.filterSection}>
             <h3>Tình Trạng</h3>
-            <div className="filter-options">
-              <div className="filter-option">
+            <div className={styles.filterOptions}>
+              <div className={styles.filterOption}>
                 <input
                   type="radio"
                   id="all-availability"
@@ -228,7 +240,7 @@ const BooksPage = () => {
                 />
                 <label htmlFor="all-availability">Tất Cả Sách</label>
               </div>
-              <div className="filter-option">
+              <div className={styles.filterOption}>
                 <input
                   type="radio"
                   id="available-only"
@@ -242,36 +254,38 @@ const BooksPage = () => {
             </div>
           </div>
 
-          <button className="clear-filters-btn" onClick={clearFilters}>
+          <button className={styles.clearFiltersBtn} onClick={clearFilters}>
             Xóa Bộ Lọc
           </button>
         </aside>
 
-        <div className="books-main">
-          <div className="books-toolbar">
-            <div className="books-count">
+        <div className={styles.booksMain}>
+          <div className={styles.booksToolbar}>
+            <div className={styles.booksCount}>
               {books.length} {books.length === 1 ? "cuốn sách" : "cuốn sách"} được tìm thấy
             </div>
-            <div className="books-sort">
-              <label htmlFor="sort">Sắp xếp theo:</label>
-              <select id="sort" name="sort" value={filters.sort} onChange={handleFilterChange}>
-                <option value="newest">Mới Nhất</option>
-                <option value="price-low">Giá: Thấp đến Cao</option>
-                <option value="price-high">Giá: Cao đến Thấp</option>
-                <option value="title-asc">Tiêu Đề: A-Z</option>
-                <option value="title-desc">Tiêu Đề: Z-A</option>
-              </select>
+            <div className={styles.booksSortSec}>
+              <div className={styles.booksSort}>
+                <label htmlFor="sort">Sắp xếp:</label>
+                <select id="sort" name="sort" value={filters.sort} onChange={handleFilterChange}>
+                  <option value="newest">Mới Nhất</option>
+                  <option value="price-low">Giá: Thấp đến Cao</option>
+                  <option value="price-high">Giá: Cao đến Thấp</option>
+                  <option value="title-asc">Tiêu Đề: A-Z</option>
+                  <option value="title-desc">Tiêu Đề: Z-A</option>
+                </select>
+              </div>
             </div>
           </div>
 
           {books.length > 0 ? (
-            <div className="books-grid">
+            <div className={styles.booksGrid}>
               {books.map((book) => (
                 <BookCard key={book.id} book={book} />
               ))}
             </div>
           ) : (
-            <div className="no-books">
+            <div className={styles.noBooks}>
               <p>Không tìm thấy sách nào phù hợp với tiêu chí của bạn.</p>
               <button onClick={clearFilters}>Xóa bộ lọc</button>
             </div>
@@ -279,7 +293,7 @@ const BooksPage = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default BooksPage
+export default BooksPage;
