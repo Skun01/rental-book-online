@@ -33,7 +33,7 @@ const BookDetailPage = () => {
     setActiveTab("description");
     window.scrollTo(0, 0);
   }, [id]);
-
+  console.log('hello ');
   const handleQuantityChange = (e) => {
     const value = Number.parseInt(e.target.value);
     if (value > 0 && value <= book.available_quantity) {

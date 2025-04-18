@@ -6,7 +6,7 @@ import Dashboard from "../pages/userPages/Dashboard";
 import BooksPage from "../pages/userPages/BooksPage"
 import BookDetailPage from "../pages/userPages/BookDetailPage"
 import Cart from "../pages/userPages/Cart"
-// import Checkout from "../pages/userPages/Checkout"
+import Checkout from "../pages/userPages/Checkout";
 // import RentalConfirmation from "../pages/userPages/RentalConfirmation"
 // import OrderTracking from "../pages/userPages/OrderTracking"
 // import UserProfile from "../pages/userPages/UserProfile"
@@ -35,10 +35,10 @@ const userRoutes = [
         path: "cart",
         element: <Cart />,
       },
-    //   {
-    //     path: "checkout",
-    //     element: <Checkout />,
-    //   },
+      {
+        path: "checkout",
+        element: <Checkout />,
+      },
     //   {
     //     path: "rental-confirmation/:id",
     //     element: <RentalConfirmation />,

@@ -1,0 +1,311 @@
+.checkoutContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.checkoutContainer h1 {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #333;
+}
+
+.checkoutGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+@media (min-width: 992px) {
+  .checkoutGrid {
+    grid-template-columns: 3fr 2fr;
+  }
+}
+
+.checkoutFormContainer {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+}
+
+.checkoutForm {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.formSection {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 1.5rem;
+}
+
+.formSection:last-child {
+  border-bottom: none;
+}
+
+.formSection h2 {
+  font-size: 1.3rem;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.formGroup {
+  margin-bottom: 1.25rem;
+}
+
+.formGroup:last-child {
+  margin-bottom: 0;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #555;
+}
+
+.formGroup input[type="text"],
+.formGroup input[type="email"],
+.formGroup input[type="tel"],
+.formGroup select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.formGroup input.error,
+.formGroup select.error {
+  border-color: #e53935;
+}
+
+.errorMessage {
+  color: #e53935;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  display: block;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.deliveryOptions,
+.paymentOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.deliveryOption,
+.paymentOption {
+  display: flex;
+  align-items: flex-start;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.deliveryOption input,
+.paymentOption input {
+  margin-right: 1rem;
+  margin-top: 0.25rem;
+}
+
+.optionTitle {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.optionDescription {
+  display: block;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.addressFields {
+  margin-top: 1.5rem;
+}
+
+.checkboxGroup {
+  display: flex;
+  align-items: flex-start;
+}
+
+.checkboxGroup input {
+  margin-right: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.termsLink {
+  color: #2196f3;
+  text-decoration: none;
+}
+
+.termsLink:hover {
+  text-decoration: underline;
+}
+
+.submitError {
+  background-color: #ffebee;
+  color: #e53935;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+}
+
+.checkoutButton {
+  background-color: #2196f3;
+  color: white;
+  border: none;
+  padding: 1rem;
+  border-radius: 4px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.checkoutButton:hover {
+  background-color: #1976d2;
+}
+
+.checkoutButton:disabled {
+  background-color: #90caf9;
+  cursor: not-allowed;
+}
+
+.orderSummaryContainer {
+  position: relative;
+}
+
+.orderSummary {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  position: sticky;
+  top: 2rem;
+}
+
+.orderSummary h2 {
+  font-size: 1.3rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #eee;
+  color: #333;
+}
+
+.cartItems {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 1.5rem;
+}
+
+.cartItem {
+  display: flex;
+  padding: 1rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.cartItem:last-child {
+  border-bottom: none;
+}
+
+.itemImage {
+  width: 60px;
+  height: 90px;
+  margin-right: 1rem;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.itemImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.itemInfo {
+  flex: 1;
+}
+
+.itemInfo h3 {
+  font-size: 1rem;
+  margin: 0 0 0.25rem;
+}
+
+.itemAuthor {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.itemPricing {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9rem;
+}
+
+.depositAmount {
+  color: #e91e63;
+}
+
+.rentalFee {
+  color: #2196f3;
+}
+
+.summaryTotals {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #eee;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.summaryRowTotal {
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+
+.rentalNote {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.rentalNote p {
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .checkoutContainer {
+    padding: 1rem;
+  }
+
+  .checkoutFormContainer,
+  .orderSummary {
+    padding: 1.5rem;
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}

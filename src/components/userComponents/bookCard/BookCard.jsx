@@ -29,7 +29,7 @@ const BookCard = ({ book }) => {
   const isOutOfStock = book.available_quantity === 0;
 
   return (
-    <Link to={`/book/${book.id}`} className={styles.bookCard}>
+    <Link to={`/books/${book.id}`} className={styles.bookCard}>
       <div className={styles.bookImage}>
         <img src={coverImage} alt={book.title} />
         {isOutOfStock && (
