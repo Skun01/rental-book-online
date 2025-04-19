@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { BookOpen, EyeOff, Eye, Loader, LogIn, Home } from "lucide-react"
-import {useUser} from "../contexts/UserContext";
+import {useAuth} from "../contexts/AuthContext";
 import axios from "axios";
 const Login = () => {
   const navigate = useNavigate()
@@ -9,7 +9,7 @@ const Login = () => {
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const {login} = useUser();
+  const {login} = useAuth();
   const [errors, setErrors] = useState({
     email: "",
     password: "",

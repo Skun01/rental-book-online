@@ -2,135 +2,113 @@ import { createContext, useContext, useState, useEffect } from "react"
 
 const CartContext = createContext()
 
-export const useCart = () => {
-  const context = useContext(CartContext)
-  if (!context) {
-    throw new Error("useCart must be used within a CartProvider")
-  }
-  return context
+export function useCart() {
+  return useContext(CartContext)
 }
 
-export const CartProvider = ({ children }) => {
-  const [cart, setCart] = useState([])
-  const [totalItems, setTotalItems] = useState(0)
+export function CartProvider({ children }) {
+  const [cartItems, setCartItems] = useState([])
+  const [isInitialized, setIsInitialized] = useState(false)
 
   // Load cart from localStorage on initial render
   useEffect(() => {
-    try {
-      const savedCart = localStorage.getItem("cart")
-      if (savedCart) {
-        const parsedCart = JSON.parse(savedCart)
-        setCart(parsedCart)
-        updateTotalItems(parsedCart)
+    const storedCart = localStorage.getItem("cart")
+    if (storedCart) {
+      try {
+        setCartItems(JSON.parse(storedCart))
+      } catch (error) {
+        console.error("Error parsing cart from localStorage:", error)
+        setCartItems([])
       }
-    } catch (error) {
-      console.error("Error loading cart from localStorage:", error)
-      // If there's an error, initialize with empty cart
-      setCart([])
-      setTotalItems(0)
     }
+    setIsInitialized(true)
   }, [])
 
   // Save cart to localStorage whenever it changes
   useEffect(() => {
-    try {
-      localStorage.setItem("cart", JSON.stringify(cart))
-      updateTotalItems(cart)
-    } catch (error) {
-      console.error("Error saving cart to localStorage:", error)
+    if (isInitialized) {
+      localStorage.setItem("cart", JSON.stringify(cartItems))
     }
-  }, [cart])
+  }, [cartItems, isInitialized])
 
-  const updateTotalItems = (cartItems) => {
-    const total = cartItems.reduce((sum, item) => sum + item.quantity, 0)
-    setTotalItems(total)
-  }
-
+  // Add item to cart
   const addToCart = (book, quantity = 1) => {
-    setCart((prevCart) => {
+    setCartItems((prevItems) => {
       // Check if the book is already in the cart
-      const existingItemIndex = prevCart.findIndex((item) => item.id === book.id)
+      const existingItemIndex = prevItems.findIndex((item) => item.id === book.id)
 
       if (existingItemIndex !== -1) {
         // If the book is already in the cart, update the quantity
-        const updatedCart = [...prevCart]
-        updatedCart[existingItemIndex] = {
-          ...updatedCart[existingItemIndex],
-          quantity: updatedCart[existingItemIndex].quantity + quantity,
-        }
-        return updatedCart
+        const updatedItems = [...prevItems]
+        const newQuantity = updatedItems[existingItemIndex].quantity + quantity
+
+        // Make sure the quantity doesn't exceed available quantity
+        updatedItems[existingItemIndex].quantity = Math.min(newQuantity, book.available_quantity)
+
+        return updatedItems
       } else {
         // If the book is not in the cart, add it
-        return [
-          ...prevCart,
-          {
-            id: book.id,
-            book,
-            quantity,
-          },
-        ]
+        return [...prevItems, { ...book, quantity }]
       }
     })
+
+    // Show success notification
+    return true
   }
 
+  // Update item quantity
   const updateQuantity = (bookId, quantity) => {
-    setCart((prevCart) => {
-      return prevCart.map((item) => {
+    if (quantity <= 0) {
+      return removeFromCart(bookId)
+    }
+
+    setCartItems((prevItems) => {
+      return prevItems.map((item) => {
         if (item.id === bookId) {
-          return { ...item, quantity }
+          // Make sure the quantity doesn't exceed available quantity
+          const newQuantity = Math.min(quantity, item.available_quantity)
+          return { ...item, quantity: newQuantity }
         }
         return item
       })
     })
   }
 
+  // Remove item from cart
   const removeFromCart = (bookId) => {
-    setCart((prevCart) => {
-      return prevCart.filter((item) => item.id !== bookId)
-    })
+    setCartItems((prevItems) => prevItems.filter((item) => item.id !== bookId))
   }
 
+  // Clear cart
   const clearCart = () => {
-    setCart([])
+    setCartItems([])
   }
 
-  const getCartTotal = () => {
-    return cart.reduce(
-      (totals, item) => {
-        const rentalPrice = item.book.rental_price || 0
-        const depositPrice = item.book.deposit_price || 0
-
-        return {
-          rental: totals.rental + rentalPrice * item.quantity,
-          deposit: totals.deposit + depositPrice * item.quantity,
-        }
-      },
-      { rental: 0, deposit: 0 },
-    )
+  // Calculate total price
+  const getTotalPrice = () => {
+    return cartItems.reduce((total, item) => total + item.rental_price * item.quantity, 0)
   }
 
-  const calculateTotal = (type) => {
-    return cart.reduce((total, item) => {
-      const price = type === "rental" ? item.book.rental_price : item.book.deposit_price
-      return total + (price || 0) * item.quantity
-    }, 0)
+  // Calculate total deposit
+  const getTotalDeposit = () => {
+    return cartItems.reduce((total, item) => total + item.deposit_price * item.quantity, 0)
   }
 
-  return (
-    <CartContext.Provider
-      value={{
-        cart,
-        totalItems,
-        addToCart,
-        updateQuantity,
-        removeFromCart,
-        clearCart,
-        getCartTotal,
-        calculateTotal,
-      }}
-    >
-      {children}
-    </CartContext.Provider>
-  )
+  // Get cart item count
+  const getCartItemCount = () => {
+    return cartItems.reduce((count, item) => count + item.quantity, 0)
+  }
+
+  const value = {
+    cartItems,
+    addToCart,
+    updateQuantity,
+    removeFromCart,
+    clearCart,
+    getTotalPrice,
+    getTotalDeposit,
+    getCartItemCount,
+  }
+
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>
 }
-

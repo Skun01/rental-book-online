@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { useUser } from "../../../contexts/UserContext";
+import { useAuth } from "../../../contexts/AuthContext";
 import { useCart } from "../../../contexts/CartContext";
 import {
   BookOpen, Home, ShoppingCart, Search, User, LogOut, LogIn, UserPlus,
@@ -9,8 +9,8 @@ import {
 import styles from "./NavBar.module.css";
 
 const NavBar = () => {
-  const { user, logout } = useUser();
-  const { cart } = useCart();
+  const { currentUser, logout } = useAuth();
+  const { getCartItemCount } = useCart();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -45,9 +45,7 @@ const NavBar = () => {
     setDropdownOpen(false);
     setMobileMenuOpen(false);
   };
-
-  const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
-
+  const cartItemCount = getCartItemCount();
   return (
     <nav className={styles.navbar}>
       <div className={styles.navbarContainer}>
@@ -85,20 +83,20 @@ const NavBar = () => {
             Giỏ hàng
           </NavLink>
 
-          {user ? (
+          {currentUser ? (
             <div className={styles.userDropdown} ref={dropdownRef}>
               <button className={styles.dropdownButton} onClick={() => setDropdownOpen(!dropdownOpen)}>
                 <img
-                  src={user.avatar || "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.full_name)}
-                  alt={user.full_name}
+                  src={currentUser.avatar || "https://ui-avatars.com/api/?name=" + encodeURIComponent(currentUser.full_name)}
+                  alt={currentUser.full_name}
                 />
-                <span>{user.full_name.split(" ")[0]}</span>
+                <span>{currentUser.full_name.split(" ")[0]}</span>
               </button>
 
               <div className={`${styles.dropdownMenu} ${dropdownOpen ? styles.dropdownMenuActive : ""}`}>
                 <div className={styles.dropdownHeader}>
-                  <h3>{user.full_name}</h3>
-                  <p>{user.email}</p>
+                  <h3>{currentUser.full_name}</h3>
+                  <p>{currentUser.email}</p>
                 </div>
                 <div className={styles.dropdownItems}>
                   <Link to="/profile" className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
@@ -179,7 +177,7 @@ const NavBar = () => {
             Giỏ hàng
           </NavLink>
 
-          {user ? (
+          {currentUser ? (
             <>
               <NavLink
                 to="/profile"
