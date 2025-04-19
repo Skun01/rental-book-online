@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { BookOpen, EyeOff, Eye, Loader, UserPlus, Home } from "lucide-react"
+
 import axios from "axios"
 const Register = () => {
   const navigate = useNavigate()
@@ -121,14 +122,9 @@ const Register = () => {
       //     password: data.password,
       //     }
       //   )
-      //   .then(res=>{
-      //     const { user, token } = res.data
-      //     login(user, token)
-      //     localStorage.setItem("user", JSON.stringify(user))
-      //     localStorage.setItem("token", token)
-      //   })
+      
       console.log(formData);
-      navigate("/")
+      navigate("/login")
     } catch (err) {
       setErrors({
         ...newErrors,

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useCart } from "../../../contexts/CartContext";
@@ -16,11 +16,20 @@ const NavBar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const navRef = useRef(null);
+  
+  // Memoize cart item count to prevent unnecessary recalculations
+  const cartItemCount = useMemo(() => getCartItemCount(), [getCartItemCount]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setDropdownOpen(false);
+      }
+      
+      // Close mobile menu when clicking outside
+      if (navRef.current && !navRef.current.contains(event.target) && mobileMenuOpen) {
+        setMobileMenuOpen(false);
       }
     };
 
@@ -28,89 +37,121 @@ const NavBar = () => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [mobileMenuOpen]);
+
+  // Prevent body scrolling when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [mobileMenuOpen]);
 
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/books?search=${encodeURIComponent(searchQuery.trim())}`);
+      // Properly encode search query for URL
+      const encodedQuery = encodeURIComponent(searchQuery.trim());
+      navigate(`/books?search=${encodedQuery}`);
       setSearchQuery("");
       setMobileMenuOpen(false);
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate("/");
-    setDropdownOpen(false);
-    setMobileMenuOpen(false);
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setDropdownOpen(false);
+      setMobileMenuOpen(false);
+      navigate("/", { replace: true });
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
   };
-  const cartItemCount = getCartItemCount();
+
   return (
-    <nav className={styles.navbar}>
+    <nav className={styles.navbar} ref={navRef}>
       <div className={styles.navbarContainer}>
         <Link to="/" className={styles.navbarLogo}>
           <BookOpen size={24} />
-          Thuê Sách
+          <span>Thuê Sách</span>
         </Link>
 
-        <form className={styles.navbarSearch} onSubmit={handleSearch}>
+        <form className={styles.navbarSearch} onSubmit={handleSearch} role="search">
           <input
             type="text"
             placeholder="Tìm kiếm sách, tác giả hoặc thể loại..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="Tìm kiếm"
           />
-          <Search className={styles.searchIcon} size={18} />
+          <button type="submit" className={styles.searchButton} aria-label="Tìm kiếm">
+            <Search className={styles.searchIcon} size={18} />
+          </button>
         </form>
 
         <div className={styles.navbarLinks}>
           <NavLink to="/" className={({ isActive }) => `${styles.navbarLink} ${isActive ? styles.navbarLinkActive : ""}`} end>
             <Home size={20} />
-            Trang chủ
+            <span>Trang chủ</span>
           </NavLink>
 
           <NavLink to="/books" className={({ isActive }) => `${styles.navbarLink} ${isActive ? styles.navbarLinkActive : ""}`}>
             <Library size={20} />
-            Sách
+            <span>Sách</span>
           </NavLink>
 
           <NavLink to="/cart" className={({ isActive }) => `${styles.navbarLink} ${isActive ? styles.navbarLinkActive : ""}`}>
             <div className={styles.cartIcon}>
               <ShoppingCart size={20} />
-              {cartItemCount > 0 && <span className={styles.cartCount}>{cartItemCount}</span>}
+              {cartItemCount > 0 && <span className={styles.cartCount} aria-label={`${cartItemCount} sản phẩm trong giỏ hàng`}>{cartItemCount}</span>}
             </div>
-            Giỏ hàng
+            <span>Giỏ Hang</span>
           </NavLink>
 
           {currentUser ? (
             <div className={styles.userDropdown} ref={dropdownRef}>
-              <button className={styles.dropdownButton} onClick={() => setDropdownOpen(!dropdownOpen)}>
+              <button 
+                className={styles.dropdownButton} 
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                aria-expanded={dropdownOpen}
+                aria-haspopup="true"
+                aria-label="Menu người dùng"
+              >
                 <img
-                  src={currentUser.avatar || "https://ui-avatars.com/api/?name=" + encodeURIComponent(currentUser.full_name)}
-                  alt={currentUser.full_name}
+                  src={currentUser.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.full_name)}`}
+                  alt={`Ảnh đại diện của ${currentUser.full_name}`}
                 />
                 <span>{currentUser.full_name.split(" ")[0]}</span>
               </button>
 
-              <div className={`${styles.dropdownMenu} ${dropdownOpen ? styles.dropdownMenuActive : ""}`}>
+              <div 
+                className={`${styles.dropdownMenu} ${dropdownOpen ? styles.dropdownMenuActive : ""}`}
+                role="menu"
+                aria-hidden={!dropdownOpen}
+              >
                 <div className={styles.dropdownHeader}>
                   <h3>{currentUser.full_name}</h3>
                   <p>{currentUser.email}</p>
                 </div>
                 <div className={styles.dropdownItems}>
-                  <Link to="/profile" className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
+                  <Link to="/profile" className={styles.dropdownItem} onClick={() => setDropdownOpen(false)} role="menuitem">
                     <User size={18} />
-                    Hồ sơ của tôi
+                    <span>Hồ sơ của tôi</span>
                   </Link>
-                  <Link to="/rental-history" className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
+                  <Link to="/rental-history" className={styles.dropdownItem} onClick={() => setDropdownOpen(false)} role="menuitem">
                     <History size={18} />
-                    Lịch sử thuê
+                    <span>Lịch sử thuê</span>
                   </Link>
-                  <div className={styles.dropdownDivider}></div>
-                  <button className={styles.logoutButton} onClick={handleLogout}>
+                  <div className={styles.dropdownDivider} role="separator"></div>
+                  <button className={styles.logoutButton} onClick={handleLogout} role="menuitem">
                     <LogOut size={18} />
-                    Đăng xuất
+                    <span>Đăng xuất</span>
                   </button>
                 </div>
               </div>
@@ -119,30 +160,41 @@ const NavBar = () => {
             <>
               <Link to="/login" className={styles.navbarLink}>
                 <LogIn size={20} />
-                Đăng nhập
+                <span>Đăng nhập</span>
               </Link>
               <Link to="/register" className={styles.navbarLink}>
                 <UserPlus size={20} />
-                Đăng ký
+                <span>Đăng ký</span>
               </Link>
             </>
           )}
         </div>
 
-        <button className={styles.mobileMenuButton} onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+        <button 
+          className={styles.mobileMenuButton} 
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-expanded={mobileMenuOpen}
+          aria-label={mobileMenuOpen ? "Đóng menu" : "Mở menu"}
+        >
           {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
 
-      <div className={`${styles.mobileMenu} ${mobileMenuOpen ? styles.mobileMenuActive : ""}`}>
-        <form className={styles.mobileSearch} onSubmit={handleSearch}>
+      <div 
+        className={`${styles.mobileMenu} ${mobileMenuOpen ? styles.mobileMenuActive : ""}`}
+        aria-hidden={!mobileMenuOpen}
+      >
+        <form className={styles.mobileSearch} onSubmit={handleSearch} role="search">
           <input
             type="text"
             placeholder="Tìm kiếm sách, tác giả hoặc thể loại..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="Tìm kiếm"
           />
-          <Search className={styles.searchIcon} size={18} />
+          <button type="submit" className={styles.searchButton} aria-label="Tìm kiếm">
+            <Search className={styles.searchIcon} size={18} />
+          </button>
         </form>
 
         <div className={styles.mobileLinks}>
@@ -153,7 +205,7 @@ const NavBar = () => {
             end
           >
             <Home size={20} />
-            Trang chủ
+            <span>Trang chủ</span>
           </NavLink>
 
           <NavLink
@@ -162,7 +214,7 @@ const NavBar = () => {
             onClick={() => setMobileMenuOpen(false)}
           >
             <Library size={20} />
-            Sách
+            <span>Sách</span>
           </NavLink>
 
           <NavLink
@@ -172,9 +224,9 @@ const NavBar = () => {
           >
             <div className={styles.cartIcon}>
               <ShoppingCart size={20} />
-              {cartItemCount > 0 && <span className={styles.cartCount}>{cartItemCount}</span>}
+              {cartItemCount > 0 && <span className={styles.cartCount} aria-label={`${cartItemCount} sản phẩm trong giỏ hàng`}>{cartItemCount}</span>}
             </div>
-            Giỏ hàng
+            <span>Giỏ hàng</span>
           </NavLink>
 
           {currentUser ? (
@@ -185,7 +237,7 @@ const NavBar = () => {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <User size={20} />
-                Hồ sơ của tôi
+                <span>Hồ sơ của tôi</span>
               </NavLink>
 
               <NavLink
@@ -194,25 +246,25 @@ const NavBar = () => {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <History size={20} />
-                Lịch sử thuê
+                <span>Lịch sử thuê</span>
               </NavLink>
 
-              <div className={styles.mobileDivider}></div>
+              <div className={styles.mobileDivider} role="separator"></div>
 
               <button className={styles.mobileLink} onClick={handleLogout}>
                 <LogOut size={20} />
-                Đăng xuất
+                <span>Đăng xuất</span>
               </button>
             </>
           ) : (
             <>
               <Link to="/login" className={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>
                 <LogIn size={20} />
-                Đăng nhập
+                <span>Đăng nhập</span>
               </Link>
               <Link to="/register" className={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>
                 <UserPlus size={20} />
-                Đăng ký
+                <span>Đăng ký</span>
               </Link>
             </>
           )}

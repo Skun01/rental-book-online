@@ -10,6 +10,7 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null)
+  const [token, setToken] = useState(null)
   const [loading, setLoading] = useState(true)
 
   // Load user from localStorage on initial render
@@ -27,27 +28,30 @@ export function AuthProvider({ children }) {
   }, [])
 
   // Login function
-  const login = (userData) => {
-    // In a real app, this would validate credentials with your backend
-    // For demo purposes, we'll just set the user data
+  const login = (userData, authToken) => {
     setCurrentUser(userData)
-    localStorage.setItem("user", JSON.stringify(userData))
-    return true
+    setToken(authToken)
+
+    // Save to localStorage
+    try {
+      localStorage.setItem("user", JSON.stringify(userData))
+      localStorage.setItem("token", authToken)
+    } catch (error) {
+      console.error("Error saving user data to localStorage:", error)
+    }
   }
 
-  // Register function
-  const register = (userData) => {
-    // In a real app, this would send data to your backend
-    // For demo purposes, we'll just set the user data
-    setCurrentUser(userData)
-    localStorage.setItem("user", JSON.stringify(userData))
-    return true
-  }
-
-  // Logout function
   const logout = () => {
     setCurrentUser(null)
-    localStorage.removeItem("user")
+    setToken(null)
+
+    // Remove from localStorage
+    try {
+      localStorage.removeItem("user")
+      localStorage.removeItem("token")
+    } catch (error) {
+      console.error("Error removing user data from localStorage:", error)
+    }
   }
 
   // Update user profile
@@ -69,7 +73,6 @@ export function AuthProvider({ children }) {
   const value = {
     currentUser,
     login,
-    register,
     logout,
     updateProfile,
   }

@@ -1,25 +1,25 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { BookOpen, EyeOff, Eye, Loader, LogIn, Home } from "lucide-react"
-import {useAuth} from "../contexts/AuthContext";
+import { useAuth } from "../contexts/AuthContext";
 import axios from "axios";
+
 const Login = () => {
   const navigate = useNavigate()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const {login} = useAuth();
+  const { login } = useAuth();
   const [errors, setErrors] = useState({
     email: "",
     password: "",
     general: "",
   })
 
-
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return emailRegex.test(email)
+    return emailRegex.test(email.trim())
   }
 
   const handleSubmit = async (e) => {
@@ -31,7 +31,7 @@ const Login = () => {
       password: "",
       general: "",
     })
-
+    
     // Validate fields
     let hasErrors = false
     const newErrors = {
@@ -40,10 +40,12 @@ const Login = () => {
       general: "",
     }
 
-    if (!email) {
+    const trimmedEmail = email.trim()
+
+    if (!trimmedEmail) {
       newErrors.email = "Hãy nhập email"
       hasErrors = true
-    } else if (!validateEmail(email)) {
+    } else if (!validateEmail(trimmedEmail)) {
       newErrors.email = "Email không hợp lệ"
       hasErrors = true
     }
@@ -51,7 +53,7 @@ const Login = () => {
     if (!password) {
       newErrors.password = "Hãy nhập mật khẩu"
       hasErrors = true
-    } else if (password.length < 6) {
+    } else if (password.length < 8) {
       newErrors.password = "Mật khẩu phải có ít nhất 8 kí tự"
       hasErrors = true
     }
@@ -64,25 +66,40 @@ const Login = () => {
     setIsLoading(true)
 
     try {
+      // Mô phỏng gọi API - bỏ comment phần này khi sử dụng API thực tế
       // await axios.post("https://api.example.com/login", {
-      //   email: email,
+      //   email: trimmedEmail,
       //   password: password,
       // })
-      // .then(res=>{
-      //   const {data, accessToken} = res.data;
-      //   login(
-      //     data
-      //   , accessToken
-      //   )
+      // .then(res => {
+      //   const { data, accessToken } = res.data;
+      //   login(data, accessToken)
       //   data.role === "admin" ? navigate("/admin") : navigate("/");
       // })
       
+      // Xóa đoạn mã này khi kết nối với API thực tế
+      setTimeout(() => {
+        login(
+          {
+            id: 1,
+            email: "user@example.com",
+            full_name: "Nguyễn Văn A",
+            phone: "0123456789",
+            gender: "Male",
+            age: 30,
+            role_id: 2,
+            role: "user",
+          },
+          "accessToken"
+        )
+        navigate("/")
+        setIsLoading(false)
+      }, 1000);
     } catch (err) {
       setErrors({
         ...newErrors,
-        general: "Invalid email or password",
+        general: "Email hoặc mật khẩu không chính xác",
       })
-    } finally {
       setIsLoading(false)
     }
   }
