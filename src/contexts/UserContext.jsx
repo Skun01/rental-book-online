@@ -15,7 +15,7 @@ export const UserProvider = ({ children }) => {
   const [token, setToken] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  // Load user data from localStorage on initial render
+  // get User data from localStorage
   useEffect(() => {
     const loadUserData = () => {
       try {

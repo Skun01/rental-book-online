@@ -2,6 +2,7 @@ import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { BookOpen, EyeOff, Eye, Loader, LogIn, Home } from "lucide-react"
 import {useUser} from "../contexts/UserContext";
+import axios from "axios";
 const Login = () => {
   const navigate = useNavigate()
   const [email, setEmail] = useState("")
@@ -63,24 +64,19 @@ const Login = () => {
     setIsLoading(true)
 
     try {
-      // Here you would implement your actual login logic with API call
-      // For demo purposes, we'll simulate a successful login
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      // Simulate successful login with sample user
-      login(
-        {
-          id: 1,
-          email: email,
-          full_name: "John Doe",
-          gender: "Male",
-          phone: "0901234567",
-        },
-        "sample-jwt-token",
-      )
-
-      // Redirect to home page after successful login
-      navigate("/")
+      // await axios.post("https://api.example.com/login", {
+      //   email: email,
+      //   password: password,
+      // })
+      // .then(res=>{
+      //   const {data, accessToken} = res.data;
+      //   login(
+      //     data
+      //   , accessToken
+      //   )
+      //   data.role === "admin" ? navigate("/admin") : navigate("/");
+      // })
+      
     } catch (err) {
       setErrors({
         ...newErrors,

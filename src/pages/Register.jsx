@@ -1,25 +1,27 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { BookOpen, EyeOff, Eye, Loader, UserPlus, Home } from "lucide-react"
-
+import axios from "axios"
 const Register = () => {
   const navigate = useNavigate()
+  const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
     gender: "",
-    phone: "",
+    age: "",
     password: "",
     confirmPassword: "",
   })
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+
   const [errors, setErrors] = useState({
     fullName: "",
     email: "",
     gender: "",
-    phone: "",
+    age: "",
     password: "",
     confirmPassword: "",
     general: "",
@@ -29,27 +31,13 @@ const Register = () => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
 
-    // Clear the specific field error when user starts typing again
+    // clear error message when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({
         ...prev,
         [name]: "",
       }))
     }
-  }
-
-  function sendDataRegister(data) {
-    console.log(data)
-  }
-
-  const validateEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return emailRegex.test(email)
-  }
-
-  const validatePhone = (phone) => {
-    const phoneRegex = /^[0-9]{10,11}$/
-    return phoneRegex.test(phone)
   }
 
   const handleSubmit = async (e) => {
@@ -60,7 +48,7 @@ const Register = () => {
       fullName: "",
       email: "",
       gender: "",
-      phone: "",
+      age: "",
       password: "",
       confirmPassword: "",
       general: "",
@@ -90,11 +78,11 @@ const Register = () => {
       hasErrors = true
     }
 
-    if (!formData.phone) {
-      newErrors.phone = "Hãy nhập số điện thoại"
+    if (!formData.age) {
+      newErrors.age = "Hãy nhập tuổi"
       hasErrors = true
-    } else if (!validatePhone(formData.phone)) {
-      newErrors.phone = "Số điện thoại phải từ 10 - 11 chữ số"
+    } else if (!validateAge(formData.age)) {
+      newErrors.age = "Tuổi phải lớn hơn hoặc bằng 18"
       hasErrors = true
     }
 
@@ -122,14 +110,24 @@ const Register = () => {
     setIsLoading(true)
 
     try {
-      // Here you would implement your actual registration logic with API call
-      // For demo purposes, we'll simulate a successful registration
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      // Simulate successful registration and login
-      sendDataRegister(formData);
-
-      // Redirect to home page after successful registration
+      // get api to register to server here:
+      const url = "";
+      // await axios
+      //   .post(url, {
+      //     fullName: data.fullName,
+      //     email: data.email,
+      //     gender: data.gender,
+      //     age: data.age,
+      //     password: data.password,
+      //     }
+      //   )
+      //   .then(res=>{
+      //     const { user, token } = res.data
+      //     login(user, token)
+      //     localStorage.setItem("user", JSON.stringify(user))
+      //     localStorage.setItem("token", token)
+      //   })
+      console.log(formData);
       navigate("/")
     } catch (err) {
       setErrors({
@@ -203,17 +201,16 @@ const Register = () => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="phone">Số điện thoại</label>
+              <label htmlFor="age">Tuổi</label>
               <input
-                id="phone"
-                name="phone"
-                type="tel"
-                placeholder="0901234567"
-                value={formData.phone}
+                id="age"
+                name="age"
+                type="number"
+                value={formData.age}
                 onChange={handleChange}
-                className={errors.phone ? "input-error" : ""}
+                className={errors.age ? "input-error" : ""}
               />
-              {errors.phone && <div className="field-error">{errors.phone}</div>}
+              {errors.age && <div className="field-error">{errors.age}</div>}
             </div>
           </div>
 
@@ -289,6 +286,16 @@ const Register = () => {
       </div>
     </div>
   )
+}
+
+// Helper functions moved to the bottom
+function validateEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email)
+}
+
+function validateAge(age) {
+  return +age >= 18 && +age < 150
 }
 
 export default Register

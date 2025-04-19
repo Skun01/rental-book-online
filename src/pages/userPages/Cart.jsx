@@ -108,13 +108,13 @@ const Cart = () => {
                   <div className={styles.priceRow}>
                     <span className={styles.priceLabel}>Thuê:</span>
                     <span className={styles.priceValue}>
-                      ₫{item.book.rental_price.toLocaleString()}
+                      ₫{item.book.rental_price}
                     </span>
                   </div>
                   <div className={styles.priceRow}>
                     <span className={styles.priceLabel}>Đặt cọc:</span>
                     <span className={styles.priceValue}>
-                      ₫{item.book.deposit_price.toLocaleString()}
+                      ₫{item.book.deposit_price}
                     </span>
                   </div>
                 </div>
@@ -146,13 +146,13 @@ const Cart = () => {
                   <div className={styles.totalRow}>
                     <span className={styles.totalLabel}>Tổng thuê:</span>
                     <span className={styles.totalValue}>
-                      ₫{itemRentalTotal.toLocaleString()}
+                      ₫{itemRentalTotal}
                     </span>
                   </div>
                   <div className={styles.totalRow}>
                     <span className={styles.totalLabel}>Tổng cọc:</span>
                     <span className={styles.totalValue}>
-                      ₫{itemDepositTotal.toLocaleString()}
+                      ₫{itemDepositTotal}
                     </span>
                   </div>
                 </div>
@@ -171,17 +171,17 @@ const Cart = () => {
 
           <div className={styles.summaryRow}>
             <span>Tổng phí thuê:</span>
-            <span>₫{rentalTotal.toLocaleString()}</span>
+            <span>₫{rentalTotal}</span>
           </div>
 
           <div className={styles.summaryRow}>
             <span>Tổng đặt cọc:</span>
-            <span>₫{depositTotal.toLocaleString()}</span>
+            <span>₫{depositTotal}</span>
           </div>
 
           <div className={styles.summaryRowTotal}>
             <span>Tổng thanh toán:</span>
-            <span>₫{(rentalTotal + depositTotal).toLocaleString()}</span>
+            <span>₫{(rentalTotal + depositTotal)}</span>
           </div>
 
           <div className={styles.depositNote}>
@@ -192,7 +192,7 @@ const Cart = () => {
           </div>
 
           <button className={styles.checkoutButton} onClick={proceedToCheckout}>
-            Tiến Hành Thanh Toán
+            Thanh Toán
           </button>
 
           <Link to="/books" className={styles.continueShopping}>

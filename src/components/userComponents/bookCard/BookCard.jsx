@@ -10,10 +10,11 @@ const BookCard = ({ book }) => {
     e.preventDefault();
     e.stopPropagation();
     addToCart({
-      id: `cart-${book.id}-${Date.now()}`, // Unique ID for cart item
+      id: `cart-${book.id}-${Date.now()}`,
       book,
       quantity: 1,
     });
+    console.log("Thêm vào giỏ hàng:", book.title);
   };
 
   const authorName =

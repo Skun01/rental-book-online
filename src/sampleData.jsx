@@ -1,19 +1,51 @@
 // Sample user data
-export const sampleUser = {
-  id: 1,
-  create_at: "2023-01-15T10:30:00",
-  create_by: "system",
-  email: "user@example.com",
-  full_name: "John Doe",
-  gender: "Male",
-  phone: "0901234567",
-  refresh_token: "sample_refresh_token",
-  update_at: "2023-05-20T14:45:00",
-  update_by: "user",
-  role_id: 2,
-  status: "Active",
-}
-
+const users = [
+  {
+    id: 1,
+    create_at: "2025-01-15 08:30:00.000000",
+    create_by: "system",
+    update_at: "2025-01-15 08:30:00.000000",
+    update_by: "system",
+    email: "admin@example.com",
+    password: "$2a$10$xJQx.zUv0qO3hNnBGfS5AuDW8v4XABNwGnYmkN6sM4.ieJWZHzNfO",
+    full_name: "Admin User",
+    gender: "Male",
+    phone: "0912345678",
+    refresh_token: null,
+    role_id: 1,
+    status: "Active"
+  },
+  {
+    id: 2,
+    create_at: "2025-01-16 09:45:00.000000",
+    create_by: "system",
+    update_at: "2025-02-20 14:30:00.000000",
+    update_by: "admin@example.com",
+    email: "nguyenvan.a@example.com",
+    password: "$2a$10$NfPS4zGCGWdXejzGRZXkOOQ5q8zDfFH7HRh1jcVHf1XHBDsLgUKGq",
+    full_name: "Nguyễn Văn A",
+    gender: "Male",
+    phone: "0923456789",
+    refresh_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwiZXhwIjoxNzE0NTg2NTAwfQ.fake_token_a",
+    role_id: 1,
+    status: "Active"
+  },
+  {
+    id: 6,
+    create_at: "2025-01-20 14:20:00.000000",
+    create_by: "system",
+    update_at: "2025-04-01 09:15:00.000000",
+    update_by: "admin@example.com",
+    email: "hoangvane@example.com",
+    password: "$2a$10$XaLtOIs/JJxTiQgVvqD0qOd4B0UVdYnA8Vd.1LZ3o0HyO3rs6aG6a",
+    full_name: "Hoàng Văn E",
+    gender: "Male",
+    phone: "0967890123",
+    refresh_token: null,
+    role_id: 3,
+    status: "Suspended"
+  },
+]
 // Sample address data
 export const sampleAddresses = [
   {
