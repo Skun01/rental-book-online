@@ -1,6 +1,7 @@
 import Login from "../pages/Login"
 import Register from "../pages/Register"
 import UserApp from "../UserApp"
+import HomePage from "../pages/userPages/HomePage/HomePage"
 import { AuthProvider } from "../contexts/AuthContext" 
 
 const userRoutes = [
@@ -8,6 +9,10 @@ const userRoutes = [
     path: "/",
     element: <UserApp />,
     children: [
+      {
+        index: true,
+        element: <HomePage />,
+      }
     ],
   },
   {
