@@ -1,0 +1,245 @@
+.searchPage {
+  padding: 2rem 0;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.searchHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.pageTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+  flex: 1;
+}
+
+.filterToggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  padding: 0.75rem 1rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.filterToggle:hover {
+  background-color: #f5f5f5;
+}
+
+.filterToggle span {
+  margin: 0 0.25rem;
+}
+
+.rotated {
+  transform: rotate(180deg);
+  transition: transform 0.3s ease;
+}
+
+.filtersSection {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  display: none;
+  transition: all 0.3s ease;
+}
+
+.filtersSection.show {
+  display: block;
+}
+
+.filterControls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  align-items: flex-end;
+}
+
+.filterGroup {
+  flex: 1;
+  min-width: 180px;
+}
+
+.filterLabel {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #555;
+}
+
+.filterSelect {
+  width: 100%;
+  padding: 0.625rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 0.375rem;
+  background-color: #fff;
+  font-size: 0.95rem;
+  color: #333;
+  transition: border-color 0.2s ease;
+}
+
+.filterSelect:focus {
+  border-color: #4f46e5;
+  outline: none;
+}
+
+.priceInputs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.priceInput {
+  flex: 1;
+  padding: 0.625rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 0.375rem;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease;
+}
+
+.priceInput:focus {
+  border-color: #4f46e5;
+  outline: none;
+}
+
+.priceSeparator {
+  margin: 0;
+  color: #888;
+}
+
+.clearFiltersButton {
+  background-color: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  padding: 0.625rem 1rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-weight: 500;
+  color: #555;
+  transition: all 0.2s ease;
+  height: fit-content;
+  margin-top: 2rem;
+}
+
+.clearFiltersButton:hover {
+  background-color: #e0e0e0;
+}
+
+.resultsSection {
+  min-height: 400px;
+}
+
+.resultsCount {
+  margin-bottom: 1.25rem;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.booksGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.bookItem {
+  height: 100%;
+  transition: transform 0.2s ease;
+}
+
+.bookItem:hover {
+  transform: translateY(-5px);
+}
+
+.loading,
+.noResults {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  text-align: center;
+  padding: 2rem;
+  background-color: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.noResults h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #333;
+}
+
+.noResults p {
+  color: #666;
+}
+
+@media (max-width: 1024px) {
+  .booksGrid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .searchHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .pageTitle {
+    margin-bottom: 1rem;
+    width: 100%;
+  }
+  
+  .filterToggle {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .filterControls {
+    flex-direction: column;
+  }
+  
+  .filterGroup {
+    width: 100%;
+  }
+  
+  .clearFiltersButton {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .booksGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .filtersSection {
+    padding: 1rem;
+  }
+  .priceInputs{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

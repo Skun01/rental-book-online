@@ -2,11 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
-import { ChevronRight, BookOpen, Clock, Award, Users } from "lucide-react"
+import { ChevronRight, ArrowRight, BookOpen, Clock, Award, Users } from "lucide-react"
 import BookCard from "../../../components/userComponents/bookCard/BookCard"
 import { mockBooks, mockCategories } from "../../../mockData"
-
-// Styles moved to a CSS module file
 import styles from "./HomePage.module.css"
 
 const HomePage = () => {
@@ -18,6 +16,9 @@ const HomePage = () => {
 
   useEffect(() => {
     // Simulate API loading
+    setIsLoading(true)
+
+    // In a real app, these would be API calls
     const fetchData = async () => {
       try {
         // Simulate network delay
@@ -38,7 +39,7 @@ const HomePage = () => {
   if (isLoading) {
     return (
       <div className={styles.loadingContainer}>
-        <div className={styles.loader}></div>
+        <div className={styles.spinner}></div>
         <p>Đang tải dữ liệu...</p>
       </div>
     )
@@ -46,48 +47,49 @@ const HomePage = () => {
 
   return (
     <div className={styles.homePage}>
-      {/* Hero Banner */}
-      <section className={styles.hero}>
-        <div className={styles.heroContent}>
-          <h1>Thế Giới Sách Trong Tầm Tay</h1>
-          <p>Khám phá, học hỏi và thư giãn với hàng ngàn đầu sách chất lượng</p>
-          <div className={styles.heroActions}>
-            <Link to="/books" className={styles.primaryButton}>
-              Khám Phá Ngay
-            </Link>
-            <Link to="/how-it-works" className={styles.secondaryButton}>
-              Hướng Dẫn
-            </Link>
+      {/* Hero Section */}
+      <section className={styles.heroSection}>
+        <div className={styles.container}>
+          <div className={styles.heroContent}>
+            <h1 className={styles.heroTitle}>Khám phá thế giới qua từng trang sách</h1>
+            <p className={styles.heroSubtitle}>Thuê sách dễ dàng, tiết kiệm chi phí và bảo vệ môi trường</p>
+            <div className={styles.heroButtons}>
+              <Link to="/search" className={styles.primaryButton}>
+                Khám phá ngay
+              </Link>
+              <Link to="/about" className={styles.secondaryButton}>
+                Tìm hiểu thêm
+              </Link>
+            </div>
           </div>
-        </div>
-        <div className={styles.heroImage}>
-          {/* Hero image will be set in CSS */}
         </div>
       </section>
 
       {/* Featured Books */}
       <section className={styles.section}>
         <div className={styles.container}>
-          <div className={styles.sectionHeading}>
-            <h2>Sách Nổi Bật</h2>
-            <Link to="/search?featured=true" className={styles.viewAll}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>Sách nổi bật</h2>
+            <Link to="/search?featured=true" className={styles.viewAllLink}>
               Xem tất cả <ChevronRight size={16} />
             </Link>
           </div>
-          <div className={styles.featuredGrid}>
+          <div className={styles.booksGrid}>
             {featuredBooks.map((book) => (
-              <BookCard key={book.id} book={book} />
+              <div key={book.id} className={styles.bookItem}>
+                <BookCard book={book} />
+              </div>
             ))}
           </div>
         </div>
       </section>
 
       {/* Categories */}
-      <section className={styles.categoriesSection}>
+      <section className={styles.section}>
         <div className={styles.container}>
-          <div className={styles.sectionHeading}>
-            <h2>Danh Mục Phổ Biến</h2>
-            <Link to="/categories" className={styles.viewAll}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>Danh mục phổ biến</h2>
+            <Link to="/search" className={styles.viewAllLink}>
               Xem tất cả <ChevronRight size={16} />
             </Link>
           </div>
@@ -95,57 +97,56 @@ const HomePage = () => {
             {popularCategories.map((category) => (
               <Link key={category.id} to={`/search?category=${category.id}`} className={styles.categoryCard}>
                 <div className={styles.categoryIcon}>{category.icon}</div>
-                <h3>{category.name}</h3>
-                <p>{category.bookCount} sách</p>
+                <h3 className={styles.categoryName}>{category.name}</h3>
+                <p className={styles.categoryCount}>{category.bookCount} sách</p>
               </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Benefits */}
+      {/* Benefits Section */}
       <section className={styles.benefitsSection}>
         <div className={styles.container}>
-          <h2>Tại Sao Chọn BookRental?</h2>
+          <h2 className={styles.benefitsTitle}>Tại sao chọn BookRental?</h2>
+
           <div className={styles.benefitsGrid}>
             <div className={styles.benefitCard}>
-              <div className={styles.benefitIconWrapper}>
-                <BookOpen size={28} />
+              <div className={styles.benefitIcon}>
+                <BookOpen size={32} />
               </div>
-              <h3>Đa Dạng Sách</h3>
-              <p>
-                Hơn 10.000 đầu sách đa dạng thể loại, từ văn học đến sách chuyên ngành
+              <h3 className={styles.benefitTitle}>Đa dạng sách</h3>
+              <p className={styles.benefitText}>
+                Hơn 10.000 đầu sách thuộc nhiều thể loại khác nhau, từ sách văn học đến sách chuyên ngành.
               </p>
             </div>
 
             <div className={styles.benefitCard}>
-              <div className={styles.benefitIconWrapper}>
-                <Clock size={28} />
+              <div className={styles.benefitIcon}>
+                <Clock size={32} />
               </div>
-              <h3>Tiết Kiệm Thời Gian</h3>
-              <p>
-                Đặt sách trực tuyến và nhận sách tại nhà hoặc tại thư viện một cách nhanh chóng
+              <h3 className={styles.benefitTitle}>Tiết kiệm thời gian</h3>
+              <p className={styles.benefitText}>
+                Đặt sách trực tuyến và nhận sách tại nhà hoặc tại thư viện của chúng tôi một cách nhanh chóng.
               </p>
             </div>
 
             <div className={styles.benefitCard}>
-              <div className={styles.benefitIconWrapper}>
-                <Award size={28} />
+              <div className={styles.benefitIcon}>
+                <Award size={32} />
               </div>
-              <h3>Chất Lượng Đảm Bảo</h3>
-              <p>
-                Sách được bảo quản cẩn thận, kiểm tra kỹ lưỡng trước khi đến tay bạn
+              <h3 className={styles.benefitTitle}>Chất lượng đảm bảo</h3>
+              <p className={styles.benefitText}>
+                Sách được bảo quản cẩn thận, kiểm tra kỹ lưỡng trước khi đến tay bạn.
               </p>
             </div>
 
             <div className={styles.benefitCard}>
-              <div className={styles.benefitIconWrapper}>
-                <Users size={28} />
+              <div className={styles.benefitIcon}>
+                <Users size={32} />
               </div>
-              <h3>Cộng Đồng Sách</h3>
-              <p>
-                Tham gia cộng đồng yêu sách, chia sẻ đánh giá và khám phá sách mới
-              </p>
+              <h3 className={styles.benefitTitle}>Cộng đồng đọc sách</h3>
+              <p className={styles.benefitText}>Tham gia cộng đồng yêu sách, chia sẻ đánh giá và khám phá sách mới.</p>
             </div>
           </div>
         </div>
@@ -154,15 +155,15 @@ const HomePage = () => {
       {/* New Arrivals */}
       <section className={styles.section}>
         <div className={styles.container}>
-          <div className={styles.sectionHeading}>
-            <h2>Sách Mới</h2>
-            <Link to="/search?sort=newest" className={styles.viewAll}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>Sách mới</h2>
+            <Link to="/search?sort=newest" className={styles.viewAllLink}>
               Xem tất cả <ChevronRight size={16} />
             </Link>
           </div>
-          <div className={styles.booksCarousel}>
+          <div className={styles.booksRow}>
             {newArrivals.map((book) => (
-              <div key={book.id} className={styles.carouselItem}>
+              <div key={book.id} className={styles.bookItemSmall}>
                 <BookCard book={book} />
               </div>
             ))}
@@ -170,18 +171,18 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Recommended Books */}
+      {/* AI Recommendations */}
       <section className={styles.section}>
         <div className={styles.container}>
-          <div className={styles.sectionHeading}>
-            <h2>Gợi Ý Cho Bạn</h2>
-            <Link to="/search?recommended=true" className={styles.viewAll}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>Gợi ý cho bạn</h2>
+            <Link to="/search?recommended=true" className={styles.viewAllLink}>
               Xem tất cả <ChevronRight size={16} />
             </Link>
           </div>
-          <div className={styles.booksCarousel}>
+          <div className={styles.booksRow}>
             {recommendedBooks.map((book) => (
-              <div key={book.id} className={styles.carouselItem}>
+              <div key={book.id} className={styles.bookItemSmall}>
                 <BookCard book={book} />
               </div>
             ))}
@@ -190,53 +191,43 @@ const HomePage = () => {
       </section>
 
       {/* How It Works */}
-      <section className={styles.howItWorksSection}>
+      <section className={styles.section}>
         <div className={styles.container}>
-          <h2>Cách Thức Hoạt Động</h2>
+          <h2 className={styles.sectionTitle}>Cách thức hoạt động</h2>
           <div className={styles.stepsContainer}>
             <div className={styles.step}>
               <div className={styles.stepNumber}>1</div>
-              <h3>Tìm Sách</h3>
-              <p>Tìm kiếm và lựa chọn sách từ thư viện đa dạng của chúng tôi</p>
+              <h3 className={styles.stepTitle}>Tìm sách</h3>
+              <p className={styles.stepDescription}>Tìm kiếm và lựa chọn sách từ thư viện đa dạng của chúng tôi</p>
             </div>
-            <div className={styles.stepDivider}></div>
             <div className={styles.step}>
               <div className={styles.stepNumber}>2</div>
-              <h3>Đặt Thuê</h3>
-              <p>Thêm sách vào giỏ hàng và tiến hành đặt thuê</p>
+              <h3 className={styles.stepTitle}>Đặt thuê</h3>
+              <p className={styles.stepDescription}>Thêm sách vào giỏ hàng và tiến hành đặt thuê</p>
             </div>
-            <div className={styles.stepDivider}></div>
             <div className={styles.step}>
               <div className={styles.stepNumber}>3</div>
-              <h3>Nhận Sách</h3>
-              <p>Nhận sách tại thư viện hoặc giao hàng tận nơi</p>
+              <h3 className={styles.stepTitle}>Nhận sách</h3>
+              <p className={styles.stepDescription}>Nhận sách tại thư viện hoặc giao hàng tận nơi</p>
             </div>
-            <div className={styles.stepDivider}></div>
             <div className={styles.step}>
               <div className={styles.stepNumber}>4</div>
-              <h3>Trả Sách</h3>
-              <p>Trả sách khi hết thời hạn hoặc gia hạn thêm</p>
+              <h3 className={styles.stepTitle}>Trả sách</h3>
+              <p className={styles.stepDescription}>Trả sách khi hết thời hạn hoặc gia hạn thêm</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Newsletter */}
-      <section className={styles.newsletterSection}>
+      {/* CTA Section */}
+      <section className={styles.ctaSection}>
         <div className={styles.container}>
-          <div className={styles.newsletterContent}>
-            <h2>Đăng Ký Nhận Tin</h2>
-            <p>Nhận thông tin về sách mới và ưu đãi đặc biệt</p>
-            <form className={styles.newsletterForm}>
-              <div className={styles.inputGroup}>
-                <input 
-                  type="email" 
-                  placeholder="Nhập địa chỉ email của bạn" 
-                  required 
-                />
-                <button type="submit">Đăng Ký</button>
-              </div>
-            </form>
+          <div className={styles.ctaContent}>
+            <h2 className={styles.ctaTitle}>Bắt đầu hành trình đọc sách ngay hôm nay</h2>
+            <p className={styles.ctaText}>Đăng ký tài khoản để trải nghiệm dịch vụ cho thuê sách của chúng tôi</p>
+            <Link to="/register" className={styles.ctaButton}>
+              Đăng ký ngay <ArrowRight size={16} />
+            </Link>
           </div>
         </div>
       </section>
