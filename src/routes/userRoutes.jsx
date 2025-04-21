@@ -5,6 +5,7 @@ import HomePage from "../pages/userPages/HomePage/HomePage"
 import SearchResultsPage from "../pages/userPages/SearchResultsPage/SearchResultsPage"
 import { AuthProvider } from "../contexts/AuthContext" 
 import CartPage from "../pages/userPages/CartPage/CartPage"
+import BookDetailsPage from "../pages/userPages/BookDetailsPage/BookDetailsPage"
 
 const userRoutes = [
   {
@@ -22,6 +23,10 @@ const userRoutes = [
       {
         path: "cart",
         element: <CartPage/>,
+      },
+      {
+        path: "books/:id",
+        element: <BookDetailsPage />,
       }
     ],
   },
