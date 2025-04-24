@@ -1,5 +1,6 @@
 .cartPage {
   padding: 2rem 0;
+  background-color: #f5f7fb;
 }
 
 .container {
@@ -44,7 +45,7 @@
 
 .continueShopping {
   display: inline-block;
-  background-color: var(--primary-color);
+  background-color: #1e40af;
   color: white;
   padding: 0.75rem 1.5rem;
   border-radius: 0.375rem;
@@ -53,7 +54,7 @@
 }
 
 .continueShopping:hover {
-  background-color: var(--primary-hover);
+  background-color: #1e3a8a;
 }
 
 .cartContent {
@@ -82,6 +83,7 @@
   grid-template-columns: 3fr 1fr 1fr 1fr 50px;
   padding: 1rem;
   border-top: 1px solid var(--border-color);
+  gap: 1rem;
 }
 
 .productInfo {
@@ -121,6 +123,7 @@
 
 .productPrice {
   font-weight: 500;
+  margin-top: 0.4rem;
 }
 
 .pricePeriod {
@@ -169,7 +172,8 @@
 
 .itemTotal {
   font-weight: 500;
-  color: var(--primary-color);
+  color: #1e40af;
+  margin-top: 0.4rem;
 }
 
 .removeButton {
@@ -178,6 +182,7 @@
   color: var(--text-light);
   cursor: pointer;
   transition: color 0.2s;
+  margin-top: 0.4rem;
 }
 
 .removeButton:hover {
@@ -189,6 +194,14 @@
   border-radius: 0.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   padding: 1.5rem;
+}
+
+.cartButtons{
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
 }
 
 .summaryTitle {
@@ -222,14 +235,10 @@
 }
 
 .checkoutButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  background-color: var(--primary-color);
+  background-color: #1e40af;
   color: white;
   border: none;
-  padding: 0.75rem;
+  padding: 0.75rem 1.5rem;
   border-radius: 0.375rem;
   font-weight: 500;
   cursor: pointer;
@@ -238,7 +247,7 @@
 }
 
 .checkoutButton:hover {
-  background-color: var(--primary-hover);
+  background-color: #1e3a8a;
 }
 
 .checkoutButton span {

@@ -19,7 +19,7 @@
 
 .productImage {
   position: relative;
-  aspect-ratio: 2/3;
+  aspect-ratio: 2 / 3;
   overflow: hidden;
   background-color: #f9fafb;
 }

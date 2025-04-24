@@ -1,0 +1,204 @@
+.successPage {
+  padding: 3rem 0;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.successCard {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  text-align: center;
+}
+
+.successIcon {
+  color: var(--success-color);
+  margin-bottom: 1.5rem;
+}
+
+.successTitle {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.successMessage {
+  color: var(--text-light);
+  margin-bottom: 2rem;
+}
+
+.orderInfo {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.orderDetail {
+  display: flex;
+  flex-direction: column;
+}
+
+.detailLabel {
+  color: var(--text-light);
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.detailValue {
+  font-weight: 500;
+}
+
+.paymentSummary {
+  background-color: var(--background-light);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.summaryTotal {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+  font-size: 1.125rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.depositInfo {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--border-color);
+}
+
+.depositInfo p {
+  font-size: 0.875rem;
+  color: var(--text-light);
+}
+
+.depositInfo p:first-child {
+  margin-bottom: 0.5rem;
+}
+
+.nextSteps {
+  text-align: left;
+}
+
+.nextStepsTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.bankInfo {
+  background-color: rgba(79, 70, 229, 0.05);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.bankInfoTitle {
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.bankInfoNote {
+  margin-top: 1rem;
+  font-style: italic;
+  color: var(--error-color);
+}
+
+.actionButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.viewOrderButton,
+.continueShoppingButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.viewOrderButton {
+  background-color: #1e40af;
+  color: white;
+}
+
+.viewOrderButton:hover {
+  background-color: #1e3a8a;
+}
+
+.viewOrderButton svg {
+  margin-right: 0.5rem;
+}
+
+.continueShoppingButton {
+  background-color: white;
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+}
+
+.continueShoppingButton:hover {
+  background-color: var(--background-light);
+}
+
+.continueShoppingButton svg {
+  margin-left: 0.5rem;
+}
+
+/* Thêm style cho loadingContainer trong OrderSuccessPage */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  text-align: center;
+}
+
+.loading {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border-color);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 640px) {
+  .orderInfo {
+    grid-template-columns: 1fr;
+  }
+
+  .actionButtons {
+    flex-direction: column;
+  }
+}

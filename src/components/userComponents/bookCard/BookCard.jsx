@@ -4,18 +4,32 @@ import { useState } from "react"
 import { Link } from "react-router-dom"
 import { ShoppingCart, Eye } from "lucide-react"
 import { useCart } from "../../../contexts/CartContext"
+import { useToast } from "../../../contexts/ToastContext"
+import { mockImages } from "../../../mockData" // Import mockImages
 import styles from "./BookCard.module.css"
 
 const BookCard = ({ book }) => {
   const { addToCart } = useCart()
+  const { showToast } = useToast()
   const [isHovered, setIsHovered] = useState(false)
   const [addedToCart, setAddedToCart] = useState(false)
 
-  const handleAddToCart = (e) => {
-    e.preventDefault()
-    e.stopPropagation()
+  // Tìm hình ảnh cover cho sách từ bảng images
+  const getCoverImage = (bookId) => {
+    const coverImage = mockImages.find((img) => img.product_id === bookId && img.is_cover)
+    return coverImage ? coverImage.url : "/placeholder.svg?height=300&width=200"
+  }
 
-    if (!addedToCart && book.available_quantity > 0) {
+  // Sửa lại hàm handleAddToCart để tránh hiển thị toast hai lần
+  // Thay thế hàm handleAddToCart hiện tại bằng hàm này:
+
+  const handleAddToCart = (e) => {
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+
+    if (!addedToCart && book.stock > 0) {
       addToCart(book)
       setAddedToCart(true)
 
@@ -26,19 +40,20 @@ const BookCard = ({ book }) => {
     }
   }
 
+  // Calculate discounted price if there's a discount
+  const discountedPrice = book.discount > 0 ? book.rental_price - (book.rental_price * book.discount) / 100 : null
+
   return (
     <div className={styles.bookCard} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
       <Link to={`/books/${book.id}`} className={styles.bookLink}>
         <div className={styles.imageContainer}>
-          <img
-            src={book.cover_image || "/placeholder.svg?height=300&width=200"}
-            alt={book.title}
-            className={styles.bookImage}
-          />
+          <img src={getCoverImage(book.id) || "/placeholder.svg"} alt={book.title} className={styles.bookImage} />
 
-          {book.available_quantity <= 0 && <div className={styles.outOfStock}>Hết sách</div>}
+          {book.stock <= 0 && <div className={styles.outOfStock}>Hết sách</div>}
 
-          {isHovered && book.available_quantity > 0 && (
+          {book.discount > 0 && <div className={styles.discountBadge}>-{book.discount}%</div>}
+
+          {isHovered && book.stock > 0 && (
             <div className={styles.quickActions}>
               <button
                 className={`${styles.actionButton} ${addedToCart ? styles.added : ""}`}
@@ -57,15 +72,22 @@ const BookCard = ({ book }) => {
 
         <div className={styles.bookInfo}>
           <h3 className={styles.bookTitle}>{book.title}</h3>
-          <p className={styles.bookAuthor}>{book.author}</p>
+          <p className={styles.bookAuthor}>{book.author_name || "Tác giả không xác định"}</p>
           <div className={styles.bookPrice}>
-            <span>{book.rental_price.toLocaleString("vi-VN")}đ</span>
+            {discountedPrice ? (
+              <>
+                <span className={styles.discountedPrice}>{Math.round(discountedPrice).toLocaleString("vi-VN")}đ</span>
+                <span className={styles.originalPrice}>{book.rental_price.toLocaleString("vi-VN")}đ</span>
+              </>
+            ) : (
+              <span>{book.rental_price.toLocaleString("vi-VN")}đ</span>
+            )}
             <span className={styles.rentalPeriod}>/tuần</span>
           </div>
         </div>
       </Link>
 
-      {book.available_quantity > 0 && (
+      {book.stock > 0 && (
         <button
           className={`${styles.addToCartButton} ${addedToCart ? styles.added : ""}`}
           onClick={handleAddToCart}

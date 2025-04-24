@@ -1,0 +1,433 @@
+.orderDetailsPage {
+  padding: 2rem 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.loading {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border-color);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.pageHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  margin-right: 1.5rem;
+  color: var(--text-light);
+}
+
+.backButton:hover {
+  color: var(--primary-color);
+}
+
+.backButton span {
+  margin-left: 0.5rem;
+}
+
+.pageTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.orderContent {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 2rem;
+}
+
+.orderCard {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.cardHeader {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.cardTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.cardContent {
+  padding: 1rem;
+}
+
+.infoRow {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.infoLabel {
+  color: var(--text-light);
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.infoValue {
+  font-weight: 500;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 500;
+}
+
+.statusBadge svg {
+  margin-right: 0.5rem;
+}
+
+.activeIcon {
+  color: #1e40af;
+}
+
+.completedIcon {
+  color: #10b981;
+}
+
+.overdueIcon {
+  color: #f59e0b;
+}
+
+.cancelledIcon {
+  color: #ef4444;
+}
+
+.pendingIcon {
+  color: #6b7280;
+}
+
+.methodItem {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.methodItem:last-child {
+  margin-bottom: 0;
+}
+
+.methodIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: rgba(79, 70, 229, 0.1);
+  border-radius: 0.5rem;
+  margin-right: 1rem;
+  color: var(--primary-color);
+}
+
+.methodInfo {
+  flex: 1;
+}
+
+.methodTitle {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.methodValue {
+  color: var(--text-light);
+}
+
+.orderItems {
+  margin-bottom: 1.5rem;
+}
+
+.orderItem {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.orderItem:last-child {
+  border-bottom: none;
+}
+
+.itemInfo {
+  flex: 1;
+}
+
+.itemTitle {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.itemMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: var(--text-light);
+}
+
+.itemPrices {
+  text-align: right;
+  min-width: 150px;
+}
+
+.itemPrice {
+  margin-bottom: 0.25rem;
+}
+
+.priceLabel {
+  color: var(--text-light);
+  margin-right: 0.5rem;
+}
+
+.priceValue {
+  font-weight: 500;
+}
+
+.summaryDetails {
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.summaryTotal {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+  font-size: 1.125rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.orderActions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.extendButton,
+.returnButton {
+  flex: 1;
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+}
+
+.extendButton {
+  background-color: var(--background-light);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+}
+
+.extendButton:hover {
+  background-color: var(--border-color);
+}
+
+.returnButton {
+  background-color: #1e40af;
+  color: white;
+}
+
+.returnButton:hover {
+  background-color: #1e3a8a;
+}
+
+/* Modal styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: white;
+  border-radius: 0.5rem;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modalHeader h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-light);
+}
+
+.closeButton:hover {
+  color: var(--text-color);
+}
+
+.modalBody {
+  padding: 1.5rem 1rem;
+}
+
+.modalBody p {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.extendOptions,
+.returnOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.extendOption,
+.returnOption {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.extendFee,
+.returnNote {
+  background-color: var(--background-light);
+  padding: 1rem;
+  border-radius: 0.375rem;
+  margin-top: 1rem;
+}
+
+.extendFee p,
+.returnNote p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.cancelButton,
+.confirmButton {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.cancelButton {
+  background-color: white;
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+}
+
+.cancelButton:hover {
+  background-color: var(--background-light);
+}
+
+.confirmButton {
+  background-color: #1e40af;
+  color: white;
+  border: none;
+}
+
+.confirmButton:hover {
+  background-color: #1e3a8a;
+}
+
+@media (max-width: 768px) {
+  .orderContent {
+    grid-template-columns: 1fr;
+  }
+
+  .infoRow {
+    grid-template-columns: 1fr;
+  }
+
+  .orderActions {
+    flex-direction: column;
+  }
+}
+
+.infoIcon {
+  color: #1e40af;
+}

@@ -377,3 +377,280 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Book image gallery styles */
+.bookImagesSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.thumbnailGallery {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.thumbnail {
+  width: 60px;
+  height: 60px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.thumbnail:hover {
+  border-color: #3b82f6;
+  transform: translateY(-2px);
+}
+
+.thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.activeThumbnail {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+/* Wishlist button active state */
+.actionButton.active {
+  background-color: #fee2e2;
+  color: #ef4444;
+}
+
+.actionButton.active svg {
+  fill: #ef4444;
+}
+
+/* Notify section when book is out of stock */
+.notifySection {
+  margin: 16px 0;
+}
+
+.notifyButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #e0f2fe;
+  color: #0284c7;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.notifyButton:hover {
+  background-color: #bae6fd;
+}
+
+.notifyForm {
+  margin-top: 16px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  position: relative;
+}
+
+.formHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.formHeader h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.closeButton {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.closeButton:hover {
+  background-color: #e2e8f0;
+}
+
+.formField {
+  margin: 16px 0;
+}
+
+.formField label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.formField input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.submitButton {
+  width: 100%;
+  background-color: #0284c7;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.submitButton:hover {
+  background-color: #0369a1;
+}
+
+.submitButton:disabled {
+  background-color: #94a3b8;
+  cursor: not-allowed;
+}
+
+/* Rental history styles */
+.rentalHistory {
+  margin-top: 32px;
+  padding-top: 32px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.historyItem {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  background-color: #f8fafc;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.historyItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.historyHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.historyOrder {
+  font-weight: 500;
+}
+
+.orderLabel {
+  color: #64748b;
+  margin-right: 4px;
+}
+
+.orderValue {
+  color: #0f172a;
+}
+
+.historyDate {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.historyStatus {
+  display: flex;
+  align-items: center;
+}
+
+.statusBadge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.statusPENDING {
+  background-color: #fef9c3;
+  color: #854d0e;
+}
+
+.statusAPPROVED {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.statusREJECTED {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.statusRETURNED {
+  background-color: #e0f2fe;
+  color: #0c4a6e;
+}
+
+.historyDetails {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.historyDetail {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+/* Recommended books section */
+.recommendedBooks {
+  margin-top: 32px;
+  padding-top: 32px;
+  border-top: 1px solid #e2e8f0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .bookImagesSection {
+    margin-bottom: 24px;
+  }
+  
+  .historyHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .historyStatus {
+    margin-top: 8px;
+  }
+}

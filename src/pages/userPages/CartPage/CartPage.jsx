@@ -1,3 +1,5 @@
+"use client"
+
 import { Link, useNavigate } from "react-router-dom"
 import { Trash2, ShoppingCart, ArrowRight } from "lucide-react"
 import { useCart } from "../../../contexts/CartContext"
@@ -49,11 +51,7 @@ const CartPage = () => {
                   <div className={styles.productCol}>
                     <div className={styles.productInfo}>
                       <Link to={`/books/${item.id}`} className={styles.productImageLink}>
-                        <img
-                          src={item.cover_image}
-                          alt={item.title}
-                          className={styles.productImage}
-                        />
+                        <img src={item.cover_image} alt={item.title} className={styles.productImage} />
                       </Link>
                       <div className={styles.productDetails}>
                         <Link to={`/books/${item.id}`} className={styles.productTitle}>
@@ -142,14 +140,15 @@ const CartPage = () => {
                 <p>* Chưa bao gồm tiền đặt cọc và phí vận chuyển</p>
               </div>
 
-              <button className={styles.checkoutButton} onClick={handleCheckout}>
-                <span>Tiến hành thanh toán</span>
-                <ArrowRight size={18} />
-              </button>
-
-              <Link to="/search" className={styles.continueShoppingLink}>
-                Tiếp tục tìm sách
-              </Link>
+              <div className={styles.cartButtons}>
+                <button className={styles.checkoutButton} onClick={handleCheckout}>
+                  <span>Tiến hành thanh toán</span>
+                  <ArrowRight size={18} />
+                </button>
+                <Link to="/search" className={styles.continueShoppingLink}>
+                  Tiếp tục tìm sách
+                </Link>
+              </div>
             </div>
           </div>
         )}
