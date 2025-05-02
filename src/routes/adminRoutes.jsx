@@ -1,7 +1,7 @@
 import AdminApp from "../AdminApp";
 import Dashboard from "../pages/adminPages/dashboard/Dashboard"
 import ManagerBook from "../pages/adminPages/dashboard/ManagerBook"
-import ManagerUsers from "../pages/adminPages/dashboard/UserManagement"
+// import ManagerUsers from "../pages/adminPages/dashboard/UserManagement"
 const routes= [
   {
     path:"/admin",
@@ -15,11 +15,11 @@ const routes= [
       { path:"managerBook",
         element:<ManagerBook/>
       }
-        ,
-      { 
-        path:"managerUsers",
-        element:<ManagerUsers/>
-      }
+      //   ,
+      // { 
+      //   path:"managerUsers",
+      //   element:<ManagerUsers/>
+      // }
     ]
   }
 ]
