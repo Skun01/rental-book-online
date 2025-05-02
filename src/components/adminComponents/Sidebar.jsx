@@ -23,7 +23,7 @@ const Sidebar = ({ isSidebarCollapsed, toggleSidebar, isMobileMenuOpen, toggleMo
         <nav className={styles.sidebarMenu}>
           <ul>
             <li>
-              <Link to="/admin">
+              <Link to="/admin/dashboard">
                 <span className={styles.menuIcon}>📊</span>
                 <span className={styles.menuText}>Trang chủ</span>
               </Link>
@@ -35,7 +35,7 @@ const Sidebar = ({ isSidebarCollapsed, toggleSidebar, isMobileMenuOpen, toggleMo
               </Link>
             </li>
             <li>
-              <Link to="/admin/users">
+              <Link to="/admin/managerUsers">
                 <span className={styles.menuIcon}>👥</span>
                 <span className={styles.menuText}>Quản lý người dùng</span>
               </Link>

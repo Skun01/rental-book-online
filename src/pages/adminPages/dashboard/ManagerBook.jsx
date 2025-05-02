@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './ManagerBook.css';
+import styles from './ManagerBook.module.css';
 import { demoBooks, demoCategories } from './fakeData';
 
 function BookManagement() {
@@ -27,7 +27,7 @@ function BookManagement() {
   });
   
   // State for category form
-  const [categoryForm, setcategoryForm] = useState({
+  const [categoryForm, setCategoryForm] = useState({
     name: '',
     description: ''
   });
@@ -50,7 +50,7 @@ function BookManagement() {
   // Handle category form input changes
   const handleCategoryFormChange = (e) => {
     const { name, value } = e.target;
-    setcategoryForm({
+    setCategoryForm({
       ...categoryForm,
       [name]: value
     });
@@ -116,7 +116,7 @@ function BookManagement() {
     }
     
     // Reset form
-    setcategoryForm({
+    setCategoryForm({
       name: '',
       description: ''
     });
@@ -146,7 +146,7 @@ function BookManagement() {
   const handleEditCategory = (category) => {
     setFormMode('edit');
     setCurrentBookId(category.id);
-    setcategoryForm({
+    setCategoryForm({
       name: category.name,
       description: category.description
     });
@@ -183,16 +183,16 @@ function BookManagement() {
   };
 
   return (
-    <div className="book-management-container">
-      <div className="tabs">
+    <div className={styles.bookManagementContainer}>
+      <div className={styles.tabs}>
         <button 
-          className={activeTab === 'books' ? 'active' : ''}
+          className={activeTab === 'books' ? styles.active : ''}
           onClick={() => setActiveTab('books')}
         >
           Quản lý sách
         </button>
         <button 
-          className={activeTab === 'categories' ? 'active' : ''}
+          className={activeTab === 'categories' ? styles.active : ''}
           onClick={() => setActiveTab('categories')}
         >
           Quản lý thể loại
@@ -200,12 +200,12 @@ function BookManagement() {
       </div>
       
       {activeTab === 'books' && (
-        <div className="books-management">
-          <div className="form-container">
+        <div className={styles.booksManagement}>
+          <div className={styles.formContainer}>
             <h2>{formMode === 'add' ? 'Thêm sách mới' : 'Cập nhật sách'}</h2>
             <form onSubmit={handleBookSubmit}>
-              <div className="form-grid">
-                <div className="form-group">
+              <div className={styles.formGrid}>
+                <div className={styles.formGroup}>
                   <label htmlFor="name">Tên sách:</label>
                   <input 
                     type="text" 
@@ -217,10 +217,7 @@ function BookManagement() {
                   />
                 </div>
                 
-                {/* Các trường form khác giữ nguyên */}
-                {/* ... */}
-                
-                <div className="form-group">
+                <div className={styles.formGroup}>
                   <label htmlFor="publisher">Nhà xuất bản:</label>
                   <input 
                     type="text" 
@@ -232,7 +229,7 @@ function BookManagement() {
                   />
                 </div>
                 
-                <div className="form-group">
+                <div className={styles.formGroup}>
                   <label htmlFor="publication_year">Năm xuất bản:</label>
                   <input 
                     type="number" 
@@ -244,7 +241,7 @@ function BookManagement() {
                   />
                 </div>
                 
-                <div className="form-group">
+                <div className={styles.formGroup}>
                   <label htmlFor="pages">Số trang:</label>
                   <input 
                     type="number" 
@@ -256,7 +253,7 @@ function BookManagement() {
                   />
                 </div>
                 
-                <div className="form-group">
+                <div className={styles.formGroup}>
                   <label htmlFor="language">Ngôn ngữ:</label>
                   <input 
                     type="text" 
@@ -268,7 +265,7 @@ function BookManagement() {
                   />
                 </div>
                 
-                <div className="form-group">
+                <div className={styles.formGroup}>
                   <label htmlFor="total_quantity">Tổng số:</label>
                   <input 
                     type="number" 
@@ -280,7 +277,7 @@ function BookManagement() {
                   />
                 </div>
                 
-                <div className="form-group">
+                <div className={styles.formGroup}>
                   <label htmlFor="available_quantity">Số lượng hiện có:</label>
                   <input 
                     type="number" 
@@ -292,7 +289,7 @@ function BookManagement() {
                   />
                 </div>
                 
-                <div className="form-group">
+                <div className={styles.formGroup}>
                   <label htmlFor="rental_price">Giá thuê:</label>
                   <input 
                     type="number" 
@@ -304,7 +301,7 @@ function BookManagement() {
                   />
                 </div>
                 
-                <div className="form-group">
+                <div className={styles.formGroup}>
                   <label htmlFor="deposit_price">Giá đặt cọc:</label>
                   <input 
                     type="number" 
@@ -316,7 +313,7 @@ function BookManagement() {
                   />
                 </div>
                 
-                <div className="form-group">
+                <div className={styles.formGroup}>
                   <label htmlFor="status">Trạng thái:</label>
                   <select 
                     id="status" 
@@ -330,7 +327,7 @@ function BookManagement() {
                   </select>
                 </div>
                 
-                <div className="form-group">
+                <div className={styles.formGroup}>
                   <label htmlFor="category_id">Thể loại:</label>
                   <select 
                     id="category_id" 
@@ -349,7 +346,7 @@ function BookManagement() {
                 </div>
               </div>
               
-              <div className="form-group full-width">
+              <div className={`${styles.formGroup} ${styles.fullWidth}`}>
                 <label htmlFor="description">Mô tả:</label>
                 <textarea 
                   id="description" 
@@ -360,14 +357,14 @@ function BookManagement() {
                 />
               </div>
               
-              <div className="form-actions">
+              <div className={styles.formActions}>
                 <button type="submit">
                   {formMode === 'add' ? 'Thêm sách' : 'Cập nhật sách'}
                 </button>
                 {formMode === 'edit' && (
                   <button 
                     type="button" 
-                    className="cancel-btn"
+                    className={styles.cancelBtn}
                     onClick={() => {
                       setFormMode('add');
                       setCurrentBookId(null);
@@ -394,9 +391,9 @@ function BookManagement() {
             </form>
           </div>
           
-          <div className="list-container">
+          <div className={styles.listContainer}>
             <h2>Danh sách sách</h2>
-            <table className="data-table">
+            <table className={styles.dataTable}>
               <thead>
                 <tr>
                   <th>ID</th>
@@ -420,21 +417,21 @@ function BookManagement() {
                     <td>{getCategoryName(book.category_id)}</td>
                     <td>{book.available_quantity}/{book.total_quantity}</td>
                     <td>
-                      <span className={`status-badge ${book.status.toLowerCase()}`}>
+                      <span className={`${styles.statusBadge} ${styles[book.status.toLowerCase()]}`}>
                         {book.status === 'Available' ? 'Có sẵn' : 
                          book.status === 'Unavailable' ? 'Không có sẵn' : 'Bảo trì'}
                       </span>
                     </td>
                     <td>{book.rental_price.toLocaleString()} đ</td>
-                    <td className="actions">
+                    <td className={styles.actions}>
                       <button 
-                        className="edit-btn"
+                        className={styles.editBtn}
                         onClick={() => handleEditBook(book)}
                       >
                         Sửa
                       </button>
                       <button 
-                        className="delete-btn"
+                        className={styles.deleteBtn}
                         onClick={() => handleDeleteBook(book.id)}
                       >
                         Xóa
@@ -449,12 +446,11 @@ function BookManagement() {
       )}
       
       {activeTab === 'categories' && (
-        <div className="categories-management">
-          {/* Phần quản lý thể loại - giữ nguyên code */}
-          <div className="form-container">
+        <div className={styles.categoriesManagement}>
+          <div className={styles.formContainer}>
             <h2>{formMode === 'add' ? 'Thêm thể loại mới' : 'Cập nhật thể loại'}</h2>
             <form onSubmit={handleCategorySubmit}>
-              <div className="form-group">
+              <div className={styles.formGroup}>
                 <label htmlFor="category-name">Tên thể loại:</label>
                 <input 
                   type="text" 
@@ -466,7 +462,7 @@ function BookManagement() {
                 />
               </div>
               
-              <div className="form-group">
+              <div className={styles.formGroup}>
                 <label htmlFor="category-description">Mô tả:</label>
                 <textarea 
                   id="category-description" 
@@ -477,18 +473,18 @@ function BookManagement() {
                 />
               </div>
               
-              <div className="form-actions">
+              <div className={styles.formActions}>
                 <button type="submit">
                   {formMode === 'add' ? 'Thêm thể loại' : 'Cập nhật thể loại'}
                 </button>
                 {formMode === 'edit' && (
                   <button 
                     type="button" 
-                    className="cancel-btn"
+                    className={styles.cancelBtn}
                     onClick={() => {
                       setFormMode('add');
                       setCurrentBookId(null);
-                      setcategoryForm({
+                      setCategoryForm({
                         name: '',
                         description: ''
                       });
@@ -501,9 +497,9 @@ function BookManagement() {
             </form>
           </div>
           
-          <div className="list-container">
+          <div className={styles.listContainer}>
             <h2>Danh sách thể loại</h2>
-            <table className="data-table">
+            <table className={styles.dataTable}>
               <thead>
                 <tr>
                   <th>ID</th>
@@ -518,15 +514,15 @@ function BookManagement() {
                     <td>{category.id}</td>
                     <td>{category.name}</td>
                     <td>{category.description}</td>
-                    <td className="actions">
+                    <td className={styles.actions}>
                       <button 
-                        className="edit-btn"
+                        className={styles.editBtn}
                         onClick={() => handleEditCategory(category)}
                       >
                         Sửa
                       </button>
                       <button 
-                        className="delete-btn"
+                        className={styles.deleteBtn}
                         onClick={() => handleDeleteCategory(category.id)}
                       >
                         Xóa
