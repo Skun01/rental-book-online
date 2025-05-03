@@ -47,7 +47,7 @@ const Sidebar = ({ isSidebarCollapsed, toggleSidebar, isMobileMenuOpen, toggleMo
               </Link>
             </li>
             <li>
-              <Link to="/admin/stats">
+              <Link to="/admin/thongKe">
                 <span className={styles.menuIcon}>📈</span>
                 <span className={styles.menuText}>Báo cáo thống kê</span>
               </Link>
