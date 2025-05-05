@@ -6,13 +6,6 @@ const Dashboard = () => {
     <div className={styles["admin-layout"]}>
       {/* Main content */}
       <div className={styles["main-content"]}>
-        <header className={styles["top-navbar"]}>
-          <h1>Hệ thống quản lý thư viện</h1>
-          <div className={styles["user-info"]}>
-            <span className={styles["user-name"]}>Admin</span>
-          </div>
-        </header>
-
         <main className={styles["content-area"]}>
           <div className={styles["dashboard-stats"]}>
             <div className={styles["stat-card"]}>

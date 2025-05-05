@@ -24,19 +24,19 @@ const Sidebar = ({ isSidebarCollapsed, toggleSidebar, isMobileMenuOpen, toggleMo
           <ul>
             <li>
               <Link to="/admin/dashboard">
-                <span className={styles.menuIcon}>📊</span>
+                <span className={styles.menuIcon}>🏠</span>
                 <span className={styles.menuText}>Trang chủ</span>
               </Link>
             </li>
             <li>
               <Link to="/admin/managerBook">
-                <span className={styles.menuIcon}>📚</span>
+                <span className={styles.menuIcon}>🕮</span>
                 <span className={styles.menuText}>Quản lý sách</span>
               </Link>
             </li>
             <li>
               <Link to="/admin/managerUsers">
-                <span className={styles.menuIcon}>👥</span>
+                <span className={styles.menuIcon}>🧑‍🧒‍🧒</span>
                 <span className={styles.menuText}>Quản lý người dùng</span>
               </Link>
             </li>
@@ -54,7 +54,7 @@ const Sidebar = ({ isSidebarCollapsed, toggleSidebar, isMobileMenuOpen, toggleMo
             </li>
             <li>
               <Link to="/admin/permissions">
-                <span className={styles.menuIcon}>🔐</span>
+                <span className={styles.menuIcon}>🛡️</span>
                 <span className={styles.menuText}>Quản lý phân quyền</span>
               </Link>
             </li>

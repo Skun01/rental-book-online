@@ -1,0 +1,275 @@
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #333;
+  }
+  
+  .header {
+    margin-bottom: 24px;
+  }
+  
+  .header h1 {
+    font-size: 24px;
+    margin-bottom: 16px;
+    color: #2563eb;
+  }
+  
+  .tabs {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .tabButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border: none;
+    background: transparent;
+    font-size: 16px;
+    font-weight: 500;
+    color: #64748b;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+  }
+  
+  .tabButton:hover {
+    color: #2563eb;
+  }
+  
+  .tabButton.active {
+    color: #2563eb;
+    border-bottom: 2px solid #2563eb;
+  }
+  
+  .filterBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  
+  .dropdown {
+    position: relative;
+  }
+  
+  .dropdownToggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .dropdownToggle:hover {
+    border-color: #d1d5db;
+  }
+  
+  .dropdownMenu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 10;
+    min-width: 200px;
+    margin-top: 4px;
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    display: none;
+  }
+  
+  .dropdown:hover .dropdownMenu {
+    display: block;
+  }
+  
+  .dropdownMenu button {
+    display: block;
+    width: 100%;
+    padding: 10px 16px;
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .dropdownMenu button:hover {
+    background-color: #f3f4f6;
+  }
+  
+  .dropdownMenu button.selected {
+    background-color: #eff6ff;
+    color: #2563eb;
+  }
+  
+  .exportButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .exportButton:hover {
+    background-color: #1d4ed8;
+  }
+  
+  .statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+  
+  .statCard {
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  .statCard h3 {
+    font-size: 14px;
+    font-weight: 500;
+    color: #64748b;
+    margin-bottom: 8px;
+  }
+  
+  .statValue {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 4px;
+  }
+  
+  .statLabel {
+    font-size: 12px;
+    color: #94a3b8;
+  }
+  
+  .statCard.primary {
+    background-color: #2563eb;
+  }
+  
+  .statCard.primary h3,
+  .statCard.primary .statValue,
+  .statCard.primary .statLabel {
+    color: white;
+  }
+  
+  .detailsPanel {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+    margin-bottom: 32px;
+  }
+  
+  .detailsPanel h2 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: #1e293b;
+  }
+  
+  .revenueTable, .booksTable {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .revenueTable th, .revenueTable td,
+  .booksTable th, .booksTable td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .revenueTable th, .booksTable th {
+    font-weight: 500;
+    color: #64748b;
+    background-color: #f8fafc;
+  }
+  
+  .revenueTable tr:last-child td,
+  .booksTable tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .totalRow {
+    font-weight: 600;
+    background-color: #f0f9ff;
+  }
+  
+  .totalRow td:last-child {
+    color: #2563eb;
+  }
+  
+  .popularBooksSection {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+  }
+  
+  .popularBooksSection h2 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: #1e293b;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .statsGrid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .filterBar {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    
+    .exportButton {
+      width: 100%;
+      justify-content: center;
+    }
+    
+    .tabs {
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .statsGrid {
+      grid-template-columns: 1fr;
+    }
+    
+    .revenueTable, .booksTable {
+      font-size: 14px;
+    }
+    
+    .revenueTable th, .revenueTable td,
+    .booksTable th, .booksTable td {
+      padding: 10px 12px;
+    }
+  }

@@ -1,7 +1,6 @@
-// BookRentalManagement.jsx
 import React, { useState, useEffect } from 'react';
 import { Download, TrendingUp, Book, ShoppingCart } from 'lucide-react';
-import './BookRentalManagement.css';
+import './HireBook.css';
 
 // Dữ liệu mẫu
 const initialOrders = [

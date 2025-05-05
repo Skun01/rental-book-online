@@ -1,0 +1,211 @@
+/* BookManagement.module.css */
+
+/* Container chính */
+.bookManagementContainer {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Arial', sans-serif;
+  }
+  
+  /* Style cho tabs */
+  .tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .tabs button {
+    background: none;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    position: relative;
+  }
+  
+  .tabs button.active {
+    color: #1a73e8;
+    font-weight: bold;
+  }
+  
+  .tabs button.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background-color: #1a73e8;
+  }
+  
+  /* Layout chung */
+  .booksManagement,
+  .categoriesManagement {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 20px;
+  }
+  
+  /* Form container */
+  .formContainer {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .formContainer h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 1.5rem;
+  }
+  
+  /* Form grid cho layout nhiều cột */
+  .formGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+  
+  /* Style cho form groups */
+  .formGroup {
+    margin-bottom: 15px;
+  }
+  
+  .formGroup.fullWidth {
+    grid-column: span 2;
+  }
+  
+  .formGroup label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+  }
+  
+  .formGroup input,
+  .formGroup select,
+  .formGroup textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+  .formGroup textarea {
+    min-height: 100px;
+    resize: vertical;
+  }
+  
+  /* Button styles */
+  .formActions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+  }
+  
+  .formActions button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  
+  .formActions button[type="submit"] {
+    background-color: #1a73e8;
+    color: white;
+  }
+  
+  .cancelBtn {
+    background-color: #f2f2f2;
+    color: #666;
+  }
+  
+  /* List container */
+  .listContainer {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .listContainer h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 1.5rem;
+  }
+  
+  /* Data table */
+  .dataTable {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .dataTable th,
+  .dataTable td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .dataTable th {
+    background-color: #f2f2f2;
+    font-weight: 600;
+  }
+  
+  .dataTable tr:hover {
+    background-color: #f5f5f5;
+  }
+  
+  /* Action buttons */
+  .actions {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .editBtn,
+  .deleteBtn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  
+  .editBtn {
+    background-color: #fbbc05;
+    color: white;
+  }
+  
+  .deleteBtn {
+    background-color: #ea4335;
+    color: white;
+  }
+  
+  /* Status badges */
+  .statusBadge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  
+  .statusBadge.available {
+    background-color: #34a853;
+    color: white;
+  }
+  
+  .statusBadge.unavailable {
+    background-color: #ea4335;
+    color: white;
+  }
+  
+  .statusBadge.maintenance {
+    background-color: #fbbc05;
+    color: white;
+  }
