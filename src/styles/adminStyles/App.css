@@ -1,6 +1,7 @@
 .admin-app-container {
     display: flex;
     height: 100vh; 
+    margin-left: 281px;
   }
   
   .admin-main-content {
