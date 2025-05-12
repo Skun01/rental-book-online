@@ -1,0 +1,48 @@
+.suggestBox {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  width: 100%;
+  background-color: rgba(15, 17, 26, 0.95);
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  z-index: 999;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.suggestItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  color: white;
+  font-size: 14px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.suggestItem:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.suggestItem svg {
+  color: #ccc;
+}
+
+.suggestItem span {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.noResult {
+  color: #ccc;
+  font-size: 14px;
+  text-align: center;
+  padding: 8px 0;
+}

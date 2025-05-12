@@ -48,22 +48,6 @@ const HomePage = () => {
   return (
     <div className={styles.homePage}>
       {/* Hero Section */}
-      <section className={styles.heroSection}>
-        <div className={styles.container}>
-          <div className={styles.heroContent}>
-            <h1 className={styles.heroTitle}>Khám phá thế giới qua từng trang sách</h1>
-            <p className={styles.heroSubtitle}>Thuê sách dễ dàng, tiết kiệm chi phí và bảo vệ môi trường</p>
-            <div className={styles.heroButtons}>
-              <Link to="/search" className={styles.primaryButton}>
-                Khám phá ngay
-              </Link>
-              <Link to="/about" className={styles.secondaryButton}>
-                Tìm hiểu thêm
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Featured Books */}
       <section className={styles.section}>

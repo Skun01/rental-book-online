@@ -10,7 +10,7 @@ const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("info")
   const [editMode, setEditMode] = useState(false)
   const [formData, setFormData] = useState({
-    full_name: currentUser?.full_name || "",
+    full_name: currentUser?.fullName || "",
     email: currentUser?.email || "",
     gender: currentUser?.gender || "MALE",
     age: currentUser?.age || "",

@@ -53,8 +53,8 @@ const Login = () => {
     if (!password) {
       newErrors.password = "Hãy nhập mật khẩu"
       hasErrors = true
-    } else if (password.length < 8) {
-      newErrors.password = "Mật khẩu phải có ít nhất 8 kí tự"
+    } else if (password.length < 6) {
+      newErrors.password = "Mật khẩu phải có ít nhất 6 kí tự"
       hasErrors = true
     }
 
@@ -66,36 +66,20 @@ const Login = () => {
     setIsLoading(true)
 
     try {
-      // Mô phỏng gọi API - bỏ comment phần này khi sử dụng API thực tế
-      // await axios.post("https://api.example.com/login", {
-      //   email: trimmedEmail,
-      //   password: password,
-      // })
-      // .then(res => {
-      //   const { data, accessToken } = res.data;
-      //   login(data, accessToken)
-      //   data.role === "admin" ? navigate("/admin") : navigate("/");
-      // })
+      console.log(trimmedEmail, password)
+      await axios.post("http://localhost:8080/api/v1/auth/login", {
+        email: trimmedEmail,
+        password: password,
+      })
+      .then(res => {
+        const { accessToken, user, message } = res.data.data;
+        login(user, accessToken)
+        console.log(message);
+        user.role.name !== "USER" ? navigate("/admin") : navigate("/");
+      })
       
-      // Xóa đoạn mã này khi kết nối với API thực tế
-      setTimeout(() => {
-        login(
-          {
-            id: 1,
-            email: "user@example.com",
-            full_name: "Nguyễn Văn A",
-            phone: "0123456789",
-            gender: "Male",
-            age: 30,
-            role_id: 2,
-            role: "user",
-          },
-          "accessToken"
-        )
-        navigate("/")
-        setIsLoading(false)
-      }, 1000);
     } catch (err) {
+      console.log(err)
       setErrors({
         ...newErrors,
         general: "Email hoặc mật khẩu không chính xác",

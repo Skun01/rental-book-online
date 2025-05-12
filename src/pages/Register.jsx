@@ -90,8 +90,8 @@ const Register = () => {
     if (!formData.password) {
       newErrors.password = "Hãy nhập mật khẩu"
       hasErrors = true
-    } else if (formData.password.length < 8) {
-      newErrors.password = "Mật khẩu phải ít nhất 8 kí tự"
+    } else if (formData.password.length < 6) {
+      newErrors.password = "Mật khẩu phải ít nhất 6 kí tự"
       hasErrors = true
     }
 
@@ -112,20 +112,19 @@ const Register = () => {
 
     try {
       // get api to register to server here:
-      const url = "";
-      // await axios
-      //   .post(url, {
-      //     fullName: data.fullName,
-      //     email: data.email,
-      //     gender: data.gender,
-      //     age: data.age,
-      //     password: data.password,
-      //     }
-      //   )
-      
-      console.log(formData);
+      const url = "http://localhost:8080/api/v1/auth/register";
+      await axios
+        .post(url, {
+          fullName: formData.fullName,
+          email: formData.email,
+          gender: formData.gender,
+          age: formData.age,
+          password: formData.password,
+          }
+        ).then(res=>console.log(res))
       navigate("/login")
     } catch (err) {
+      console.log(err);
       setErrors({
         ...newErrors,
         general: "Đăng nhập thất bại, vui lòng thử lại.",

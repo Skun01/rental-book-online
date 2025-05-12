@@ -1,0 +1,44 @@
+.menu {
+  background-color: #1e293b;
+  color: white;
+  padding: 12px;
+  border-radius: 10px;
+  width: 180px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 14px;
+  position: absolute;
+  top: 50px;
+  right: 0;
+}
+
+.header p{
+  margin: 0;
+}
+
+.username {
+  color: #cbd5e1;
+  font-weight: bold;
+}
+
+.separator {
+  height: 1px;
+  background-color: #334155;
+  margin: 4px 0;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.menuItem:hover {
+  background-color: #334155;
+}
