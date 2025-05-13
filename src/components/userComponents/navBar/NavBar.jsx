@@ -32,7 +32,6 @@ function NavBar(){
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
-  console.log(currentUser);
   // Sync search query with URL when on search page
   useEffect(() => {
     if (location.pathname === "/search") {
