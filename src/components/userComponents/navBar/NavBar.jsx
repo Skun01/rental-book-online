@@ -7,6 +7,8 @@ import { popularSearchTerms } from "../../../mockData"
 import styles from "./NavBar.module.css"
 import UserMenu from "./UserMenu"
 import SearchSuggest from "./SearchSuggest"
+import Login from "../../../pages/Login"
+import Register from "../../../pages/Register"
 
 
 function NavBar(){
@@ -14,6 +16,8 @@ function NavBar(){
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [showSuggest, setShowSuggest] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
+  const [authMode, setAuthMode] = useState("login");
   const { currentUser, logout } = useAuth();
   const { cartItems } = useCart();
   const navigate = useNavigate();
@@ -94,6 +98,20 @@ function NavBar(){
     }
   };
 
+  // authorization
+  const openAuthModal = (mode) => {
+    setAuthMode(mode);
+    setShowAuth(true);
+  };
+
+  const closeAuthModal = () => {
+    setShowAuth(false);
+  };
+
+  const switchAuthMode = (mode) => {
+    setAuthMode(mode);
+  };
+
   // mock data
   const theLoai = [
     { id: 1, name: "Khoa học" },
@@ -107,94 +125,111 @@ function NavBar(){
     { id: 9, name: "Nghệ thuật" }
   ]
   return(
-    <div className={`${styles.navBar} ${isScorred ? styles.navBarScorred : ""}`}>
-      <div className={styles.navBarTitle}>
-        <Link to="/">
-          <p>Thuê sách</p>
-        </Link>
-      </div>
+    <>
+      <div className={`${styles.navBar} ${isScorred ? styles.navBarScorred : ""}`}>
+        <div className={styles.navBarTitle}>
+          <Link to="/">
+            <p>Thuê sách</p>
+          </Link>
+        </div>
 
-      {/* searching */}
-      <div className={styles.navBarSearch}>
-        <input
-          type="text"
-          className={styles.searchInput}
-          placeholder="Tìm kiếm sách..."
-          value={searchTerm}
-          onFocus={handleSearchFocus}
-          onKeyDown={handleSearchKeyDown}
-          onChange={handleSearchChange}
-        />
-        <Search className={styles.searchIcon} />
-        {showSuggest && (
-          <SearchSuggest 
-            searchTerm={searchTerm} 
-            data={popularSearchTerms} 
-            setSearchTerm={setSearchTerm}
-            setShowSuggest={setShowSuggest}
+        {/* searching */}
+        <div className={styles.navBarSearch}>
+          <input
+            type="text"
+            className={styles.searchInput}
+            placeholder="Tìm kiếm sách..."
+            value={searchTerm}
+            onFocus={handleSearchFocus}
+            onKeyDown={handleSearchKeyDown}
+            onChange={handleSearchChange}
           />
-        )}
-      </div>
+          <Search className={styles.searchIcon} />
+          {showSuggest && (
+            <SearchSuggest 
+              searchTerm={searchTerm} 
+              data={popularSearchTerms} 
+              setSearchTerm={setSearchTerm}
+              setShowSuggest={setShowSuggest}
+            />
+          )}
+        </div>
 
-      {/* menu */}
-      <ul className={styles.mainMenu}>
-        <li className={styles.menuItem}>
-          <Link to="/search">Sách</Link>
-        </li>
-        <li className={`${styles.menuItem} ${styles.menuSub}`}>
-            <p>Thể loại </p>
-            <ChevronDown className={styles.chevronDown}/>
-            <ul className={styles.subMenu}>
-              {theLoai.map((item) => (
-                <li key={item.id} className={styles.subMenuItem}>
-                  <Link to={`/search?category=${item.name}`}>{item.name}</Link>
-                </li>
-              ))}
-            </ul>
-        </li>
-        <li className={styles.menuItem}>
-          <Link to="/search">Chủ đề</Link>
-        </li>
-        <li className={styles.menuItem}>
-          <Link to="/search">Tác giả</Link>
-        </li>
-      </ul>
-
-      {/* notification */}
-      <div className={styles.mainNotification}>
-        <Bell className={styles.notifiIcon}/>
-      </div>
-
-      {/* authentication */}
-      <div className={styles.mainUser}>
-        {currentUser ? (
-          <div className = {styles.userInfor}>
-            <div className={styles.cart}>
-              <ShoppingCart className={styles.cartIcon}/>
-              <div className={styles.cartCount}>{cartItems.length}</div>
-            </div>
-            <div className={styles.user}
-              onClick={() => setUserMenuOpen(!userMenuOpen)}
-            >
-              <div className={styles.userAvatar}>
-                <img src="/avatar.jpg" alt="avatar" />
-              </div>
+        {/* menu */}
+        <ul className={styles.mainMenu}>
+          <li className={styles.menuItem}>
+            <Link to="/search">Sách</Link>
+          </li>
+          <li className={`${styles.menuItem} ${styles.menuSub}`}>
+              <p>Thể loại </p>
               <ChevronDown className={styles.chevronDown}/>
-              {userMenuOpen && (
-                <UserMenu username={currentUser.name} onLogout={logout} />
-              )}
+              <ul className={styles.subMenu}>
+                {theLoai.map((item) => (
+                  <li key={item.id} className={styles.subMenuItem}>
+                    <Link to={`/search?category=${item.name}`}>{item.name}</Link>
+                  </li>
+                ))}
+              </ul>
+          </li>
+          <li className={styles.menuItem}>
+            <Link to="/search">Chủ đề</Link>
+          </li>
+          <li className={styles.menuItem}>
+            <Link to="/search">Tác giả</Link>
+          </li>
+        </ul>
+
+        {/* notification */}
+        <div className={styles.mainNotification}>
+          <Bell className={styles.notifiIcon}/>
+        </div>
+
+        {/* authentication */}
+        <div className={styles.mainUser}>
+          {currentUser ? (
+            <div className = {styles.userInfor}>
+              <div className={styles.cart}>
+                <ShoppingCart className={styles.cartIcon}/>
+                <div className={styles.cartCount}>{cartItems.length}</div>
+              </div>
+              <div className={styles.user}
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+              >
+                <div className={styles.userAvatar}>
+                  <img src="/avatar.jpg" alt="avatar" />
+                </div>
+                <ChevronDown className={styles.chevronDown}/>
+                {userMenuOpen && (
+                  <UserMenu username={currentUser.name} onLogout={logout} />
+                )}
+              </div>
             </div>
+          ): (
+            <div className={styles.loginBtn}
+              onClick={() => openAuthModal("login")}
+            >
+              <User/>
+              <p>Thành viên</p>
           </div>
-        ): (
-          <div className={styles.loginBtn}
-            onClick={() => navigate("/login")}
-          >
-            <User/>
-            <p>Thành viên</p>
-         </div>
-        )}
+          )}
+        </div>
       </div>
-    </div>
+
+      {/* Auth Modal */}
+      {showAuth && (
+        authMode === "login" ? (
+          <Login 
+            onClose={closeAuthModal} 
+            switchToRegister={() => switchAuthMode("register")} 
+          />
+        ) : (
+          <Register 
+            onClose={closeAuthModal} 
+            switchToLogin={() => switchAuthMode("login")} 
+          />
+        )
+      )}
+    </>
   )
 }
 
