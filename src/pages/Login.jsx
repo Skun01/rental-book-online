@@ -105,7 +105,7 @@ function Login({ onClose, switchToRegister }) {
             </div>
           </div>
           <div className="cover-image">
-            <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1498&q=80" alt="Books" />
+            <img src="/auth1.jpg" alt="Books" />
           </div>
         </div>
 

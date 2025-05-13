@@ -152,7 +152,7 @@ function Register({ onClose, switchToLogin }) {
             </div>
           </div>
           <div className="cover-image">
-            <img src="https://images.unsplash.com/photo-1495446815901-a7297e633e8d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Books" />
+            <img src="/auth.jpg" alt="conan" />
           </div>
         </div>
 
