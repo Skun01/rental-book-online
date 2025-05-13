@@ -1,0 +1,175 @@
+/* BookSlider.module.css */
+
+.container {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  margin: 0 auto;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.8s ease-in-out;
+  z-index: 0;
+}
+
+.slide.active {
+  opacity: 1;
+  z-index: 1;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 30px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+  color: #fff;
+  text-align: center;
+}
+
+.title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  letter-spacing: 1px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.description {
+  font-size: 1.1rem;
+  font-weight: 300;
+  max-width: 700px;
+  margin: 0 auto;
+  margin-bottom: 10px;
+  opacity: 0.9;
+}
+
+.navButton {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(255, 255, 255, 0.25);
+  color: white;
+  border: none;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+.navButton:hover {
+  background-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.prevButton {
+  left: 20px;
+}
+
+.nextButton {
+  right: 20px;
+}
+
+.indicators {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 10;
+}
+
+.indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.5);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.activeIndicator {
+  background-color: white;
+  transform: scale(1.2);
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .container {
+    height: 400px;
+  }
+  
+  .title {
+    font-size: 1.8rem;
+  }
+  
+  .description {
+    font-size: 0.9rem;
+  }
+  
+  .navButton {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    height: 300px;
+    border-radius: 8px;
+  }
+  
+  .content {
+    padding: 20px;
+  }
+  
+  .title {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+  }
+  
+  .description {
+    font-size: 0.8rem;
+  }
+  
+  .navButton {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .prevButton {
+    left: 10px;
+  }
+  
+  .nextButton {
+    right: 10px;
+  }
+}

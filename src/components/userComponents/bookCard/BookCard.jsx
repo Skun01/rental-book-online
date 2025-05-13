@@ -1,110 +1,191 @@
-"use client"
-
-import { useState } from "react"
-import { Link } from "react-router-dom"
-import { ShoppingCart, Eye } from "lucide-react"
+import { useState, useRef, useEffect } from "react"
+import { Link, useNavigate } from "react-router-dom"
+import { ShoppingCart, Heart, Info } from "lucide-react"
 import { useCart } from "../../../contexts/CartContext"
 import { useToast } from "../../../contexts/ToastContext"
-import { mockImages } from "../../../mockData" // Import mockImages
+// import { mockImages } from "../../../mockData"
 import styles from "./BookCard.module.css"
 
-const BookCard = ({ book }) => {
+const BookCard = ({ book, showBookDetail = true }) => {
   const { addToCart } = useCart()
   const { showToast } = useToast()
-  const [isHovered, setIsHovered] = useState(false)
   const [addedToCart, setAddedToCart] = useState(false)
-
-  // Tìm hình ảnh cover cho sách từ bảng images
-  const getCoverImage = (bookId) => {
-    const coverImage = mockImages.find((img) => img.product_id === bookId && img.is_cover)
-    return coverImage ? coverImage.url : "/placeholder.svg?height=300&width=200"
-  }
-
-  // Sửa lại hàm handleAddToCart để tránh hiển thị toast hai lần
-  // Thay thế hàm handleAddToCart hiện tại bằng hàm này:
-
+  const [isHovered, setIsHovered] = useState(false)
+  const [hoverTimeout, setHoverTimeout] = useState(null)
+  const [detailPosition, setDetailPosition] = useState("center")
+  const cardRef = useRef(null)
+  const navigate = useNavigate();
+  
+  // xử lý khi ấn nút thêm vào giỏ hàng
   const handleAddToCart = (e) => {
     if (e) {
       e.preventDefault()
       e.stopPropagation()
     }
-
     if (!addedToCart && book.stock > 0) {
       addToCart(book)
       setAddedToCart(true)
-
-      // Reset added state after 2 seconds
+      showToast({
+        type: "success",
+        message: `Đã thêm "${book.title}" vào giỏ hàng`,
+      })
       setTimeout(() => {
         setAddedToCart(false)
-      }, 2000)
+      }, 1000)
     }
   }
 
-  // Calculate discounted price if there's a discount
-  const discountedPrice = book.discount > 0 ? book.rental_price - (book.rental_price * book.discount) / 100 : null
+  // xử lý khi ấn vào nút thích
+  const handleAddToFavorite = (e) => {
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+    showToast({
+      type: "info",
+      message: `Đã thêm "${book.title}" vào danh sách yêu thích`,
+    })
+  }
+
+  // xử lý hiển thị book detail khi hover vào card
+  useEffect(() => {
+    if (isHovered && cardRef.current) {
+      const cardRect = cardRef.current.getBoundingClientRect()
+      const windowWidth = window.innerWidth
+      if (cardRect.left < 270) {
+        setDetailPosition("right")
+      } 
+      else if (windowWidth - cardRect.right < 270) {
+        setDetailPosition("left")
+      } 
+      else {
+        setDetailPosition("center")
+      }
+    }
+  }, [isHovered])
+
+  const handleMouseEnter = () => {
+    if (hoverTimeout) {
+      clearTimeout(hoverTimeout)
+    }
+    const timeout = setTimeout(() => {
+      setIsHovered(true)
+    }, 200)
+    setHoverTimeout(timeout)
+  }
+
+  const handleMouseLeave = () => {
+    if (hoverTimeout) {
+      clearTimeout(hoverTimeout)
+      setHoverTimeout(null)
+    }
+    setTimeout(() => {
+      const cardElement = cardRef.current
+      const detailElement = document.querySelector(`.${styles.bookDetail}`)
+      if (cardElement && detailElement) {
+        const isHoveringCard = cardElement.matches(':hover')
+        const isHoveringDetail = detailElement.matches(':hover')
+        if (!isHoveringCard && !isHoveringDetail) {
+          setIsHovered(false)
+        }
+      } else {
+        setIsHovered(false)
+      }
+    }, 50)
+  }
+
+  const getDetailStyle = () => {
+    let transformValue = "translate(-50%, -50%)";
+    if (detailPosition === "left") {
+      transformValue = "translate(-90%, -50%)";
+    } else if (detailPosition === "right") {
+      transformValue = "translate(-10%, -50%)";
+    }
+    return {
+      opacity: isHovered ? 1 : 0,
+      transform: `${transformValue} scale(${isHovered ? 1 : 0.95})`,
+      visibility: isHovered ? "visible" : "hidden",
+      transition: isHovered 
+        ? "opacity 0.25s ease-in-out, transform 0.25s ease-in-out" 
+        : "opacity 0.25s ease-in-out, transform 0.25s ease-in-out, visibility 0s linear 0.25s",
+      willChange: 'transform, opacity'
+    }
+  }
 
   return (
-    <div className={styles.bookCard} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
-      <Link to={`/books/${book.id}`} className={styles.bookLink}>
-        <div className={styles.imageContainer}>
-          <img src={getCoverImage(book.id) || "/placeholder.svg"} alt={book.title} className={styles.bookImage} />
-
-          {book.stock <= 0 && <div className={styles.outOfStock}>Hết sách</div>}
-
-          {book.discount > 0 && <div className={styles.discountBadge}>-{book.discount}%</div>}
-
-          {isHovered && book.stock > 0 && (
-            <div className={styles.quickActions}>
-              <button
-                className={`${styles.actionButton} ${addedToCart ? styles.added : ""}`}
-                onClick={handleAddToCart}
-                disabled={addedToCart}
-                aria-label="Thêm vào giỏ hàng"
-              >
-                <ShoppingCart size={16} />
-              </button>
-              <Link to={`/books/${book.id}`} className={styles.actionButton} aria-label="Xem chi tiết">
-                <Eye size={16} />
-              </Link>
-            </div>
-          )}
-        </div>
-
-        <div className={styles.bookInfo}>
-          <h3 className={styles.bookTitle}>{book.title}</h3>
-          <p className={styles.bookAuthor}>{book.author_name || "Tác giả không xác định"}</p>
-          <div className={styles.bookPrice}>
-            {discountedPrice ? (
-              <>
-                <span className={styles.discountedPrice}>{Math.round(discountedPrice).toLocaleString("vi-VN")}đ</span>
-                <span className={styles.originalPrice}>{book.rental_price.toLocaleString("vi-VN")}đ</span>
-              </>
-            ) : (
-              <span>{book.rental_price.toLocaleString("vi-VN")}đ</span>
-            )}
-            <span className={styles.rentalPeriod}>/tuần</span>
-          </div>
+    <div className={styles.bookCard} ref={cardRef}>
+      <Link to={`/books/${book?.id}`} className={styles.bookLink}>
+        <div 
+          className={styles.imageContain}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
+          <img src="/auth.jpg" alt="book" className={styles.bookImg} />
         </div>
       </Link>
+      
+      <div className={styles.bookInfo}>
+        <Link to={`/books/${book?.id}`} className={styles.bookLink}>
+          <p className={styles.bookTitle}>Sự thật chỉ có một</p>
+        </Link>
+        
+        <Link to={'/authors/thaitruong'}>
+          <p className={styles.bookAuthor}>Thái Văn Trường</p>
+        </Link>
+        
+        <div className={styles.bookPrice}>
+          <span className={styles.normalPrice}>{book?.rental_price.toLocaleString("vi-VN")}đ</span>
+          <span className={styles.rentalPeriod}>/tuần</span>
+        </div>
+      </div>
 
-      {book.stock > 0 && (
-        <button
-          className={`${styles.addToCartButton} ${addedToCart ? styles.added : ""}`}
-          onClick={handleAddToCart}
-          disabled={addedToCart}
+      {/* Book Detail */}
+      {showBookDetail && (
+        <div 
+          className={styles.bookDetail}
+          style={getDetailStyle()}
+          onMouseEnter={() => {
+            if (hoverTimeout) {
+              clearTimeout(hoverTimeout)
+              setHoverTimeout(null)
+            }
+            setIsHovered(true)
+          }}
+          onMouseLeave={handleMouseLeave}
         >
-          {addedToCart ? (
-            <>
-              <ShoppingCart size={16} />
-              <span>Đã thêm vào giỏ</span>
-            </>
-          ) : (
-            <>
-              <ShoppingCart size={16} />
-              <span>Thêm vào giỏ</span>
-            </>
-          )}
-        </button>
+          <div className={styles.deltaiImgContainer}>
+            <img src="auth.jpg" alt="" className={styles.deltailImg} />
+          </div>
+          
+          <div className={styles.detailInfor}>
+            <div className={styles.basicInfor}>
+              <p className={styles.bookTitleDetail}>Sự thật chỉ có một</p>
+              <p className={styles.bookAuthorDetail}>Tác giả: Thái Văn Trường</p>
+              <p className={styles.bookCategory}>Thể loại: Kinh tế</p>
+              <p className={styles.bookPrice}>Giá thuê: 200.000đ/tuần</p>
+            </div>
+            
+            <div className={styles.bookFunc}>
+              <p 
+                className={styles.addToCardBtn} 
+                onClick={handleAddToCart}
+              >
+                <ShoppingCart /> Thêm vào giỏ
+              </p>
+              
+              <p className={styles.addToFavoriteBtn}
+                onClick={handleAddToFavorite}
+              >
+                <Heart /> Thích
+              </p>
+              
+              <p className={styles.viewMoreBtn}
+                onClick={()=> navigate(`/books/${book?.id}`)}>
+                <Info /> Xem thêm
+              </p>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

@@ -1,10 +1,9 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
-import { ChevronRight, ArrowRight, BookOpen, Clock, Award, Users } from "lucide-react"
+import { ChevronRight, ArrowRight, BookOpen, Clock, Award, Users, Send } from "lucide-react"
 import BookCard from "../../../components/userComponents/bookCard/BookCard"
 import { mockBooks, mockCategories } from "../../../mockData"
+import BookSlider from "./BookSlider"
 import styles from "./HomePage.module.css"
 
 const HomePage = () => {
@@ -12,6 +11,7 @@ const HomePage = () => {
   const [newArrivals, setNewArrivals] = useState([])
   const [popularCategories, setPopularCategories] = useState([])
   const [recommendedBooks, setRecommendedBooks] = useState([])
+  const [email, setEmail] = useState("")
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -36,6 +36,16 @@ const HomePage = () => {
     fetchData()
   }, [])
 
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    // Xử lý đăng ký email
+    console.log("Email đăng ký:", email)
+    // Reset form sau khi đăng ký
+    setEmail("")
+    // Thông báo thành công (có thể thêm thông báo toast ở đây)
+    alert("Đăng ký nhận thông báo thành công!")
+  }
+
   if (isLoading) {
     return (
       <div className={styles.loadingContainer}>
@@ -47,8 +57,7 @@ const HomePage = () => {
 
   return (
     <div className={styles.homePage}>
-      {/* Hero Section */}
-
+      <BookSlider />
       {/* Featured Books */}
       <section className={styles.section}>
         <div className={styles.container}>
@@ -60,9 +69,7 @@ const HomePage = () => {
           </div>
           <div className={styles.booksGrid}>
             {featuredBooks.map((book) => (
-              <div key={book.id} className={styles.bookItem}>
-                <BookCard book={book} />
-              </div>
+              <BookCard book={book} showBookDetail = {false} />
             ))}
           </div>
         </div>
@@ -72,7 +79,7 @@ const HomePage = () => {
       <section className={styles.section}>
         <div className={styles.container}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Danh mục phổ biến</h2>
+            <h2 className={styles.sectionTitle}>Bạn đang muốn sách gì?</h2>
             <Link to="/search" className={styles.viewAllLink}>
               Xem tất cả <ChevronRight size={16} />
             </Link>
@@ -85,53 +92,6 @@ const HomePage = () => {
                 <p className={styles.categoryCount}>{category.bookCount} sách</p>
               </Link>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Benefits Section */}
-      <section className={styles.benefitsSection}>
-        <div className={styles.container}>
-          <h2 className={styles.benefitsTitle}>Tại sao chọn BookRental?</h2>
-
-          <div className={styles.benefitsGrid}>
-            <div className={styles.benefitCard}>
-              <div className={styles.benefitIcon}>
-                <BookOpen size={32} />
-              </div>
-              <h3 className={styles.benefitTitle}>Đa dạng sách</h3>
-              <p className={styles.benefitText}>
-                Hơn 10.000 đầu sách thuộc nhiều thể loại khác nhau, từ sách văn học đến sách chuyên ngành.
-              </p>
-            </div>
-
-            <div className={styles.benefitCard}>
-              <div className={styles.benefitIcon}>
-                <Clock size={32} />
-              </div>
-              <h3 className={styles.benefitTitle}>Tiết kiệm thời gian</h3>
-              <p className={styles.benefitText}>
-                Đặt sách trực tuyến và nhận sách tại nhà hoặc tại thư viện của chúng tôi một cách nhanh chóng.
-              </p>
-            </div>
-
-            <div className={styles.benefitCard}>
-              <div className={styles.benefitIcon}>
-                <Award size={32} />
-              </div>
-              <h3 className={styles.benefitTitle}>Chất lượng đảm bảo</h3>
-              <p className={styles.benefitText}>
-                Sách được bảo quản cẩn thận, kiểm tra kỹ lưỡng trước khi đến tay bạn.
-              </p>
-            </div>
-
-            <div className={styles.benefitCard}>
-              <div className={styles.benefitIcon}>
-                <Users size={32} />
-              </div>
-              <h3 className={styles.benefitTitle}>Cộng đồng đọc sách</h3>
-              <p className={styles.benefitText}>Tham gia cộng đồng yêu sách, chia sẻ đánh giá và khám phá sách mới.</p>
-            </div>
           </div>
         </div>
       </section>
@@ -174,44 +134,25 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className={styles.section}>
-        <div className={styles.container}>
-          <h2 className={styles.sectionTitle}>Cách thức hoạt động</h2>
-          <div className={styles.stepsContainer}>
-            <div className={styles.step}>
-              <div className={styles.stepNumber}>1</div>
-              <h3 className={styles.stepTitle}>Tìm sách</h3>
-              <p className={styles.stepDescription}>Tìm kiếm và lựa chọn sách từ thư viện đa dạng của chúng tôi</p>
-            </div>
-            <div className={styles.step}>
-              <div className={styles.stepNumber}>2</div>
-              <h3 className={styles.stepTitle}>Đặt thuê</h3>
-              <p className={styles.stepDescription}>Thêm sách vào giỏ hàng và tiến hành đặt thuê</p>
-            </div>
-            <div className={styles.step}>
-              <div className={styles.stepNumber}>3</div>
-              <h3 className={styles.stepTitle}>Nhận sách</h3>
-              <p className={styles.stepDescription}>Nhận sách tại thư viện hoặc giao hàng tận nơi</p>
-            </div>
-            <div className={styles.step}>
-              <div className={styles.stepNumber}>4</div>
-              <h3 className={styles.stepTitle}>Trả sách</h3>
-              <p className={styles.stepDescription}>Trả sách khi hết thời hạn hoặc gia hạn thêm</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* CTA Section */}
       <section className={styles.ctaSection}>
         <div className={styles.container}>
           <div className={styles.ctaContent}>
-            <h2 className={styles.ctaTitle}>Bắt đầu hành trình đọc sách ngay hôm nay</h2>
-            <p className={styles.ctaText}>Đăng ký tài khoản để trải nghiệm dịch vụ cho thuê sách của chúng tôi</p>
-            <Link to="/register" className={styles.ctaButton}>
-              Đăng ký ngay <ArrowRight size={16} />
-            </Link>
+            <h2 className={styles.ctaTitle}>Nhận thông báo về sách mới</h2>
+            <p className={styles.ctaText}>Nhập email để nhận thông báo về sách mới, khuyến mãi và các sự kiện</p>
+            <form onSubmit={handleSubmit} className={styles.ctaForm}>
+              <input 
+                type="email" 
+                className={styles.ctaInput} 
+                placeholder="Nhập địa chỉ email của bạn" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+              <button type="submit" className={styles.ctaButton}>
+                Đăng ký ngay <Send size={16} />
+              </button>
+            </form>
           </div>
         </div>
       </section>

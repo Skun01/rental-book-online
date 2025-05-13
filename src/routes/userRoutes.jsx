@@ -65,22 +65,6 @@ const userRoutes = [
       },
     ],
   },
-  {
-    path: "/login",
-    element: (
-      <AuthProvider>
-        <Login />
-      </AuthProvider>
-    ),
-  },
-  {
-    path: "/register",
-    element: (
-      <AuthProvider>
-        <Register />
-      </AuthProvider>
-    ),
-  },
 ]
 
 export default userRoutes

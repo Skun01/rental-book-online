@@ -1,229 +1,160 @@
+/* Giữ nguyên các style hiện tại */
 .bookCard {
-  background: white;
-  border-radius: 1rem;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  border: 1px solid #e5e7eb;
-}
-
-.bookCard:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-  border-color: #3b82f6;
-}
-
-.bookLink {
-  text-decoration: none;
-  color: inherit;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.imageContainer {
+  text-align: center;
+  width: 250px;
+  border-radius: 12px;
   position: relative;
-  padding-top: 150%;
-  background: #f3f4f6;
-  overflow: hidden;
 }
 
-.bookImage {
-  position: absolute;
-  top: 0;
-  left: 0;
+.imageContain {
+  width: 100%;
+  height: 350px; 
+  overflow: hidden;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.imageContain:hover {
+  opacity: 0.7;
+}
+
+.bookImg {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
+  display: block;
 }
 
-.bookCard:hover .bookImage {
-  transform: scale(1.05);
+.bookTitle{
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 5px 0 5px 0;
+  transition: color 0.2s ease;
 }
 
-.outOfStock {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 500;
-  font-size: 1.1rem;
-  text-transform: uppercase;
+.bookTitle:hover {
+  color: #f59e0b;
 }
 
-.discountBadge {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: #ef4444;
-  color: white;
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  font-size: 0.875rem;
-  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
-  animation: bounce 0.6s ease-out;
-}
-
-.quickActions {
-  position: absolute;
-  bottom: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 0.5rem;
-  animation: slideUp 0.3s ease-out;
-}
-
-.actionButton {
-  background: white;
-  border: none;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #1e40af;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.actionButton:hover {
-  background: #1e40af;
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.actionButton.added {
-  background: #22c55e;
-  color: white;
-}
-
-.bookInfo {
-  padding: 1.25rem;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.bookTitle {
+.bookAuthor{
   font-size: 1rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  color: #111827;
-}
-
-.bookAuthor {
-  font-size: 0.875rem;
-  color: #6b7280;
-  margin-bottom: 0.75rem;
-}
-
-.bookPrice {
-  margin-top: auto;
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.discountedPrice {
-  font-weight: 600;
-  color: #ef4444;
-  font-size: 1.125rem;
-}
-
-.originalPrice {
-  text-decoration: line-through;
-  color: #9ca3af;
-  font-size: 0.875rem;
-}
-
-.rentalPeriod {
-  color: #6b7280;
-  font-size: 0.875rem;
-}
-
-.addToCartButton {
-  width: 100%;
-  padding: 0.75rem;
-  background: #1e40af;
-  color: white;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  cursor: pointer;
-  font-weight: 500;
+  color: #555;
+  margin: 0;
   transition: all 0.2s ease;
 }
 
-.addToCartButton:hover {
-  background: #1e3a8a;
+.bookAuthor:hover {
+  font-style: italic;
+  color: #a8a5a5
 }
 
-.addToCartButton.added {
-  background: #22c55e;
+.bookPrice{
+  font-size: 1.2rem;
+  color: #003cff;
 }
 
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translate(-50%, 1rem);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
+.bookPrice,
+.bookCategory,
+.bookAuthorDetail{
+  margin: 0;
 }
 
-@keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
-    transform: translateY(0);
-  }
-  40% {
-    transform: translateY(-5px);
-  }
-  60% {
-    transform: translateY(-3px);
-  }
+/* book detail - thêm transition và hiệu ứng mới */
+.bookDetail {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1000;
+  width: 500px;
+  max-width: 90vw;
+  background-color: #2C2F45;
+  text-align: left;
+  border-radius: 12px;
+  padding-bottom: 20px;
+  /* Những style mới cho transition và animation */
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, -50%) scale(0.95);
+  transition: 
+    opacity 0.25s ease-in-out, 
+    transform 0.25s ease-in-out, 
+    visibility 0s linear 0.25s;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  pointer-events: none; /* Mặc định không nhận sự kiện chuột khi ẩn */
 }
 
-@media (max-width: 640px) {
-  .bookCard {
-    border-radius: 0.75rem;
-  }
+/* Khi hiển thị, cho phép nhận sự kiện chuột */
+.bookDetail[style*="visibility: visible"] {
+  pointer-events: auto;
+}
 
-  .bookInfo {
-    padding: 1rem;
-  }
+.detailInfor{
+  padding: 20px;
+}
 
-  .bookTitle {
-    font-size: 0.875rem;
-  }
+.deltaiImgContainer{
+  width: 100%;
+  height: 250px;
+  overflow: hidden;
+  border-radius: 12px;
+}
 
-  .bookAuthor {
-    font-size: 0.75rem;
-  }
+.deltailImg {
+  width: 100%;
+  object-fit: cover;
+}
 
-  .discountedPrice {
-    font-size: 1rem;
-  }
+.bookFunc {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-start;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.bookFunc p {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+}
+
+.bookTitleDetail {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0;
+  color: #f59e0b;
+}
+
+.addToCardBtn {
+  color: #f59e0b;
+  background-color: transparent;
+  border: 1px solid #f59e0b;
+  font-weight: 500;
+}
+
+.addToCardBtn:hover {
+  color: #2C2F45;
+  background-color: #f59e0b;
+  border: 1px solid transparent;
+}
+
+.addToFavoriteBtn,
+.viewMoreBtn {
+  background-color: transparent;
+  color: white;
+  border: 1px solid white;
+}
+
+.addToFavoriteBtn:hover {
+  color: #f13838
+}
+
+.viewMoreBtn:hover {
+  color: rgba(255, 255, 255, 0.7);
 }
