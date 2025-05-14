@@ -17,7 +17,12 @@
   align-items: center;
   justify-content: center;
   min-height: 60vh;
-  color: #e5e7eb; /* Thêm màu chữ sáng */
+  margin-top: 100px;
+  background-color: #191b24;
+}
+
+.loadingContainer p{
+  color: white;
 }
 
 .spinner {
@@ -45,7 +50,6 @@
 .sectionHeader {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   margin-bottom: 2rem;
 }
 
@@ -85,7 +89,7 @@
 /* Books Grid */
 .booksGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 2rem;
 }
 

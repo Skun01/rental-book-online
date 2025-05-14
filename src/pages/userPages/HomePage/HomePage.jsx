@@ -2,8 +2,10 @@ import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { ChevronRight, ArrowRight, BookOpen, Clock, Award, Users, Send } from "lucide-react"
 import BookCard from "../../../components/userComponents/bookCard/BookCard"
+import BookCardOrder from "../../../components/userComponents/bookCardOrder/BookCardOrder"
 import { mockBooks, mockCategories } from "../../../mockData"
 import BookSlider from "./BookSlider"
+import ViewMoreBtn from "../../../components/userComponents/viewMorebtn/ViewMoreBtn"
 import styles from "./HomePage.module.css"
 
 const HomePage = () => {
@@ -14,16 +16,12 @@ const HomePage = () => {
   const [email, setEmail] = useState("")
   const [isLoading, setIsLoading] = useState(true)
 
+  // Lấy dữ liệu từ API backend
   useEffect(() => {
-    // Simulate API loading
     setIsLoading(true)
-
-    // In a real app, these would be API calls
     const fetchData = async () => {
       try {
-        // Simulate network delay
         await new Promise((resolve) => setTimeout(resolve, 800))
-
         setFeaturedBooks(mockBooks.slice(0, 4))
         setNewArrivals(mockBooks.slice(4, 10))
         setPopularCategories(mockCategories.slice(0, 6))
@@ -32,20 +30,18 @@ const HomePage = () => {
         setIsLoading(false)
       }
     }
-
     fetchData()
   }, [])
 
+  // xử lý submit email khi người dùng đăng ký
   const handleSubmit = (e) => {
     e.preventDefault()
-    // Xử lý đăng ký email
-    console.log("Email đăng ký:", email)
-    // Reset form sau khi đăng ký
     setEmail("")
-    // Thông báo thành công (có thể thêm thông báo toast ở đây)
     alert("Đăng ký nhận thông báo thành công!")
   }
 
+
+  // giao diện loading để hiển thị khi đang tải dữ liệu
   if (isLoading) {
     return (
       <div className={styles.loadingContainer}>
@@ -54,17 +50,19 @@ const HomePage = () => {
       </div>
     )
   }
-
   return (
     <div className={styles.homePage}>
+
+      {/* bookslider để làm đẹp thôi :) */}
       <BookSlider />
-      {/* Featured Books */}
+
+      {/* Các sách nổi bật */}
       <section className={styles.section}>
         <div className={styles.container}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Sách nổi bật</h2>
+            <h2 className={styles.sectionTitle}>Các sách nổi bật</h2>
             <Link to="/search?featured=true" className={styles.viewAllLink}>
-              Xem tất cả <ChevronRight size={16} />
+              <ViewMoreBtn text="Xem tất cả" />
             </Link>
           </div>
           <div className={styles.booksGrid}>
@@ -81,7 +79,7 @@ const HomePage = () => {
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>Bạn đang muốn sách gì?</h2>
             <Link to="/search" className={styles.viewAllLink}>
-              Xem tất cả <ChevronRight size={16} />
+              <ViewMoreBtn text="Xem tất cả" />
             </Link>
           </div>
           <div className={styles.categoriesGrid}>
@@ -96,17 +94,34 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* New Arrivals */}
+      {/* Top 5 sách bán chạy */}
+      <section className={styles.section}>
+        <div className={styles.container}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>Top 5 sách bán chạy</h2>
+            <Link to="/search?featured=true" className={styles.viewAllLink}>
+              <ViewMoreBtn text="Xem tất cả" />
+            </Link>
+          </div>
+          <div className={styles.booksGrid}>
+            {newArrivals.slice(0, 5).map((book, index) => (
+              <BookCardOrder book={book} orderNumber={index + 1} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Các sách mới */}
       <section className={styles.section}>
         <div className={styles.container}>
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>Sách mới</h2>
             <Link to="/search?sort=newest" className={styles.viewAllLink}>
-              Xem tất cả <ChevronRight size={16} />
+              <ViewMoreBtn text="Xem tất cả" />
             </Link>
           </div>
           <div className={styles.booksRow}>
-            {newArrivals.map((book) => (
+            {newArrivals.slice(0, 4).map((book) => (
               <div key={book.id} className={styles.bookItemSmall}>
                 <BookCard book={book} />
               </div>
@@ -121,11 +136,11 @@ const HomePage = () => {
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>Gợi ý cho bạn</h2>
             <Link to="/search?recommended=true" className={styles.viewAllLink}>
-              Xem tất cả <ChevronRight size={16} />
+              <ViewMoreBtn text="Xem tất cả" />
             </Link>
           </div>
           <div className={styles.booksRow}>
-            {recommendedBooks.map((book) => (
+            {recommendedBooks.slice(0, 4).map((book) => (
               <div key={book.id} className={styles.bookItemSmall}>
                 <BookCard book={book} />
               </div>

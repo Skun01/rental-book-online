@@ -4,9 +4,9 @@ import { ShoppingCart, Heart, Info } from "lucide-react"
 import { useCart } from "../../../contexts/CartContext"
 import { useToast } from "../../../contexts/ToastContext"
 // import { mockImages } from "../../../mockData"
-import styles from "./BookCard.module.css"
+import styles from "./BookCardOrder.module.css"
 
-const BookCard = ({ book, showBookDetail = true, releaseYear}) => {
+const BookCardOrder = ({ book, showBookDetail = true, orderNumber }) => {
   const { addToCart } = useCart()
   const { showToast } = useToast()
   const [addedToCart, setAddedToCart] = useState(false)
@@ -120,25 +120,27 @@ const BookCard = ({ book, showBookDetail = true, releaseYear}) => {
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
         >
-          {releaseYear && (
-              <p className={styles.releaseYear}>{releaseYear}</p>
-            )}
           <img src="/auth.jpg" alt="book" className={styles.bookImg} />
         </div>
       </Link>
       
-      <div className={styles.bookInfo}>
-        <Link to={`/books/${book?.id}`} className={styles.bookLink}>
-          <p className={styles.bookTitle}>Sự thật chỉ có một</p>
-        </Link>
+      <div className={styles.bookInfoContainer}>
+        <div className={styles.bookInfoTop}>
+          <p className={styles.bookOrderNumber}>{orderNumber}</p>
+        </div>
+        <div className={styles.bookInfo}>
+          <Link to={`/books/${book?.id}`} className={styles.bookLink}>
+            <p className={styles.bookTitle}>Sự thật chỉ có một</p>
+          </Link>
         
-        <Link to={'/authors/thaitruong'}>
-          <p className={styles.bookAuthor}>Thái Văn Trường</p>
-        </Link>
+          <Link to={'/authors/thaitruong'}>
+            <p className={styles.bookAuthor}>Thái Văn Trường</p>
+          </Link>
         
-        <div className={styles.bookPrice}>
-          <span className={styles.normalPrice}>{book?.rental_price.toLocaleString("vi-VN")}đ</span>
-          <span className={styles.rentalPeriod}>/tuần</span>
+          <div className={styles.bookPrice}>
+            <span className={styles.normalPrice}>{book?.rental_price.toLocaleString("vi-VN")}đ</span>
+            <span className={styles.rentalPeriod}>/tuần</span>
+          </div>
         </div>
       </div>
 
@@ -194,4 +196,4 @@ const BookCard = ({ book, showBookDetail = true, releaseYear}) => {
   )
 }
 
-export default BookCard
+export default BookCardOrder;
