@@ -3,6 +3,7 @@ import { Link } from "react-router-dom"
 import { ChevronRight, ArrowRight, BookOpen, Clock, Award, Users, Send } from "lucide-react"
 import BookCard from "../../../components/userComponents/bookCard/BookCard"
 import BookCardOrder from "../../../components/userComponents/bookCardOrder/BookCardOrder"
+import CategoryCard from "../../../components/userComponents/categoryCard/CategoryCard" 
 import { mockBooks, mockCategories } from "../../../mockData"
 import BookSlider from "./BookSlider"
 import ViewMoreBtn from "../../../components/userComponents/viewMorebtn/ViewMoreBtn"
@@ -33,6 +34,12 @@ const HomePage = () => {
     fetchData()
   }, [])
 
+  // tự động scoll lên đầu trang khi dữ liệu đã được tải xong
+  useEffect(() => {
+  if (!isLoading) {
+    window.scrollTo({ top: 0, behavior: "smooth" }) // hoặc "auto"
+  }
+}, [isLoading]) 
   // xử lý submit email khi người dùng đăng ký
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -56,39 +63,42 @@ const HomePage = () => {
       {/* bookslider để làm đẹp thôi :) */}
       <BookSlider />
 
-      {/* Các sách nổi bật */}
+      {/* Categories */}
       <section className={styles.section}>
         <div className={styles.container}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Các sách nổi bật</h2>
+            <h2 className={styles.sectionTitle}>Bạn đang quan tâm chủ đề gì?</h2>
+          </div>
+          <div className={styles.categoriesGrid}>
+            {popularCategories.slice(0, 5).map((category, index) => (
+              <Link key={category.id} to={`/search?category=${category.id}`}>
+                <CategoryCard categoryName={category.name} categoryOrder={index} />
+              </Link>
+            ))}
+            {popularCategories.length > 5 && (
+            <Link to="/search?featured=true" className={styles.viewAllLink}>
+              <div className={styles.categoriesMore}>
+                + {popularCategories.length - 5} chủ đề khác
+              </div>
+            </Link>
+          )}
+          </div>
+          
+        </div>
+      </section>
+
+      {/* Mới phát hành */}
+      <section className={styles.section}>
+        <div className={styles.container}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>Mới phát hành</h2>
             <Link to="/search?featured=true" className={styles.viewAllLink}>
               <ViewMoreBtn text="Xem tất cả" />
             </Link>
           </div>
           <div className={styles.booksGrid}>
             {featuredBooks.map((book) => (
-              <BookCard book={book} showBookDetail = {false} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Categories */}
-      <section className={styles.section}>
-        <div className={styles.container}>
-          <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Bạn đang muốn sách gì?</h2>
-            <Link to="/search" className={styles.viewAllLink}>
-              <ViewMoreBtn text="Xem tất cả" />
-            </Link>
-          </div>
-          <div className={styles.categoriesGrid}>
-            {popularCategories.map((category) => (
-              <Link key={category.id} to={`/search?category=${category.id}`} className={styles.categoryCard}>
-                <div className={styles.categoryIcon}>{category.icon}</div>
-                <h3 className={styles.categoryName}>{category.name}</h3>
-                <p className={styles.categoryCount}>{category.bookCount} sách</p>
-              </Link>
+              <BookCard book={book} showBookDetail = {false} releaseYear={2025}/>
             ))}
           </div>
         </div>
@@ -98,7 +108,7 @@ const HomePage = () => {
       <section className={styles.section}>
         <div className={styles.container}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Top 5 sách bán chạy</h2>
+            <h2 className={styles.sectionTitle}>Top 5 được thuê nhiều nhất</h2>
             <Link to="/search?featured=true" className={styles.viewAllLink}>
               <ViewMoreBtn text="Xem tất cả" />
             </Link>
@@ -111,39 +121,35 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Các sách mới */}
+      {/* Sách tuổi trẻ */}
       <section className={styles.section}>
         <div className={styles.container}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Sách mới</h2>
-            <Link to="/search?sort=newest" className={styles.viewAllLink}>
+            <h2 className={styles.sectionTitle}>Dành cho tuổi teen</h2>
+            <Link to="/search?featured=true" className={styles.viewAllLink}>
               <ViewMoreBtn text="Xem tất cả" />
             </Link>
           </div>
-          <div className={styles.booksRow}>
-            {newArrivals.slice(0, 4).map((book) => (
-              <div key={book.id} className={styles.bookItemSmall}>
-                <BookCard book={book} />
-              </div>
+          <div className={styles.booksGrid}>
+            {featuredBooks.map((book) => (
+              <BookCard book={book}/>
             ))}
           </div>
         </div>
       </section>
 
-      {/* AI Recommendations */}
+      {/* Mới phát hành */}
       <section className={styles.section}>
         <div className={styles.container}>
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>Gợi ý cho bạn</h2>
-            <Link to="/search?recommended=true" className={styles.viewAllLink}>
+            <Link to="/search?featured=true" className={styles.viewAllLink}>
               <ViewMoreBtn text="Xem tất cả" />
             </Link>
           </div>
-          <div className={styles.booksRow}>
-            {recommendedBooks.slice(0, 4).map((book) => (
-              <div key={book.id} className={styles.bookItemSmall}>
-                <BookCard book={book} />
-              </div>
+          <div className={styles.booksGrid}>
+            {featuredBooks.map((book) => (
+              <BookCard book={book}/>
             ))}
           </div>
         </div>

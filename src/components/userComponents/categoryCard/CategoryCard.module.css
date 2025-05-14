@@ -1,0 +1,39 @@
+.categoryCard{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #1f2937; /* Màu nền tối */
+  border-radius: 0.5rem;
+  padding: 1rem;
+  text-align: center;
+  transition: transform 0.3s, box-shadow 0.3s;
+  width: 200px;
+  height: 150px;
+}
+
+.categoryCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
+  z-index: 1;
+  position: relative;
+}
+
+.categoryName{
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #e5e7eb;
+  margin-bottom: 0.5rem;
+}
+
+.descText{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+}

@@ -16,8 +16,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 60vh;
-  margin-top: 100px;
+  padding-top: 100px;
+  height: 400px;
   background-color: #191b24;
 }
 
@@ -44,7 +44,6 @@
 /* Section Styles */
 .section {
   padding: 3rem 0;
-  margin-bottom: 3rem;
 }
 
 .sectionHeader {
@@ -106,59 +105,26 @@
 /* Categories Grid */
 .categoriesGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(5, minmax(200px, 1fr));
   gap: 1.5rem;
 }
 
-.categoryCard {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  background-color: #242736; /* Màu nền sáng hơn so với background chính */
-  border-radius: 1rem;
-  text-decoration: none;
-  color: #e5e7eb; /* Màu chữ sáng */
-  transition: all 0.3s ease;
-  text-align: center;
-  border: 1px solid #2d3142; /* Màu viền tối hơn một chút */
-}
-
-.categoryCard:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(231, 76, 60, 0.15);
-  border-color: #e74c3c;
-}
-
-.categoryIcon {
-  width: 64px;
-  height: 64px;
-  margin: 0 auto 1rem;
+.categoriesMore{
+  width: 230px;
+  height: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #2d3142; /* Màu nền tối hơn một chút */
-  border-radius: 1rem;
-  color: #e74c3c; /* Màu icon đỏ */
-  transition: all 0.3s ease;
-}
-
-.categoryCard:hover .categoryIcon {
-  background: #e74c3c;
-  color: #f8f9fa;
-}
-
-.categoryName {
-  font-size: 1.2rem;
+  border: 3px solid white;
+  font-size: 1.25rem;
   font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: #e5e7eb; /* Màu chữ sáng */
+  color: #e5e7eb;
+  border-radius: 10px;
+  transition: all 0.3s ease;
 }
-
-.categoryCount {
-  font-size: 0.9rem;
-  color: #9ca3af; /* Màu chữ xám sáng */
+.categoriesMore:hover {
+  background-color: #e5e7eb;
+  color: #191b24;
 }
 
 /* Books Row */
@@ -190,12 +156,12 @@
 .ctaTitle {
   font-size: 2rem;
   font-weight: 700;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0;
 }
 
 .ctaText {
   font-size: 1.1rem;
-  margin-bottom: 2rem;
+  margin-bottom: 20px;
   opacity: 0.9;
 }
 
@@ -204,6 +170,7 @@
   display: flex;
   max-width: 500px;
   margin: 0 auto;
+  margin-top: 20px;
 }
 
 .ctaInput {
