@@ -1,0 +1,212 @@
+/* FilterSection.module.css */
+.searchHeader {
+  display: flex;
+  justify-content: end;
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.pageTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #e5e7eb;
+  margin: 0;
+}
+
+/* Nút filter */
+.filterToggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #252836;
+  border: 1px solid #333;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  color: #e5e7eb;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.filterToggle:hover {
+  background-color: #2f3242;
+}
+
+.filterBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  background-color: #3b82f6;
+  color: white;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  margin-left: 0.25rem;
+}
+
+.rotated {
+  transform: rotate(180deg);
+  transition: transform 0.3s ease;
+}
+
+/* Filter chips */
+.activeFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.filterChip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #252836;
+  padding: 0.375rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  color: #e5e7eb;
+  border: 1px solid #333;
+}
+
+.starIcon {
+  color: #f59e0b;
+}
+
+.removeFilter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0;
+}
+
+.removeFilter:hover {
+  color: #ef4444;
+}
+
+.clearAllButton {
+  background-color: #323546;
+  border: none;
+  padding: 0.375rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  color: #e5e7eb;
+  cursor: pointer;
+}
+
+.clearAllButton:hover {
+  background-color: #3a3e54;
+}
+
+/* Section filter */
+.filtersSection {
+  background-color: #252836;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  display: none;
+  border: 1px solid #333;
+}
+
+.filtersSection.show {
+  display: block;
+}
+
+.filterControls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.filterGroup {
+  flex: 1;
+  min-width: 180px;
+}
+
+.filterLabel {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #e5e7eb;
+  font-size: 0.875rem;
+}
+
+.filterSelect {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #333;
+  border-radius: 0.375rem;
+  background-color: #323546;
+  color: #e5e7eb;
+  font-size: 0.9rem;
+}
+
+.filterSelect:focus {
+  border-color: #3b82f6;
+  outline: none;
+}
+
+/* Price inputs */
+.priceInputs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.priceInput {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #333;
+  border-radius: 0.375rem;
+  background-color: #323546;
+  color: #e5e7eb;
+}
+
+.priceInput:focus {
+  border-color: #3b82f6;
+  outline: none;
+}
+
+.priceSeparator {
+  color: #9ca3af;
+}
+
+/* Filter actions */
+.filterActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.clearFiltersButton {
+  background-color: #323546;
+  border: 1px solid #333;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  color: #e5e7eb;
+}
+
+.clearFiltersButton:hover {
+  background-color: #3a3e54;
+}
+
+.applyFiltersButton {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+}
+
+.applyFiltersButton:hover {
+  background-color: #2563eb;
+}

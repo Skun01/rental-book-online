@@ -1,11 +1,11 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect } from "react"
 import { useSearchParams, Link } from "react-router-dom"
 import { Filter, ChevronDown, X, ChevronRight, Home, Star } from "lucide-react"
 import BookCard from "../../../components/userComponents/bookCard/BookCard"
 import { mockBooks, mockCategories, mockAuthors } from "../../../mockData"
-import styles from "./SearchResultsPage.module.css"
+import styles from "./Backup.module.css"
 
 // Custom hook for debounce
 const useDebounce = (value, delay) => {
@@ -319,24 +319,6 @@ const SearchResultsPage = () => {
   return (
     <div className={styles.searchPage}>
       <div className={styles.container}>
-        {/* Breadcrumbs */}
-        <div className={styles.breadcrumbs}>
-          <Link to="/" className={styles.breadcrumbLink}>
-            <Home size={14} />
-            <span>Trang chủ</span>
-          </Link>
-          <ChevronRight size={14} className={styles.breadcrumbSeparator} />
-          <Link to="/search" className={styles.breadcrumbLink}>
-            <span>Sách</span>
-          </Link>
-          {getCategoryName() && (
-            <>
-              <ChevronRight size={14} className={styles.breadcrumbSeparator} />
-              <span className={styles.breadcrumbCurrent}>{getCategoryName()}</span>
-            </>
-          )}
-        </div>
-
         <div className={styles.searchHeader}>
           <h1 className={styles.pageTitle}>
             {filters.query
@@ -583,9 +565,9 @@ const SearchResultsPage = () => {
                     value={itemsPerPage}
                     onChange={(e) => setItemsPerPage(Number(e.target.value))}
                   >
-                    <option value={12}>12</option>
-                    <option value={24}>24</option>
-                    <option value={48}>48</option>
+                    <option value={8}>8</option>
+                    <option value={16}>16</option>
+                    <option value={32}>32</option>
                   </select>
                 </div>
               </div>
@@ -593,7 +575,7 @@ const SearchResultsPage = () => {
               <div className={styles.booksGrid}>
                 {displayedBooks.map((book) => (
                   <div key={book.id} className={styles.bookItem}>
-                    <BookCard book={book} />
+                    <BookCard book={book} showBookDetail={false} />
                   </div>
                 ))}
               </div>

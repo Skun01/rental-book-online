@@ -13,7 +13,7 @@ const HomePage = () => {
   const [featuredBooks, setFeaturedBooks] = useState([])
   const [newArrivals, setNewArrivals] = useState([])
   const [popularCategories, setPopularCategories] = useState([])
-  const [recommendedBooks, setRecommendedBooks] = useState([])
+  // const [recommendedBooks, setRecommendedBooks] = useState([])
   const [email, setEmail] = useState("")
   const [isLoading, setIsLoading] = useState(true)
 
@@ -26,7 +26,7 @@ const HomePage = () => {
         setFeaturedBooks(mockBooks.slice(0, 4))
         setNewArrivals(mockBooks.slice(4, 10))
         setPopularCategories(mockCategories.slice(0, 6))
-        setRecommendedBooks(mockBooks.slice(10, 16))
+        // setRecommendedBooks(mockBooks.slice(10, 16))
       } finally {
         setIsLoading(false)
       }
@@ -98,7 +98,7 @@ const HomePage = () => {
           </div>
           <div className={styles.booksGrid}>
             {featuredBooks.map((book) => (
-              <BookCard book={book} showBookDetail = {false} releaseYear={2025}/>
+              <BookCard book={book} releaseYear={2025}/>
             ))}
           </div>
         </div>

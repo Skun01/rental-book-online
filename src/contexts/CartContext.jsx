@@ -62,15 +62,6 @@ export function CartProvider({ children }) {
         return [...prevItems, { ...book, quantity }]
       }
     })
-
-    // Chỉ hiển thị thông báo nếu sách chưa có trong giỏ hàng hoặc số lượng đã thay đổi
-    if (!existingItem || wasAdded) {
-      showToast({
-        type: "success",
-        message: `Đã thêm "${book.title}" vào giỏ hàng!`,
-      })
-    }
-
     return true
   }
 

@@ -157,7 +157,7 @@ function NavBar(){
         {/* menu */}
         <ul className={styles.mainMenu}>
           <li className={styles.menuItem}>
-            <Link to="/search">Sách</Link>
+            <Link to="/books">Sách</Link>
           </li>
           <li className={`${styles.menuItem} ${styles.menuSub}`}>
               <p>Thể loại </p>

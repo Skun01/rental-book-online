@@ -1,0 +1,62 @@
+.paginationContainer {
+  display: flex;
+  align-items: center;
+  background-color: #1e1e2e;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: white;
+  font-family: system-ui, -apple-system, sans-serif;
+  width: fit-content;
+}
+
+.navButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #27273a;
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.navButton:hover:not(.disabled) {
+  background-color: #34344a;
+}
+
+.navButton.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #23232e;
+}
+
+.pageInfo {
+  display: flex;
+  align-items: center;
+  margin: 0 12px;
+  font-size: 14px;
+}
+
+.pageLabel {
+  margin-right: 8px;
+  color: #b4b4c8;
+}
+
+.currentPage {
+  background-color: transparent;
+  color: white;
+  font-weight: 500;
+  margin-right: 4px;
+}
+
+.separator {
+  margin: 0 4px;
+  color: #b4b4c8;
+}
+
+.totalPages {
+  color: #b4b4c8;
+}

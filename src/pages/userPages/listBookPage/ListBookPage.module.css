@@ -1,0 +1,23 @@
+.listBookPage{
+  padding: 0 20px;
+  padding-top: 80px;
+  background-color: #191b24;
+}
+
+.header{
+  color: #e5e7eb;
+  font-size: 22px;
+}
+
+.bookGrid{
+  margin-bottom: 40px;
+}
+
+.pagination{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: 30px;
+}
+
+
