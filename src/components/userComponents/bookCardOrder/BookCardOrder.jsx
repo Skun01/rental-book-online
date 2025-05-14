@@ -130,7 +130,7 @@ const BookCardOrder = ({ book, showBookDetail = true, orderNumber }) => {
         </div>
         <div className={styles.bookInfo}>
           <Link to={`/books/${book?.id}`} className={styles.bookLink}>
-            <p className={styles.bookTitle}>Sự thật chỉ có một</p>
+            <p className={styles.bookTitle}>Sự thật chỉ có một và có cả không</p>
           </Link>
         
           <Link to={'/authors/thaitruong'}>

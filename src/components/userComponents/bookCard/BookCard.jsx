@@ -6,7 +6,7 @@ import { useToast } from "../../../contexts/ToastContext"
 // import { mockImages } from "../../../mockData"
 import styles from "./BookCard.module.css"
 
-const BookCard = ({ book, showBookDetail = true, releaseYear}, smaller = true) => {
+const BookCard = ({ book, showBookDetail = true, releaseYear, smaller = false}) => {
   const { addToCart } = useCart()
   const { showToast } = useToast()
   const [addedToCart, setAddedToCart] = useState(false)
@@ -129,7 +129,7 @@ const BookCard = ({ book, showBookDetail = true, releaseYear}, smaller = true) =
       
       <div className={styles.bookInfo}>
         <Link to={`/books/${book?.id}`} className={styles.bookLink}>
-          <p className={styles.bookTitle}>Sự thật chỉ có một nhưng có nhiều lựa chọn</p>
+          <p className={styles.bookTitle} style={smaller === true ? {fontSize: "16px"} : {}}>Sự thật chỉ có một nhưng có nhiều lựa chọn</p>
         </Link>
         
         <Link to={'/authors/thaitruong'}>

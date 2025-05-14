@@ -44,10 +44,14 @@
 }
 
 .bookTitle{
-  font-size: 17px;
+  font-size: 16px;
   font-weight: bold;
   margin: 5px 0 5px 0;
   transition: color 0.2s ease;
+  white-space: nowrap;          
+  overflow: hidden;              
+  text-overflow: ellipsis; 
+  width: 150px;
 }
 
 .bookTitle:hover {
