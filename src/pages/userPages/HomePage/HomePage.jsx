@@ -11,10 +11,11 @@ import axios from "axios"
 
 const HomePage = () => {
   const [books, setBooks] = useState([])
+  const [categories, setCategories] = useState([])
   const [email, setEmail] = useState("")
   const [isLoading, setIsLoading] = useState(true)
 
-  // get data from backend
+  // get book backend
   useEffect(()=>{
     const fetchData = async () => {
       try {
@@ -32,6 +33,23 @@ const HomePage = () => {
     fetchData();
   }, []);
 
+  //get category backend
+   useEffect(()=>{
+    const fetchData = async () => {
+      try {
+       await axios.get("http://localhost:8080/api/v1/category?page=0&size=10")
+        .then(response=>{
+          setCategories(response.data.data.content)
+        })
+        .finally(()=>{
+          setIsLoading(false)
+        })
+      } catch (error) {
+        console.error("Error fetching data:", error)
+      }
+    };
+    fetchData();
+  }, []);
   // tự động scoll lên đầu trang khi dữ liệu đã được tải xong
   useEffect(() => {
   if (!isLoading) {
@@ -68,15 +86,15 @@ const HomePage = () => {
             <h2 className={styles.sectionTitle}>Bạn đang quan tâm chủ đề gì?</h2>
           </div>
           <div className={styles.categoriesGrid}>
-            {books.slice(0, 5).map((category, index) => (
+            {categories.slice(0, 5).map((category, index) => (
               <Link key={category.id} to={`/search?category=${category.id}`}>
                 <CategoryCard categoryName={category.name} categoryOrder={index} />
               </Link>
             ))}
-            {books.length > 5 && (
+            {categories.length > 5 && (
             <Link to="/categories" className={styles.viewAllLink}>
               <div className={styles.categoriesMore}>
-                + {books.length - 5} chủ đề khác
+                + {categories.length - 5} chủ đề khác
               </div>
             </Link>
           )}
