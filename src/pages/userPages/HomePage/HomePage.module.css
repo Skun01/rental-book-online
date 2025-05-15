@@ -1,7 +1,7 @@
 .homePage {
   min-height: 100vh;
   background-color: #191b24;
-  color: #e5e7eb; /* Thêm màu chữ sáng để phù hợp với nền tối */
+  color: #e5e7eb; 
 }
 
 .container {
@@ -54,7 +54,7 @@
 .sectionTitle {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #e5e7eb; /* Đổi màu tiêu đề để phù hợp với nền tối */
+  color: #e5e7eb; 
   position: relative;
   padding-bottom: 0.5rem;
 }

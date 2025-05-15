@@ -36,6 +36,7 @@
   font-size: 50px;
   font-weight: bold;
   color: #FFDC82;
+  margin: 0;
 }
 .bookInfo{
   display: flex;

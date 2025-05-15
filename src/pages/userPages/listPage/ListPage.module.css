@@ -1,0 +1,19 @@
+.listPage{
+  background-color: #191b24;
+  margin-top: 0;
+  color: #e5e7eb;
+  padding: 20px;
+  padding-top: 100px;
+}
+
+.listPage h1{
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 30px;
+}
+
+.pagination{
+  display: flex;
+  justify-content: center;
+  margin-top: 60px;
+}

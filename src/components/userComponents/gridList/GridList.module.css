@@ -1,0 +1,6 @@
+.gridList {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  row-gap: 40px;
+  justify-items: center;
+}

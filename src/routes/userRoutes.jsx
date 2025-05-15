@@ -13,6 +13,7 @@ import OrderSuccessPage from "../pages/userPages/OrderSuccessPage/OrderSuccessPa
 import ProfilePage from "../pages/userPages/ProfilePage/ProfilePage"
 import OrdersPage from "../pages/userPages/OrdersPage/OrdersPage"
 import OrderDetailsPage from "../pages/userPages/OrderDetailsPage/OrderDetailsPage"
+import ListPage from "../pages/userPages/listPage/ListPage"
 
 const userRoutes = [
   {
@@ -34,6 +35,14 @@ const userRoutes = [
       {
         path: "books",
         element: <ListBookPage />,
+      },
+      {
+        path: "authors",
+        element: <ListPage pageData={"authors"} />,
+      },
+      {
+        path: "categories",
+        element: <ListPage pageData={"categories"} />,
       },
       {
         path: "books/:id",

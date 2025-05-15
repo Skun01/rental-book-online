@@ -76,7 +76,7 @@ const HomePage = () => {
               </Link>
             ))}
             {popularCategories.length > 5 && (
-            <Link to="/search?featured=true" className={styles.viewAllLink}>
+            <Link to="/categories" className={styles.viewAllLink}>
               <div className={styles.categoriesMore}>
                 + {popularCategories.length - 5} chủ đề khác
               </div>

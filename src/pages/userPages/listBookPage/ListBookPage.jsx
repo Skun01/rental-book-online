@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom"
 import {TextSearch} from 'lucide-react'
 import FilterSection from "../../../components/userComponents/filter/FilterSection"
 import styles from "./ListBookPage.module.css"
-import BookGrid from "../../../components/userComponents/bookGrid/BookGrid"
+import GridList from "../../../components/userComponents/gridList/GridList"
 import Pagination from "../../../components/userComponents/pagination/Pagination"
 import {mockBooks} from "../../../mockData";
 import { useEffect, useState } from "react"
@@ -30,7 +30,7 @@ const ListBookPage = () => {
 
     {/* list books */}
     <div className={styles.bookGrid}>
-      <BookGrid books={mockBooks}/>
+      <GridList data={mockBooks} listData = {"books"}/>
     </div>
 
     {/* phân trang */}

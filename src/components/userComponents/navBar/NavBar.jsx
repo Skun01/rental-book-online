@@ -171,10 +171,10 @@ function NavBar(){
               </ul>
           </li>
           <li className={styles.menuItem}>
-            <Link to="/search">Chủ đề</Link>
+            <Link to="/categories">Chủ đề</Link>
           </li>
           <li className={styles.menuItem}>
-            <Link to="/search">Tác giả</Link>
+            <Link to="/authors">Tác giả</Link>
           </li>
         </ul>
 
