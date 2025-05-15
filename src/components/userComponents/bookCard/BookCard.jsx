@@ -123,22 +123,22 @@ const BookCard = ({ book, showBookDetail = true, releaseYear, smaller = false}) 
           {releaseYear && (
               <p className={styles.releaseYear}>{releaseYear}</p>
             )}
-          <img src="/auth.jpg" alt="book" className={styles.bookImg} />
+          <img src={book.imageList[0]["url"] ? book.imageList[0]["url"] : "/auth.jpg"} alt="book" className={styles.bookImg} />
         </div>
       </Link>
       
       <div className={styles.bookInfo}>
         <Link to={`/books/${book?.id}`} className={styles.bookLink}>
-          <p className={styles.bookTitle} style={smaller === true ? {fontSize: "16px"} : {}}>Sự thật chỉ có một nhưng có nhiều lựa chọn</p>
+          <p className={styles.bookTitle} style={smaller === true ? {fontSize: "16px"} : {}}>{book.name}</p>
         </Link>
         
         <Link to={'/authors/thaitruong'}>
-          <p className={styles.bookAuthor}>Thái Văn Trường</p>
+          <p className={styles.bookAuthor}>{book.authorName}</p>
         </Link>
         
         <div className={styles.bookPrice}>
-          <span className={styles.normalPrice}>{book?.rental_price.toLocaleString("vi-VN")}đ</span>
-          <span className={styles.rentalPeriod}>/tuần</span>
+          <span className={styles.normalPrice}>{book.depositPrice.toLocaleString('vi-VN')}đ</span>
+          <span className={styles.rentalPeriod}>/Ngày</span>
         </div>
       </div>
 
@@ -157,15 +157,15 @@ const BookCard = ({ book, showBookDetail = true, releaseYear, smaller = false}) 
           onMouseLeave={handleMouseLeave}
         >
           <div className={styles.deltaiImgContainer}>
-            <img src="auth.jpg" alt="" className={styles.deltailImg} />
+            <img src={book.imageList[0]["url"] ? book.imageList[0]["url"] : "/auth.jpg"} alt="" className={styles.deltailImg} />
           </div>
           
           <div className={styles.detailInfor}>
             <div className={styles.basicInfor}>
-              <p className={styles.bookTitleDetail}>Sự thật chỉ có một</p>
-              <p className={styles.bookAuthorDetail}>Tác giả: Thái Văn Trường</p>
-              <p className={styles.bookCategory}>Thể loại: Kinh tế</p>
-              <p className={styles.bookPrice}>Giá thuê: 200.000đ/tuần</p>
+              <p className={styles.bookTitleDetail}>{book.name}</p>
+              <p className={styles.bookAuthorDetail}>Tác giả: {book.authorName}</p>
+              <p className={styles.bookCategory}>Thể loại: {book.categoryName}</p>
+              <p className={styles.bookPrice}>Giá thuê: {`${book.depositPrice.toLocaleString('vi-VN')}/Tuần`}</p>
             </div>
             
             <div className={styles.bookFunc}>

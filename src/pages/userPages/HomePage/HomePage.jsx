@@ -4,35 +4,33 @@ import { ChevronRight, ArrowRight, BookOpen, Clock, Award, Users, Send } from "l
 import BookCard from "../../../components/userComponents/bookCard/BookCard"
 import BookCardOrder from "../../../components/userComponents/bookCardOrder/BookCardOrder"
 import CategoryCard from "../../../components/userComponents/categoryCard/CategoryCard" 
-import { mockBooks, mockCategories } from "../../../mockData"
 import BookSlider from "./BookSlider"
 import ViewMoreBtn from "../../../components/userComponents/viewMorebtn/ViewMoreBtn"
 import styles from "./HomePage.module.css"
+import axios from "axios"
 
 const HomePage = () => {
-  const [featuredBooks, setFeaturedBooks] = useState([])
-  const [newArrivals, setNewArrivals] = useState([])
-  const [popularCategories, setPopularCategories] = useState([])
-  // const [recommendedBooks, setRecommendedBooks] = useState([])
+  const [books, setBooks] = useState([])
   const [email, setEmail] = useState("")
   const [isLoading, setIsLoading] = useState(true)
 
-  // Lấy dữ liệu từ API backend
-  useEffect(() => {
-    setIsLoading(true)
+  // get data from backend
+  useEffect(()=>{
     const fetchData = async () => {
       try {
-        await new Promise((resolve) => setTimeout(resolve, 800))
-        setFeaturedBooks(mockBooks.slice(0, 4))
-        setNewArrivals(mockBooks.slice(4, 10))
-        setPopularCategories(mockCategories.slice(0, 6))
-        // setRecommendedBooks(mockBooks.slice(10, 16))
-      } finally {
-        setIsLoading(false)
+       await axios.get("http://localhost:8080/api/v1/book?page=0&size=12")
+        .then(response=>{
+          setBooks(response.data.data.content)
+        })
+        .finally(()=>{
+          setIsLoading(false)
+        })
+      } catch (error) {
+        console.error("Error fetching data:", error)
       }
-    }
-    fetchData()
-  }, [])
+    };
+    fetchData();
+  }, []);
 
   // tự động scoll lên đầu trang khi dữ liệu đã được tải xong
   useEffect(() => {
@@ -70,15 +68,15 @@ const HomePage = () => {
             <h2 className={styles.sectionTitle}>Bạn đang quan tâm chủ đề gì?</h2>
           </div>
           <div className={styles.categoriesGrid}>
-            {popularCategories.slice(0, 5).map((category, index) => (
+            {books.slice(0, 5).map((category, index) => (
               <Link key={category.id} to={`/search?category=${category.id}`}>
                 <CategoryCard categoryName={category.name} categoryOrder={index} />
               </Link>
             ))}
-            {popularCategories.length > 5 && (
+            {books.length > 5 && (
             <Link to="/categories" className={styles.viewAllLink}>
               <div className={styles.categoriesMore}>
-                + {popularCategories.length - 5} chủ đề khác
+                + {books.length - 5} chủ đề khác
               </div>
             </Link>
           )}
@@ -97,7 +95,7 @@ const HomePage = () => {
             </Link>
           </div>
           <div className={styles.booksGrid}>
-            {featuredBooks.map((book) => (
+            {books.slice(0, 4).map((book) => (
               <BookCard book={book} releaseYear={2025}/>
             ))}
           </div>
@@ -114,7 +112,7 @@ const HomePage = () => {
             </Link>
           </div>
           <div className={styles.booksGrid}>
-            {newArrivals.slice(0, 5).map((book, index) => (
+            {books.slice(0, 5).map((book, index) => (
               <BookCardOrder book={book} orderNumber={index + 1} />
             ))}
           </div>
@@ -131,7 +129,7 @@ const HomePage = () => {
             </Link>
           </div>
           <div className={styles.booksGrid}>
-            {featuredBooks.map((book) => (
+            {books.slice(0, 4).map((book) => (
               <BookCard book={book}/>
             ))}
           </div>
@@ -148,7 +146,7 @@ const HomePage = () => {
             </Link>
           </div>
           <div className={styles.booksGrid}>
-            {featuredBooks.map((book) => (
+            {books.slice(0, 4).map((book) => (
               <BookCard book={book}/>
             ))}
           </div>

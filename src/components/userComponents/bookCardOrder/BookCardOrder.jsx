@@ -120,7 +120,7 @@ const BookCardOrder = ({ book, showBookDetail = true, orderNumber }) => {
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
         >
-          <img src="/auth.jpg" alt="book" className={styles.bookImg} />
+          <img src={book.imageList[0]["url"] ? book.imageList[0]["url"] : "/auth.jpg"} alt="book" className={styles.bookImg} />
         </div>
       </Link>
       
@@ -130,15 +130,15 @@ const BookCardOrder = ({ book, showBookDetail = true, orderNumber }) => {
         </div>
         <div className={styles.bookInfo}>
           <Link to={`/books/${book?.id}`} className={styles.bookLink}>
-            <p className={styles.bookTitle}>Sự thật chỉ có một và có cả không</p>
+            <p className={styles.bookTitle}>{book.name}</p>
           </Link>
         
-          <Link to={'/authors/thaitruong'}>
-            <p className={styles.bookAuthor}>Thái Văn Trường</p>
+          <Link to={`/authors/${book.id}`}>
+            <p className={styles.bookAuthor}>{book.authorName}</p>
           </Link>
         
           <div className={styles.bookPrice}>
-            <span className={styles.normalPrice}>{book?.rental_price.toLocaleString("vi-VN")}đ</span>
+            <span className={styles.normalPrice}>{book.depositPrice.toLocaleString("vi-VN")}đ</span>
             <span className={styles.rentalPeriod}>/tuần</span>
           </div>
         </div>
@@ -159,7 +159,7 @@ const BookCardOrder = ({ book, showBookDetail = true, orderNumber }) => {
           onMouseLeave={handleMouseLeave}
         >
           <div className={styles.deltaiImgContainer}>
-            <img src="auth.jpg" alt="" className={styles.deltailImg} />
+            <img src={book.imageList[0]["url"] ? book.imageList[0]["url"] : "/auth.jpg"} alt="" className={styles.deltailImg} />
           </div>
           
           <div className={styles.detailInfor}>

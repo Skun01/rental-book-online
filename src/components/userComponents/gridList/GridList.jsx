@@ -10,9 +10,7 @@ const GridList = ({data, listData}) => {
       <div className={styles.gridList}>
         {data.map((book) => (
           <div key={book.id} className={styles.bookCardContainer}>
-            <Link to={`/book/${book.id}`} className={styles.bookCardLink}>
-              <BookCard book={book} smaller = {true} showBookDetail = {false} />
-            </Link>
+            <BookCard book={book} smaller = {true} />
           </div>
         ))}
       </div>

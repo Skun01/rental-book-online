@@ -5,9 +5,23 @@ import FilterSection from "../../../components/userComponents/filter/FilterSecti
 import styles from "./ListBookPage.module.css"
 import GridList from "../../../components/userComponents/gridList/GridList"
 import Pagination from "../../../components/userComponents/pagination/Pagination"
-import {mockBooks} from "../../../mockData";
 import { useEffect, useState } from "react"
+import axios from "axios"
 const ListBookPage = () => {
+  const [books, setBooks] = useState([]);
+  
+  // get data from backend
+  useEffect(()=>{
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("http://localhost:8080/api/v1/book?page=0&size=12");
+        setBooks(response.data.data.content);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    fetchData();
+  }, []);
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   useEffect(()=>{
@@ -30,7 +44,7 @@ const ListBookPage = () => {
 
     {/* list books */}
     <div className={styles.bookGrid}>
-      <GridList data={mockBooks} listData = {"books"}/>
+      <GridList data={books} listData = {"books"}/>
     </div>
 
     {/* phân trang */}
