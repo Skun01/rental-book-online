@@ -187,10 +187,12 @@ function NavBar(){
         <div className={styles.mainUser}>
           {currentUser ? (
             <div className = {styles.userInfor}>
-              <div className={styles.cart}>
-                <ShoppingCart className={styles.cartIcon}/>
-                <div className={styles.cartCount}>{cartItems.length}</div>
-              </div>
+              <Link to="/cart">
+                <div className={styles.cart}>
+                  <ShoppingCart className={styles.cartIcon}/>
+                  <div className={styles.cartCount}>{cartItems.length}</div>
+                </div>
+              </Link>
               <div className={styles.user}
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
               >

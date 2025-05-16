@@ -1,0 +1,316 @@
+.navBarContainer {
+  background-color: transparent;
+  padding: 0 1rem;
+}
+
+.navBar{
+  display: flex;
+  gap: 20px;
+}
+
+.navItem{
+  color: #fff;
+  font-weight: 500;
+  opacity: .8;
+  padding: 0.75rem 0;
+  cursor: pointer;
+  border-bottom: 1px solid transparent;
+}
+
+.navItem.active{
+  color: #FFD875;
+  opacity: 1;
+  border-color: #FFD875;
+}
+
+
+
+.navItem{
+}
+
+.navItem:hover{
+  opacity: 1;
+}
+
+.horizonLine{
+  border: none;
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.1);
+  margin: 0;
+  margin-bottom: 30px;
+}
+
+.bookDescription{
+  color: #aaa;
+  font-weight: 300;
+}
+
+/* book reviewer */
+.commentContainer {
+  background-color: transparent;
+  border-radius: 8px;
+  width: 100%;
+  padding: 16px;
+  color: #fff;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 12px;
+  align-self: flex-start;
+}
+
+.nameContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.commentText {
+  font-size: 0.8rem;
+  color: #8b8b8b;
+}
+
+.username {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+/* rating */
+.ratingContainer {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.ratingText {
+  font-size: 0.9rem;
+  color: #ffffff;
+  margin-right: 10px;
+  font-weight: 400;
+}
+
+.starRating {
+  display: flex;
+  align-items: center;
+}
+
+.star {
+  font-size: 24px;
+  color: #4a4a4a;
+  cursor: pointer;
+  transition: color 0.2s;
+  margin-right: 2px;
+}
+
+.star:hover {
+  color: #FFD875;
+}
+
+.starActive {
+  color: #FFD875;
+}
+
+
+/* input */
+
+.inputBox{
+  margin-bottom: 30px;
+}
+
+.inputContainer {
+  width: 100%;
+  padding: .5rem;
+  background-color: #ffffff10;
+  border-radius: .75rem;
+}
+
+.commentInput {
+  width: 100%;
+  background-color: #191B24;
+  border: 1px solid transparent;
+  border-radius: .5rem;
+  padding: 12px;
+  color: #fff;
+  font-size: 0.9rem;
+  resize: none;
+  margin-bottom: 8px;
+  outline: none;
+  box-sizing: border-box;
+
+}
+
+.commentInput:focus{
+  border-color: white;
+}
+
+.commentInput::placeholder {
+  color: #8b8b8b;
+}
+
+.commentFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.actionContainer {
+  display: flex;
+  align-items: center;
+}
+
+.charCount {
+  font-size: 0.8rem;
+  color: #8b8b8b;
+  margin-right: 15px;
+}
+
+.sendButton {
+  background-color: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  color: #FFD875;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: opacity 0.2s;
+}
+
+.sendButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sendIcon {
+  margin-left: 8px;
+  font-size: 0.8rem;
+}
+
+
+/* book review card */
+.userCommentHeader{
+
+}
+
+.userCommentInfor{
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.rated{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 3px;
+  background-color: #3556b6;
+  font-size: 12px;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 20px;
+}
+
+.ratedIcon{
+  color: #FFD875;
+}
+
+.commentTime{
+  font-size: 12px;
+  color: #aaa;
+}
+
+.userCommentText{
+  margin: 15px 0;
+  color: #aaaaaa;
+  font-size: 14px;
+}
+
+.actionText{
+  color: #fff;
+}
+
+.actionIcon{
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+.actionIcon:hover{
+  opacity: 0.9;
+}
+
+.actionList{
+  display: flex;
+  gap: 15px;
+  font-size: 14px;
+}
+
+.commentAction{
+  display: flex;
+  gap: 2px;
+  justify-content: center;
+  align-items: center;
+}
+
+.actionIcon.likeActive{
+  color: #25d366;
+  opacity: 1;
+}
+
+.actionIcon.dislikeActive{
+  color: #d33d25;
+  opacity: 1;
+}
+
+.viewReply{
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  color: #FFD875;
+  cursor: pointer;
+  gap: 2px;
+  margin-top: 15px;
+}
+
+.viewReply:hover{
+  color: #ffbe19;
+  width: fit-content;
+}
+
+.viewReplyIcon{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  line-height: 0;
+}
+
+.viewReplyIcon.replyActive{
+  transform: rotate(180deg);
+}
+
+.replyBox{
+  width: 40%;
+  margin: 15px;
+}
+
+
+.reply{
+  cursor: pointer;
+}
+
+
+
+
+

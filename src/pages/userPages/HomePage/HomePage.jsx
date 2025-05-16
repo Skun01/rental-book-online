@@ -114,7 +114,7 @@ const HomePage = () => {
           </div>
           <div className={styles.booksGrid}>
             {books.slice(0, 4).map((book) => (
-              <BookCard book={book} releaseYear={2025}/>
+              <BookCard key={book.id} book={book} releaseYear={2025}/>
             ))}
           </div>
         </div>
@@ -131,7 +131,7 @@ const HomePage = () => {
           </div>
           <div className={styles.booksGrid}>
             {books.slice(0, 5).map((book, index) => (
-              <BookCardOrder book={book} orderNumber={index + 1} />
+              <BookCardOrder key={book.id} book={book} orderNumber={index + 1} />
             ))}
           </div>
         </div>
@@ -148,7 +148,7 @@ const HomePage = () => {
           </div>
           <div className={styles.booksGrid}>
             {books.slice(0, 4).map((book) => (
-              <BookCard book={book}/>
+              <BookCard key={book.id} book={book}/>
             ))}
           </div>
         </div>
@@ -165,7 +165,7 @@ const HomePage = () => {
           </div>
           <div className={styles.booksGrid}>
             {books.slice(0, 4).map((book) => (
-              <BookCard book={book}/>
+              <BookCard key={book.id} book={book}/>
             ))}
           </div>
         </div>
