@@ -10,9 +10,11 @@ const UserMenu = ({ username = "truongg", onLogout }) => {
         <p className={styles.username}>{username}</p>
       </div>
       <div className={styles.separator} />
-      <div className={styles.menuItem}><Heart size={18} /> Yêu thích</div>
+      <div className={styles.menuItem}><Heart size={18} />Sách đang thuê</div>
       <div className={styles.menuItem}><Plus size={18} /> Đơn hàng của tôi</div>
-      <div className={styles.menuItem}><User size={18} /> Tài khoản</div>
+      <Link to ="/profile">
+        <div className={styles.menuItem}><User size={18} /> Tài khoản</div>
+      </Link>
       <div className={styles.separator} />
       <div className={styles.menuItem} onClick={onLogout}><LogOut size={18} />Đăng xuất</div>
     </div>
