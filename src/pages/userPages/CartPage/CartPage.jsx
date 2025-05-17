@@ -203,6 +203,7 @@ const EmptyCart = () => (
 
 const CartItem = ({ item, onQuantityChange, onRemoveItem, updateRentDays, addDays }) => {
   const [showCustomDate, setShowCustomDate] = useState(false)
+  const [otherDate, setOtherDate] = useState(-1)
   const inputOtherDate = useRef(null)
 
   // Xử lý chọn số ngày thuê
@@ -210,7 +211,7 @@ const CartItem = ({ item, onQuantityChange, onRemoveItem, updateRentDays, addDay
     if (item.rent_day !== date) {
       updateRentDays(item.id, date)
     }
-    if (showCustomDate && (date === 7 || date === 14 || date === 30)) {
+    if (showCustomDate && (date === 7 || date === 14 || date === 30 || date === otherDate)) {
       setShowCustomDate(false)
     }
   }
@@ -238,6 +239,7 @@ const CartItem = ({ item, onQuantityChange, onRemoveItem, updateRentDays, addDay
     }
 
     updateRentDays(item.id, diffDays)
+    setOtherDate(diffDays)
     setShowCustomDate(false)
   }
 
@@ -327,8 +329,15 @@ const CartItem = ({ item, onQuantityChange, onRemoveItem, updateRentDays, addDay
             >
               30 ngày
             </div>
+
+            {otherDate == -1 ? '' : (
+              <div className={`${styles.rentDateOption} ${item.rent_day === otherDate? styles.active : ''}`}
+                onClick = {()=>handleClickRentDate(otherDate)}>
+                {otherDate} ngày
+              </div>
+            )}
             <div
-              className={`${styles.rentDateOption} ${[7, 14, 30].indexOf(item.rent_day) === -1 ? styles.active : ""}`}
+              className={`${styles.rentDateOption}`}
               onClick={handleClickRentOtherDate}
             >
               khác

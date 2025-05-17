@@ -7,6 +7,7 @@ const BookDetailsPage = () => {
   const [rentNumber, setRentNumber] = useState(1);
   const [rentDate, setRentDate] = useState(7);
   const [showCustomDate, setShowCustomDate] = useState(false);
+  const [otherDate, setOtherDate] = useState(-1);
   const inputOtherDate = useRef(null);
   const [totalPrice, setTotalPrice] = useState(10000*rentDate*rentNumber);
   const {showToast} = useToast();
@@ -14,15 +15,15 @@ const BookDetailsPage = () => {
   useEffect(()=>{
     setTotalPrice(10000*rentDate*rentNumber)
   }, [rentDate, rentNumber])
+
   // handle click choose rent date
   function handleClickRentDate(date){
     if(rentDate !== date) setRentDate(date);
-    if(showCustomDate && date === 7 || date === 14 || date === 30) setShowCustomDate(false);
+    if(showCustomDate && date === 7 || date === 14 || date === 30 || date === otherDate) setShowCustomDate(false);
   }
 
   function handleClickRentOtherDate(){
-    if(!showCustomDate) setShowCustomDate(!showCustomDate);
-    setRentDate(0);
+    setShowCustomDate(!showCustomDate);
   }
 
   // ham xu ly ngay thang
@@ -35,6 +36,11 @@ const BookDetailsPage = () => {
   // xu ly lay ngay khi chon ngay khac
   function handleGetOtherDay(){
     const selectedDateMs = Date.parse(inputOtherDate.current.value); 
+
+    if(!selectedDateMs){
+      alert('vui lòng chọn số ngày');
+      return;
+    }
     const todayMs = Date.parse(new Date().toISOString().slice(0, 10));
     const diffDays = Math.round((selectedDateMs - todayMs) / (1000 * 60 * 60 * 24));
     if(diffDays < 7){
@@ -43,6 +49,7 @@ const BookDetailsPage = () => {
       return;
     }
     setRentDate(diffDays);
+    setOtherDate(diffDays);
     setShowCustomDate(!showCustomDate);
   }
 
@@ -133,7 +140,15 @@ const BookDetailsPage = () => {
                     onClick = {()=>handleClickRentDate(30)}>
                     30 ngày
                   </div>
-                  <div className={`${styles.rentDateOption} ${[7,14, 30].indexOf(rentDate) === -1 ? styles.active : ''}`}
+
+                  {otherDate == -1 ? '' : (
+                    <div className={`${styles.rentDateOption} ${rentDate === otherDate? styles.active : ''}`}
+                      onClick = {()=>handleClickRentDate(30)}>
+                      {otherDate} ngày
+                    </div>
+                  )}
+
+                  <div className={`${styles.rentDateOption}`}
                     onClick={handleClickRentOtherDate}>
                     khác
                   </div>
@@ -146,6 +161,7 @@ const BookDetailsPage = () => {
                           className={styles.customDateInput}
                           placeholder="Chọn ngày trả"
                           ref={inputOtherDate}
+                          min={new Date(new Date().setDate(new Date().getDate() + 7)).toISOString().split("T")[0]}
                         />
                       </div>
                       <button className={styles.customDateConfirm}
