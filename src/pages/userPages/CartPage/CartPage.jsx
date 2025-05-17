@@ -1,5 +1,3 @@
-"use client"
-
 import { Link, useNavigate } from "react-router-dom"
 import { Trash2, ShoppingCart, ArrowRight } from "lucide-react"
 import { useState, useRef } from "react"
