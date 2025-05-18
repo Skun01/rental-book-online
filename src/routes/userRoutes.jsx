@@ -11,10 +11,12 @@ import BookDetailsPage from "../pages/userPages/BookDetailsPage/BookDetailsPage"
 import CheckoutPage from "../pages/userPages/CheckoutPage/CheckoutPage"
 import OrderSuccessPage from "../pages/userPages/OrderSuccessPage/OrderSuccessPage"
 import ProfilePage from "../pages/userPages/ProfilePage/ProfilePage"
-import OrdersPage from "../pages/userPages/OrdersPage/OrdersPage"
+import OrdersPage from "../pages/userPages/orderPage/OrdersPage"
 import OrderDetailsPage from "../pages/userPages/OrderDetailsPage/OrderDetailsPage"
 import ListPage from "../pages/userPages/listPage/ListPage"
-
+import RentedBooksPage from "../pages/userPages/rentedBookPage/RentedBookPage"
+import ReturnBooksPage from "../pages/userPages/returnBooksPage/ReturnBooksPage"
+import ReturnSuccessPage from "../pages/userPages/returnSuccessPage/ReturnSuccessPage"
 const userRoutes = [
   {
     path: "/",
@@ -76,6 +78,18 @@ const userRoutes = [
         path: "/orders/:id",
         element: <OrderDetailsPage />,
       },
+      {
+        path: '/rented-books',
+        element: <RentedBooksPage/>
+      },
+      {
+        path: '/return-books',
+        element: <ReturnBooksPage/>
+      },
+      {
+        path: '/return-success',
+        element: <ReturnSuccessPage/>
+      }
     ],
   },
 ]

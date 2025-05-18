@@ -1,0 +1,651 @@
+.rentedBooksPage {
+  padding: 2rem 0;
+  background-color: #191b24;
+  color: #e2e8f0;
+  min-height: 100vh;
+  padding-top: 100px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.pageTitle {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  color: #f8fafc;
+}
+
+.controlsSection {
+  margin-bottom: 2rem;
+}
+
+.returnSelectedSection {
+  background-color: #2a2a3c;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.returnSelectedButton {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.returnSelectedButton:hover {
+  background-color: #dc2626;
+  transform: translateY(-2px);
+}
+
+.searchBar {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.875rem 1rem 0.875rem 3rem;
+  background-color: #222632;
+  border: 1px solid #2d3748;
+  border-radius: 0.5rem;
+  color: #f1f5f9;
+  font-size: 1rem;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #4d51da;
+  box-shadow: 0 0 0 1px #4d51da;
+}
+
+.filterControls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.filterButtons {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.filterButton {
+  padding: 0.625rem 1.25rem;
+  background-color: #222632;
+  border: 1px solid #2d3748;
+  border-radius: 0.5rem;
+  color: #cbd5e1;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filterButton:hover {
+  background-color: #2a2a3c;
+  color: #f1f5f9;
+}
+
+.activeFilter {
+  background-color: #4d51da;
+  color: white;
+  border-color: #4d51da;
+}
+
+.sortControl {
+  position: relative;
+}
+
+.sortWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.sortIcon {
+  position: absolute;
+  left: 1rem;
+  color: #94a3b8;
+  z-index: 1;
+}
+
+.selectIcon {
+  position: absolute;
+  right: 1rem;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.sortSelect {
+  padding: 0.625rem 2.5rem;
+  background-color: #222632;
+  border: 1px solid #2d3748;
+  border-radius: 0.5rem;
+  color: #cbd5e1;
+  font-size: 0.95rem;
+  appearance: none;
+  cursor: pointer;
+}
+
+.sortSelect:focus {
+  outline: none;
+  border-color: #4d51da;
+}
+
+.booksGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.bookCard {
+  background-color: #222632;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s;
+}
+
+.bookCard:hover {
+  transform: translateY(-4px);
+}
+
+.bookImageContainer {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+}
+
+.bookImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bookStatus {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 2rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.statusActive {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
+
+.statusWarning {
+  background-color: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+}
+
+.statusOverdue {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.statusReturned {
+  background-color: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+}
+
+.bookInfo {
+  padding: 1.5rem;
+  flex: 1;
+}
+
+.bookTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #f1f5f9;
+}
+
+.bookAuthor {
+  color: #94a3b8;
+  margin-bottom: 1.25rem;
+}
+
+.bookDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.detailItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.detailIcon {
+  color: #4d51da;
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+}
+
+.detailText {
+  display: flex;
+  flex-direction: column;
+}
+
+.detailLabel {
+  font-size: 0.875rem;
+  color: #94a3b8;
+  margin-bottom: 0.25rem;
+}
+
+.detailValue {
+  color: #cbd5e1;
+  font-weight: 500;
+}
+
+.bookActions {
+  padding: 1.5rem;
+  display: flex;
+  gap: 1rem;
+  border-top: 1px solid #2d3748;
+}
+
+.extendButton,
+.viewDetailsButton {
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.extendButton {
+  background-color: #4d51da;
+  color: white;
+  border: none;
+  flex: 1;
+}
+
+.extendButton:hover {
+  background-color: #5d61ea;
+}
+
+.viewDetailsButton {
+  background-color: transparent;
+  color: #cbd5e1;
+  border: 1px solid #2d3748;
+  flex: 1;
+}
+
+.viewDetailsButton:hover {
+  background-color: #2a2a3c;
+  color: #f1f5f9;
+}
+
+.noBooks {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  background-color: #222632;
+  border-radius: 0.75rem;
+  text-align: center;
+  color: #94a3b8;
+}
+
+.noBooks svg {
+  margin-bottom: 1.5rem;
+  color: #4d51da;
+}
+
+.noBooks p {
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+}
+
+.resetFilterButton {
+  background-color: #4d51da;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.resetFilterButton:hover {
+  background-color: #5d61ea;
+}
+
+/* Modal styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal {
+  background-color: #222632;
+  border-radius: 0.75rem;
+  width: 100%;
+  max-width: 600px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.modalHeader {
+  padding: 1.5rem;
+  border-bottom: 1px solid #2d3748;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modalHeader h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  margin: 0;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 1.5rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.closeButton:hover {
+  color: #f1f5f9;
+}
+
+.modalBody {
+  padding: 1.5rem;
+}
+
+.selectedBookInfo {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #2d3748;
+}
+
+.modalBookImage {
+  width: 100px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 0.375rem;
+}
+
+.selectedBookInfo h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  color: #f1f5f9;
+}
+
+.selectedBookInfo p {
+  color: #94a3b8;
+  margin: 0 0 1rem 0;
+}
+
+.bookDates {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bookDates p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #cbd5e1;
+}
+
+.extensionOptions {
+  margin-bottom: 1.5rem;
+}
+
+.extensionOptions label {
+  display: block;
+  margin-bottom: 0.75rem;
+  color: #cbd5e1;
+  font-weight: 500;
+}
+
+.extensionDaysButtons {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.extensionDaysButtons button {
+  padding: 0.5rem 1rem;
+  background-color: #2a2a3c;
+  border: 1px solid #2d3748;
+  border-radius: 0.5rem;
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.extensionDaysButtons button:hover {
+  background-color: #323546;
+}
+
+.extensionDaysButtons button.activeDays {
+  background-color: #4d51da;
+  color: white;
+  border-color: #4d51da;
+}
+
+.extensionSlider {
+  width: 100%;
+  margin-bottom: 0.5rem;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  background: #2d3748;
+  border-radius: 3px;
+  outline: none;
+}
+
+.extensionSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #4d51da;
+  cursor: pointer;
+}
+
+.extensionSlider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #4d51da;
+  cursor: pointer;
+  border: none;
+}
+
+.sliderValue {
+  text-align: center;
+  font-weight: 500;
+  color: #f1f5f9;
+  margin-top: 0.5rem;
+}
+
+.extensionSummary {
+  background-color: #2a2a3c;
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  color: #cbd5e1;
+}
+
+.summaryRow:last-child {
+  margin-bottom: 0;
+}
+
+.totalRow {
+  padding-top: 0.75rem;
+  margin-top: 0.75rem;
+  border-top: 1px solid #2d3748;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #f1f5f9;
+}
+
+.newDueDate {
+  color: #10b981;
+  font-weight: 500;
+}
+
+.modalFooter {
+  padding: 1.5rem;
+  border-top: 1px solid #2d3748;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.cancelButton,
+.confirmButton {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancelButton {
+  background-color: transparent;
+  color: #cbd5e1;
+  border: 1px solid #2d3748;
+}
+
+.cancelButton:hover {
+  background-color: #2a2a3c;
+  color: #f1f5f9;
+}
+
+.confirmButton {
+  background-color: #4d51da;
+  color: white;
+  border: none;
+}
+
+.confirmButton:hover {
+  background-color: #5d61ea;
+}
+
+.bookCheckbox {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+}
+
+.bookCheckbox input {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.bookCheckbox label {
+  font-size: 0.875rem;
+  color: #f1f5f9;
+  cursor: pointer;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .filterControls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filterButtons {
+    justify-content: center;
+  }
+
+  .sortControl {
+    width: 100%;
+  }
+
+  .sortSelect {
+    width: 100%;
+  }
+
+  .booksGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .selectedBookInfo {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .bookActions {
+    flex-direction: column;
+  }
+}
