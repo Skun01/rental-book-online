@@ -13,7 +13,6 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  // Load user from localStorage on initial render
   useEffect(() => {
     const storedUser = localStorage.getItem("user")
     if (storedUser) {
@@ -31,8 +30,6 @@ export function AuthProvider({ children }) {
   const login = (userData, authToken) => {
     setCurrentUser(userData)
     setToken(authToken)
-
-    // Save to localStorage
     try {
       localStorage.setItem("user", JSON.stringify(userData))
       localStorage.setItem("token", authToken)
@@ -45,7 +42,6 @@ export function AuthProvider({ children }) {
     setCurrentUser(null)
     setToken(null)
 
-    // Remove from localStorage
     try {
       localStorage.removeItem("user")
       localStorage.removeItem("token")
@@ -54,7 +50,6 @@ export function AuthProvider({ children }) {
     }
   }
 
-  // Update user profile
   const updateProfile = (userData) => {
     setCurrentUser((prevUser) => ({
       ...prevUser,

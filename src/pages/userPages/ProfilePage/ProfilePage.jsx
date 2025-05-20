@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react"
 import { User, Mail, MapPin, Lock, Edit2, Plus, Trash2 } from 'lucide-react'
 import styles from "./ProfilePage.module.css"
+import { useAuth } from "../../../contexts/AuthContext"
+import axios from "axios"
+import { useNavigate } from "react-router-dom"
 
 const mockUserData = {
   fullName: "Nguyễn Văn A",
@@ -13,19 +16,22 @@ const mockUserData = {
 const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("info")
   const [editMode, setEditMode] = useState(false)
+  const {currentUser} = useAuth()
   const [formData, setFormData] = useState({
-    full_name: mockUserData.fullName || "",
-    email: mockUserData.email || "",
-    gender: mockUserData.gender || "MALE",
-    age: mockUserData.age || "",
+    full_name: "",
+    email: "",
+    gender: "",
+    age: "",
+    password: ""
   })
 
   const [addresses, setAddresses] = useState([])
   const [newAddress, setNewAddress] = useState({
     city: "",
     district: "",
-    province: "",
-    is_default: false
+    ward: "",
+    street: "",
+    isDefault: false
   })
 
   const [passwordData, setPasswordData] = useState({
@@ -34,17 +40,63 @@ const ProfilePage = () => {
     confirmPassword: "",
   })
   const [message, setMessage] = useState({ type: "", text: "" })
+  const navigate = useNavigate();
   useEffect(() => {
-    setAddresses([
-      {
-        id: 1,
-        city: "Hồ Chí Minh",
-        district: "Quận 1",
-        province: "Phường Bến Nghé",
-        is_default: true
-      }
-    ])
+    const bearer = localStorage.getItem('token')
+    if(!bearer){
+      navigate('/')
+    }
+    // user address
+    async function getUserAddress(){
+      await axios.get(`http://localhost:8080/api/v1/address/user/${currentUser.id}?page=0&size=5`, {
+        headers: {
+          Authorization: `${bearer}`
+        }
+      })
+        .then(response=>{
+          setAddresses(response.data.data.content)
+        })
+    }
+    getUserAddress()
+
+    // full user infor
+    async function getFullUserInfor(){
+      await axios.get(`http://localhost:8080/api/v1/user/${currentUser.id}`, {
+        headers: {
+          Authorization: `${bearer}`
+        }
+      })
+        .then(response=>{
+          const fullUserInfor = response.data.data
+          setFormData({
+            full_name: fullUserInfor.fullName || "",
+            email: fullUserInfor.email || "",
+            gender: fullUserInfor.gender.toUpperCase() || "",
+            age: (fullUserInfor.age) || "",
+            password: '123456',
+          })
+        })
+    }
+    getFullUserInfor();
   }, [])
+
+  // update userInfor 
+
+  async function updateUser(){
+    await axios.put(`http://localhost:8080/api/v1/user/${currentUser.id}`, 
+    {
+      fullName: formData.full_name,
+      gender: formData.gender === 'MALE' ? 'Male' : formData.gender === 'FEMALE' ? 'Female' : 'Other',
+      age: formData.age,
+      email: formData.email,
+      password: formData.password
+    },
+    {
+      headers: {
+        Authorization: `${localStorage.getItem('token')}`
+      }
+    })
+  }
 
   const handleTabChange = (tab) => {
     setActiveTab(tab)
@@ -77,6 +129,7 @@ const ProfilePage = () => {
                 setFormData={setFormData} 
                 handleEditToggle={handleEditToggle}
                 setMessage={setMessage}
+                handleSubmitForm = {updateUser}
               />
             )}
 
@@ -136,7 +189,7 @@ const ProfileTabs = ({ activeTab, handleTabChange }) => {
 }
 
 // tab thông tin cá nhân
-const PersonalInfoTab = ({ editMode, formData, setFormData, handleEditToggle, setMessage }) => {
+const PersonalInfoTab = ({ editMode, formData, setFormData, handleEditToggle, setMessage, handleSubmitForm }) => {
   const handleInputChange = (e) => {
     const { name, value } = e.target
     setFormData((prev) => ({
@@ -148,7 +201,7 @@ const PersonalInfoTab = ({ editMode, formData, setFormData, handleEditToggle, se
   const handleProfileSubmit = async (e) => {
     e.preventDefault()
     try {
-      setMessage({ type: "success", text: "Thông tin cá nhân đã được cập nhật thành công!" })
+      handleSubmitForm()
       handleEditToggle()
     } catch (error) {
       setMessage({ type: error, text: "Có lỗi xảy ra khi cập nhật thông tin!" })
@@ -305,8 +358,9 @@ const PersonalInfoTab = ({ editMode, formData, setFormData, handleEditToggle, se
   )
 }
 
-// Component tab địa chỉ
+// tab địa chỉ
 const AddressTab = ({ addresses, setAddresses, newAddress, setNewAddress, editMode, setEditMode, setMessage }) => {
+  const {currentUser} = useAuth()
   const handleAddressChange = (e) => {
     const { name, value, type, checked } = e.target
     setNewAddress((prev) => ({
@@ -318,24 +372,33 @@ const AddressTab = ({ addresses, setAddresses, newAddress, setNewAddress, editMo
   const handleAddressSubmit = async (e) => {
     e.preventDefault()
     try {
-      if (newAddress.is_default) {
+      if (newAddress.isDefault) {
         setAddresses(addresses.map(addr => ({
           ...addr,
-          is_default: false
+          isDefault: false
         })))
       }
       
-      const newAddressWithId = {
-        ...newAddress,
-        id: Date.now()
-      }
-      
-      setAddresses([...addresses, newAddressWithId])
+      // query create address
+      await axios.post('http://localhost:8080/api/v1/address',
+        {
+          userId: currentUser.id,
+          ...newAddress,
+        },
+        {
+          headers: {
+            Authorization: `${localStorage.getItem('token')}`
+          }
+        }
+      )
+
+      setAddresses([...addresses, newAddress])
       setNewAddress({
         city: "",
         district: "",
         province: "",
-        is_default: false
+        street: "",
+        isDefault: false
       })
       setEditMode(false)
       setMessage({ type: "success", text: "Địa chỉ mới đã được thêm thành công!" })
@@ -357,7 +420,7 @@ const AddressTab = ({ addresses, setAddresses, newAddress, setNewAddress, editMo
     try {
       setAddresses(addresses.map(addr => ({
         ...addr,
-        is_default: addr.id === addressId
+        isDefault: addr.id === addressId
       })))
       setMessage({ type: "success", text: "Đã cập nhật địa chỉ mặc định!" })
     } catch (error) {
@@ -380,23 +443,8 @@ const AddressTab = ({ addresses, setAddresses, newAddress, setNewAddress, editMo
           <h3 className={styles.formSubtitle}>Thêm địa chỉ mới</h3>
 
           <div className={styles.formGroup}>
-            <label htmlFor="province" className={styles.formLabel}>
-              Tỉnh/Thành phố
-            </label>
-            <input 
-              type="text" 
-              id="province" 
-              name="province" 
-              value={newAddress.province}
-              onChange={handleAddressChange}
-              className={styles.formControl} 
-              required 
-            />
-          </div>
-
-          <div className={styles.formGroup}>
             <label htmlFor="city" className={styles.formLabel}>
-              Quận/Huyện
+              Tỉnh/Thành phố
             </label>
             <input 
               type="text" 
@@ -411,7 +459,7 @@ const AddressTab = ({ addresses, setAddresses, newAddress, setNewAddress, editMo
 
           <div className={styles.formGroup}>
             <label htmlFor="district" className={styles.formLabel}>
-              Phường/Xã
+              Quận/Huyện
             </label>
             <input 
               type="text" 
@@ -424,15 +472,45 @@ const AddressTab = ({ addresses, setAddresses, newAddress, setNewAddress, editMo
             />
           </div>
 
+          <div className={styles.formGroup}>
+            <label htmlFor="ward" className={styles.formLabel}>
+              Phường/Xã
+            </label>
+            <input 
+              type="text" 
+              id="ward" 
+              name="ward" 
+              value={newAddress.ward}
+              onChange={handleAddressChange}
+              className={styles.formControl} 
+              required 
+            />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label htmlFor="street" className={styles.formLabel}>
+              Tên đường
+            </label>
+            <input 
+              type="text" 
+              id="street" 
+              name="street" 
+              value={newAddress.street}
+              onChange={handleAddressChange}
+              className={styles.formControl} 
+              required 
+            />
+          </div>
+
           <div className={styles.formCheckbox}>
             <input 
               type="checkbox" 
-              id="is_default" 
-              name="is_default"
-              checked={newAddress.is_default}
+              id="isDefault" 
+              name="isDefault"
+              checked={newAddress.isDefault}
               onChange={handleAddressChange}
             />
-            <label htmlFor="is_default">Đặt làm địa chỉ mặc định</label>
+            <label htmlFor="isDefault">Đặt làm địa chỉ mặc định</label>
           </div>
 
           <div className={styles.formActions}>
@@ -451,11 +529,11 @@ const AddressTab = ({ addresses, setAddresses, newAddress, setNewAddress, editMo
               <div key={address.id} className={styles.addressCard}>
                 <div className={styles.addressHeader}>
                   <h3 className={styles.addressTitle}>
-                    {address.is_default && <span className={styles.defaultBadge}>Mặc định</span>}
-                    Địa chỉ {address.is_default ? "mặc định" : ""}
+                    {address.isDefault && <span className={styles.defaultBadge}>Mặc định</span>}
+                    Địa chỉ {address.isDefault ? "mặc định" : ""}
                   </h3>
                   <div className={styles.addressActions}>
-                    {!address.is_default && (
+                    {!address.isDefault && (
                       <button 
                         className={styles.setDefaultButton}
                         onClick={() => handleSetDefaultAddress(address.id)}
@@ -492,7 +570,7 @@ const AddressTab = ({ addresses, setAddresses, newAddress, setNewAddress, editMo
   )
 }
 
-// Component tab đổi mật khẩu
+// tab đổi mật khẩu
 const PasswordTab = ({ passwordData, setPasswordData, setMessage }) => {
   const handlePasswordChange = (e) => {
     const { name, value } = e.target
