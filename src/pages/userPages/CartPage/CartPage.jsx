@@ -1,14 +1,15 @@
 import { Link, useNavigate } from "react-router-dom"
 import { Trash2, ShoppingCart, ArrowRight } from "lucide-react"
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import styles from "./CartPage.module.css"
 import { useCart } from "../../../contexts/CartContext"
-// Component chính
+
 const CartPage = () => {
   const { cartItems, updateQuantity, removeFromCart, getTotalPrice, getTotalDeposit, updateRentDays } = useCart()
   const navigate = useNavigate()
   const [showCommonDatePicker, setShowCommonDatePicker] = useState(false)
   const commonDateInputRef = useRef(null)
+  const [commonDate, setCommonDate] = useState(-1)
 
   const handleQuantityChange = (bookId, quantity) => {
     updateQuantity(bookId, quantity)
@@ -31,7 +32,6 @@ const CartPage = () => {
 
   // Xử lý chọn ngày trả chung
   const handleCommonReturnDate = () => {
-    // thong bao khi chua chon ngay
     if(!commonDateInputRef.current.value){
       alert('Vui lòng chọn ngày');
       return;
@@ -44,7 +44,6 @@ const CartPage = () => {
     const selectedDateMs = Date.parse(commonDateInputRef.current.value)
     const todayMs = Date.parse(new Date().toISOString().slice(0, 10))
     const diffDays = Math.round((selectedDateMs - todayMs) / (1000 * 60 * 60 * 24))
-
     if (diffDays < 7) {
       alert("Bạn phải thuê ít nhất 7 ngày!")  
       return
@@ -55,6 +54,7 @@ const CartPage = () => {
       updateRentDays(item.id, diffDays)
     })
 
+    setCommonDate(diffDays)
     setShowCommonDatePicker(false)
   }
 
@@ -110,6 +110,7 @@ const CartPage = () => {
                 onRemoveItem={handleRemoveItem}
                 updateRentDays={updateRentDays}
                 addDays={addDays}
+                commonDate={commonDate}
               />
             </div>
             <CartSummary totalPrice={getTotalPrice()} totalDeposit={getTotalDeposit()} onCheckout={handleCheckout} />
@@ -121,32 +122,6 @@ const CartPage = () => {
 }
 
 export default CartPage
-
-// Mock data
-const mockCartItems = [
-  {
-    id: 1,
-    title: "Đắc Nhân Tâm",
-    author: "Dale Carnegie",
-    cover_image: "/Book.jpg",
-    rental_price: 25000,
-    deposit_price: 100000,
-    quantity: 2,
-    available_quantity: 8,
-    rent_day: 7,
-  },
-  {
-    id: 2,
-    title: "Nhà Giả Kim",
-    author: "Paulo Coelho",
-    cover_image: "/Book.jpg",
-    rental_price: 30000,
-    deposit_price: 120000,
-    quantity: 1,
-    available_quantity: 3,
-    rent_day: 7,
-  },
-]
 
 
 const EmptyCart = () => (
@@ -160,14 +135,17 @@ const EmptyCart = () => (
   </div>
 )
 
-const CartItem = ({ item, onQuantityChange, onRemoveItem, updateRentDays, addDays }) => {
+const CartItem = ({ item, onQuantityChange, onRemoveItem, updateRentDays, addDays, commonDate }) => {
   const [showCustomDate, setShowCustomDate] = useState(false)
   const [otherDate, setOtherDate] = useState(-1)
   const inputOtherDate = useRef(null)
-
+  useEffect(()=>{
+    setOtherDate(commonDate)
+    console.log(commonDate)
+  }, [commonDate])
   // Xử lý chọn số ngày thuê
   const handleClickRentDate = (date) => {
-    if (item.rent_day !== date) {
+    if (item.rentedDay !== date) {
       updateRentDays(item.id, date)
     }
     if (showCustomDate && (date === 7 || date === 14 || date === 30 || date === otherDate)) {
@@ -208,21 +186,21 @@ const CartItem = ({ item, onQuantityChange, onRemoveItem, updateRentDays, addDay
         <div className={styles.productCol}>
           <div className={styles.productInfo}>
             <Link to={`/books/${item.id}`} className={styles.productImageLink}>
-              <img src={item.cover_image || "/placeholder.svg"} alt={item.title} className={styles.productImage} />
+              <img src={item.imageList[0].url || "/placeholder.svg"} alt={item.name} className={styles.productImage} />
             </Link>
             <div className={styles.productDetails}>
               <Link to={`/books/${item.id}`} className={styles.productTitle}>
-                {item.title}
+                {item.name}
               </Link>
-              <div className={styles.productAuthor}>{item.author}</div>
-              <div className={styles.productDeposit}>Đặt cọc: {item.deposit_price.toLocaleString("vi-VN")}đ</div>
+              <div className={styles.productAuthor}>{item.author ? item.author : "Đang cập nhật"}</div>
+              <div className={styles.productDeposit}>Đặt cọc: {item.depositPrice ? item.depositPrice.toLocaleString("vi-VN"): 0}đ</div>
             </div>
           </div>
         </div>
 
         <div className={styles.priceCol}>
           <div className={styles.productPrice}>
-            {item.rental_price.toLocaleString("vi-VN")}đ<span className={styles.pricePeriod}>/Ngày</span>
+            {item.rentalPrice.toLocaleString("vi-VN")}đ<span className={styles.pricePeriod}>/Ngày</span>
           </div>
         </div>
 
@@ -238,7 +216,7 @@ const CartItem = ({ item, onQuantityChange, onRemoveItem, updateRentDays, addDay
             <input
               type="number"
               min="1"
-              max={item.available_quantity}
+              max={item.stock}
               value={item.quantity}
               onChange={(e) => onQuantityChange(item.id, Number.parseInt(e.target.value) || 1)}
               className={styles.quantityInput}
@@ -246,7 +224,7 @@ const CartItem = ({ item, onQuantityChange, onRemoveItem, updateRentDays, addDay
             <button
               className={styles.quantityButton}
               onClick={() => onQuantityChange(item.id, item.quantity + 1)}
-              disabled={item.quantity >= item.available_quantity}
+              disabled={item.quantity >= item.stock}
             >
               +
             </button>
@@ -255,7 +233,7 @@ const CartItem = ({ item, onQuantityChange, onRemoveItem, updateRentDays, addDay
 
         <div className={styles.totalCol}>
           <div className={styles.itemTotal}>
-            {(item.rental_price * item.quantity * item.rent_day).toLocaleString("vi-VN")}đ
+            {(item.rentalPrice * item.quantity * item.rentedDay).toLocaleString("vi-VN")}đ
           </div>
         </div>
 
@@ -271,26 +249,26 @@ const CartItem = ({ item, onQuantityChange, onRemoveItem, updateRentDays, addDay
           <div className={styles.rentOptionTitle}>Số ngày thuê</div>
           <div className={styles.rentDateList}>
             <div
-              className={`${styles.rentDateOption} ${item.rent_day === 7 ? styles.active : ""}`}
+              className={`${styles.rentDateOption} ${item.rentedDay === 7 ? styles.active : ""}`}
               onClick={() => handleClickRentDate(7)}
             >
               7 ngày
             </div>
             <div
-              className={`${styles.rentDateOption} ${item.rent_day === 14 ? styles.active : ""}`}
+              className={`${styles.rentDateOption} ${item.rentedDay === 14 ? styles.active : ""}`}
               onClick={() => handleClickRentDate(14)}
             >
               14 ngày
             </div>
             <div
-              className={`${styles.rentDateOption} ${item.rent_day === 30 ? styles.active : ""}`}
+              className={`${styles.rentDateOption} ${item.rentedDay === 30 ? styles.active : ""}`}
               onClick={() => handleClickRentDate(30)}
             >
               30 ngày
             </div>
 
             {otherDate == -1 ? '' : (
-              <div className={`${styles.rentDateOption} ${item.rent_day === otherDate? styles.active : ''}`}
+              <div className={`${styles.rentDateOption} ${item.rentedDay === otherDate? styles.active : ''}`}
                 onClick = {()=>handleClickRentDate(otherDate)}>
                 {otherDate} ngày
               </div>
@@ -319,13 +297,13 @@ const CartItem = ({ item, onQuantityChange, onRemoveItem, updateRentDays, addDay
             </div>
           </div>
         </div>
-        <div className={styles.rentDateResult}>Ngày trả sách: {addDays(item.rent_day)}</div>
+        <div className={styles.rentDateResult}>Ngày trả sách: {addDays(item.rentedDay)}</div>
       </div>
     </div>
   )
 }
 
-const CartItemsList = ({ cartItems, onQuantityChange, onRemoveItem, updateRentDays, addDays }) => (
+const CartItemsList = ({ cartItems, onQuantityChange, onRemoveItem, updateRentDays, addDays, commonDate }) => (
   <div className={styles.cartItems}>
     <div className={styles.cartItemsHeader}>
       <div className={styles.productCol}>Sản phẩm</div>
@@ -343,6 +321,7 @@ const CartItemsList = ({ cartItems, onQuantityChange, onRemoveItem, updateRentDa
         onRemoveItem={onRemoveItem}
         updateRentDays={updateRentDays}
         addDays={addDays}
+        commonDate={commonDate}
       />
     ))}
   </div>

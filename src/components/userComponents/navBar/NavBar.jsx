@@ -19,7 +19,7 @@ function NavBar(){
   const [showAuth, setShowAuth] = useState(false);
   const [authMode, setAuthMode] = useState("login");
   const { currentUser, logout } = useAuth();
-  const { cartItems } = useCart();
+  const { getCartItemCount } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
    const searchRef = useRef(null);
@@ -190,7 +190,7 @@ function NavBar(){
               <Link to="/cart">
                 <div className={styles.cart}>
                   <ShoppingCart className={styles.cartIcon}/>
-                  <div className={styles.cartCount}>{cartItems.length}</div>
+                  <div className={styles.cartCount}>{getCartItemCount()}</div>
                 </div>
               </Link>
               <div className={styles.user}

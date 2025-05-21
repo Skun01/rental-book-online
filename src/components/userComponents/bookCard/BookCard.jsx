@@ -2,12 +2,10 @@ import { useState, useRef, useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { ShoppingCart, Heart, Info } from "lucide-react"
 import { useCart } from "../../../contexts/CartContext"
-import { useToast } from "../../../contexts/ToastContext"
 import styles from "./BookCard.module.css"
 
 const BookCard = ({ book, showBookDetail = true, releaseYear, smaller = false}) => {
   const { addToCart } = useCart()
-  const { showToast } = useToast()
   const [isHovered, setIsHovered] = useState(false)
   const [hoverTimeout, setHoverTimeout] = useState(null)
   const [detailPosition, setDetailPosition] = useState("center")

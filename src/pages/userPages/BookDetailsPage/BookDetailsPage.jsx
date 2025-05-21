@@ -15,7 +15,7 @@ const BookDetailsPage = () => {
   const [totalRentalPrice, setTotalRentalPrice] = useState(0)
   const {id} = useParams()
   const [book, setBook] = useState(null)
-  const {addToCart} = useCart()
+  const {addToCart, clearCart} = useCart()
   useEffect(()=>{
     async function getBookById(){
       await axios.get(`http://localhost:8080/api/v1/book/${id}`)
@@ -29,7 +29,6 @@ const BookDetailsPage = () => {
     if(book){
       setTotalRentalPrice(book['depositPrice']*rentDate*rentNumber)
       setTotalDepositPrice(book.rentalPrice*rentNumber)
-      console.log(book['depositPrice'], rentDate, rentNumber)
     }
   }, [book, rentDate, rentNumber])
 
@@ -71,8 +70,9 @@ const BookDetailsPage = () => {
   }
 
   // handle click them vao gio hang
-  function handleAddToCard(){
+  function handleAddToCart(){
     addToCart(book, rentDate, rentNumber)
+    // clearCart()
   }
 
   return (
@@ -204,7 +204,7 @@ const BookDetailsPage = () => {
               </div>
               <div className={styles.actionBtn}>
                 <button className={styles.addCartBtn}
-                  onClick={handleAddToCard}>
+                  onClick={handleAddToCart}>
                   Thêm vào giỏ hàng
                 </button>
                 <button className={styles.rentButton}>

@@ -48,15 +48,7 @@ const userRoutes = [
       },
       {
         path: "books/:id",
-        element: (
-          <AuthProvider>
-            <ToastProvider>
-              <CartProvider>
-                <BookDetailsPage />
-              </CartProvider>
-            </ToastProvider>
-          </AuthProvider>
-        ),
+        element: <BookDetailsPage/>,
       },
       {
         path: "checkout",

@@ -11,7 +11,7 @@ export function CartProvider({ children }) {
   const [cartItems, setCartItems] = useState([])
   const [isInitialized, setIsInitialized] = useState(false)
   const { showToast } = useToast()
-
+  
   // get init cart items
   useEffect(() => {
     async function getCart() {
@@ -40,17 +40,16 @@ export function CartProvider({ children }) {
 //cart structure:
 //[{book,rentedDay, quantity},....]
   const addToCart = async (book, rentedDay = 7, quantity = 1) => {
-    setCartItems((prevItems) => {
-      const existingItemIndex = prevItems.findIndex((item) => item.book.id === book.id)
-      if (existingItemIndex !== -1) {
-        const updatedItems = [...prevItems]
-        const newQuantity = updatedItems[existingItemIndex].quantity + quantity
-        updatedItems[existingItemIndex].quantity = Math.min(newQuantity, book.stock)
-        return updatedItems
-      } else {
-        return [...prevItems, { book, rentedDay, quantity }]
-      }
-    })
+    const existingItemIndex = cartItems.findIndex((item) => item.id === book.id)
+    if (existingItemIndex !== -1) {
+      const updatedItems = [...cartItems]
+      const newQuantity = updatedItems[existingItemIndex].quantity + quantity
+      updatedItems[existingItemIndex].quantity = Math.min(newQuantity, book.stock)
+      setCartItems(updatedItems)
+    } else {
+      setCartItems([...cartItems, {...book, rentedDay, quantity }])
+    }
+    console.log(cartItems)
     showToast({
       type: "success",
       message: `Đã thêm ${book.name} vào giỏ hàng`,
@@ -64,8 +63,8 @@ export function CartProvider({ children }) {
     }
     setCartItems((prevItems) => {
       const updatedItems = prevItems.map((item) => {
-        if (item.book.id === bookId) {
-          const newQuantity = Math.min(quantity, item.book.stock)
+        if (item.id === bookId) {
+          const newQuantity = Math.min(quantity, item.stock)
           return { ...item, quantity: newQuantity }
         }
         return item
@@ -80,7 +79,7 @@ export function CartProvider({ children }) {
 
   // Remove item from cart
   const removeFromCart = (bookId) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item.book.id !== bookId))
+    setCartItems((prevItems) => prevItems.filter((item) => item.id !== bookId))
     showToast({
       type: "info",
       message: "Đã xóa sách khỏi giỏ hàng",
@@ -95,12 +94,12 @@ export function CartProvider({ children }) {
 
   // Calculate total price
   const getTotalPrice = () => {
-    return cartItems.reduce((total, item) => total + item.book.rentalPrice * item.quantity, 0)
+    return cartItems.reduce((total, item) => total + item.rentalPrice * item.quantity, 0)
   }
 
   // Calculate total deposit
   const getTotalDeposit = () => {
-    return cartItems.reduce((total, item) => total + item.book.depositPrice * item.quantity, 0)
+    return cartItems.reduce((total, item) => total + item.depositPrice * item.quantity, 0)
   }
 
   // Get cart item count
@@ -111,7 +110,7 @@ export function CartProvider({ children }) {
   const updateRentDays = (bookId, days) => {
     setCartItems((prevItems) =>
       prevItems.map((item) =>
-        item.book.id === bookId ? { ...item, rentedDay: days } : item
+        item.id === bookId ? { ...item, rentedDay: days } : item
       )
     )
   }
