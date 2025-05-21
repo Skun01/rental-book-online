@@ -32,12 +32,12 @@ const FilterSection = ({setFilterList}) => {
     query: "",
     categoryId: "",
     authorId: "",
-    sort: "newest",
+    sort: "",
     minPrice: "",
     maxPrice: "",
     rating: "",
   })
-  
+
   // For price filter debounce
   const [priceInput, setPriceInput] = useState({
     minPrice: filters.minPrice,
@@ -89,8 +89,9 @@ const FilterSection = ({setFilterList}) => {
       minPrice: "",
       maxPrice: ""
     })
+    setFilterList(null)
   }
-  
+
   const removeFilter = (filterName) => {
     setFilters(prev => ({
       ...prev,
@@ -104,7 +105,6 @@ const FilterSection = ({setFilterList}) => {
       }))
     }
   }
-  
   // Get the category and author name for display
   const getCategoryName = () => {
     if (!filters.categoryId) return null
@@ -241,10 +241,10 @@ const FilterSection = ({setFilterList}) => {
               onChange={handleFilterChange}
               className={styles.filterSelect}
             >
-              <option value="newest">Mới nhất</option>
-              <option value="oldest">Cũ nhất</option>
-              <option value="price-asc">Giá tăng dần</option>
-              <option value="price-desc">Giá giảm dần</option>
+              <option value="sortBy=publish_date&sortDir=asc">Mới nhất</option>
+              <option value="sortBy=publish_date&sortDir=desc">Cũ nhất</option>
+              <option value="sortBy=rentalPrice&sortDir=asc">Giá tăng dần</option>
+              <option value="sortBy=rentalPrice&sortDir=desc">Giá giảm dần</option>
             </select>
           </div>
           

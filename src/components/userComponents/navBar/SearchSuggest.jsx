@@ -1,26 +1,31 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
 import styles from "./SearchSuggest.module.css";
+import axios from "axios";
 
-function SearchSuggest({ searchTerm, data = [], setSearchTerm, setShowSuggest }) {
+
+function SearchSuggest({ searchTerm, setSearchTerm, setShowSuggest }) {
   const navigate = useNavigate();
+  const [filtered, setFiltered] = useState([]);
+  useEffect(()=>{
+    async function getSearchingByKeyword(){
+      await axios.get(`http://localhost:8080/api/v1/book/search?page=0&size=5&keyword=${searchTerm}`)
+        .then(response=>{
+          const suggestList = response.data.data.result.content.map(item=>item.name)
+          setFiltered(suggestList)
+        })
+    }
+    getSearchingByKeyword()
+  }, [searchTerm])
+    
   
-  // Filter suggestions based on search term
-  const filtered = searchTerm 
-    ? data
-        .filter((term) => term.toLowerCase().includes(searchTerm.toLowerCase()))
-        .slice(0, 5) // Limit to 5 suggestions
-    : [];
-  
-  // Handle suggestion click
   const handleSuggestionClick = (term) => {
     navigate(`/search?q=${encodeURIComponent(term)}`);
     setSearchTerm(term);
     setShowSuggest(false);
   };
 
-  // Không hiển thị nếu không có searchTerm
   if (!searchTerm) return null;
 
   return (

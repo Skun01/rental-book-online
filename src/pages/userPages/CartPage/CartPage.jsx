@@ -137,12 +137,16 @@ const EmptyCart = () => (
 
 const CartItem = ({ item, onQuantityChange, onRemoveItem, updateRentDays, addDays, commonDate }) => {
   const [showCustomDate, setShowCustomDate] = useState(false)
-  const [otherDate, setOtherDate] = useState(-1)
+  const [otherDate, setOtherDate] = useState(1)
   const inputOtherDate = useRef(null)
   useEffect(()=>{
     setOtherDate(commonDate)
-    console.log(commonDate)
   }, [commonDate])
+  useEffect(()=>{
+    if(item.rentedDay !== 7 && item.rentedDay !== 14 && item.rentedDay !== 30){
+      setOtherDate(item.rentedDay)
+    }
+  }, [item])
   // Xử lý chọn số ngày thuê
   const handleClickRentDate = (date) => {
     if (item.rentedDay !== date) {
@@ -192,7 +196,7 @@ const CartItem = ({ item, onQuantityChange, onRemoveItem, updateRentDays, addDay
               <Link to={`/books/${item.id}`} className={styles.productTitle}>
                 {item.name}
               </Link>
-              <div className={styles.productAuthor}>{item.author ? item.author : "Đang cập nhật"}</div>
+              <div className={styles.productAuthor}>{item.author ? item.author.name : "Đang cập nhật"}</div>
               <div className={styles.productDeposit}>Đặt cọc: {item.depositPrice ? item.depositPrice.toLocaleString("vi-VN"): 0}đ</div>
             </div>
           </div>

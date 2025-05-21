@@ -121,8 +121,8 @@ const BookCardOrder = ({ book, showBookDetail = true, orderNumber }) => {
             <p className={styles.bookTitle}>{book.name}</p>
           </Link>
         
-          <Link to={`/authors/${book.id}`}>
-            <p className={styles.bookAuthor}>{book.authorName}</p>
+          <Link to={`/authors/${book.author.id}`}>
+            <p className={styles.bookAuthor}>{book.author.name}</p>
           </Link>
         
           <div className={styles.bookPrice}>
@@ -153,9 +153,10 @@ const BookCardOrder = ({ book, showBookDetail = true, orderNumber }) => {
           <div className={styles.detailInfor}>
             <div className={styles.basicInfor}>
               <p className={styles.bookTitleDetail}>{book.name}</p>
-              <p className={styles.bookAuthorDetail}>Tác giả: {book.authorName}</p>
-              <p className={styles.bookCategory}>Thể loại: {book.categoryName}</p>
-              <p className={styles.bookPrice}>Giá thuê: {`${book.depositPrice.toLocaleString('vi-VN')}/Tuần`}</p>
+              <p className={styles.bookAuthorDetail}>Tác giả: {book.author.name}</p>
+              <p className={styles.bookCategory}>Thể loại: {book.category.name}</p>
+              <p className={styles.bookCategory}>Tiền đặt cọc: {book.depositPrice.toLocaleString('vi-VN')}</p>
+              <p className={styles.bookPrice}>Giá thuê: {`${book.depositPrice.toLocaleString('vi-VN')}/Ngày`}</p>
             </div>
             
             <div className={styles.bookFunc}>

@@ -3,12 +3,12 @@ import { Link, useNavigate, useLocation } from "react-router-dom"
 import { Search, ShoppingCart, User, ChevronDown, Menu, Bell, X, LogOut, BookOpen, UserCircle, ClipboardList } from "lucide-react"
 import { useAuth } from "../../../contexts/AuthContext"
 import { useCart } from "../../../contexts/CartContext"
-import { popularSearchTerms } from "../../../mockData"
 import styles from "./NavBar.module.css"
 import UserMenu from "./UserMenu"
 import SearchSuggest from "./SearchSuggest"
 import Login from "../../../pages/Login"
 import Register from "../../../pages/Register"
+import axios from "axios"
 
 
 function NavBar(){
@@ -20,6 +20,7 @@ function NavBar(){
   const [authMode, setAuthMode] = useState("login");
   const { currentUser, logout } = useAuth();
   const { getCartItemCount } = useCart();
+  const [categories, setCategories] = useState()
   const navigate = useNavigate();
   const location = useLocation();
    const searchRef = useRef(null);
@@ -28,9 +29,17 @@ function NavBar(){
       setIsScored(window.scrollY > 0);
     };
     window.addEventListener("scroll", handleScroll);
+    async function getCategories(){
+      await axios.get('http://localhost:8080/api/v1/category?page=0&size=100')
+        .then(response=>{
+          setCategories(response.data.data.content)
+        })
+    }
+    getCategories()
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
+    
   }, []);
   // Sync search query with URL when on search page
   useEffect(() => {
@@ -111,18 +120,6 @@ function NavBar(){
     setAuthMode(mode);
   };
 
-  // mock data
-  const theLoai = [
-    { id: 1, name: "Khoa học" },
-    { id: 2, name: "Văn học" },
-    { id: 3, name: "Lịch sử" },
-    { id: 4, name: "Địa lý" },
-    { id: 5, name: "Giáo dục" },
-    { id: 6, name: "Kinh tế" },
-    { id: 7, name: "Tâm lý học" },
-    { id: 8, name: "Tôn giáo" },
-    { id: 9, name: "Nghệ thuật" }
-  ]
   return(
     <>
       <div className={`${styles.navBar} ${isScorred ? styles.navBarScorred : ""}`}>
@@ -147,7 +144,6 @@ function NavBar(){
           {showSuggest && (
             <SearchSuggest 
               searchTerm={searchTerm} 
-              data={popularSearchTerms} 
               setSearchTerm={setSearchTerm}
               setShowSuggest={setShowSuggest}
             />
@@ -163,7 +159,7 @@ function NavBar(){
               <p>Thể loại </p>
               <ChevronDown className={styles.chevronDown}/>
               <ul className={styles.subMenu}>
-                {theLoai.map((item) => (
+                {categories && categories.map((item) => (
                   <li key={item.id} className={styles.subMenuItem}>
                     <Link to={`/search?category=${item.name}`}>{item.name}</Link>
                   </li>

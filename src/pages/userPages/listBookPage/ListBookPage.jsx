@@ -11,6 +11,7 @@ const ListBookPage = () => {
   const [books, setBooks] = useState([])
   const [page, setPage] = useState(0)
   const [filterList, setFilterList] = useState(null)
+  const [totalPage, setTotalPage] = useState(0)
   // get data from backend
   useEffect(()=>{
     const fetchData = async () => {
@@ -18,21 +19,29 @@ const ListBookPage = () => {
         const queryParams = new URLSearchParams(location.search)
         const search = queryParams.get("q") || ""
         let api = ""
+        console.log(search)
         if(filterList){
-          api = `http://localhost:8080/api/v1/user/search?page=0&size=3&sortDir=asc`
+          api = search ? `http://localhost:8080/api/v1/book/search?page=0&size=5&keyword=${search}` :  `http://localhost:8080/api/v1/book/search?page=0&size=5`
           if (filterList.categoryId) api += `&categoryId=${filterList.categoryId}`
           if (filterList.authorId) api += `&authorId=${filterList.authorId}`
           if (filterList.minPrice) api += `&minPrice=${filterList.minPrice}`
           if (filterList.maxPrice) api += `&maxPrice=${filterList.maxPrice}`
+          if(filterList.sort) api += `&${filterList.sort}`
         }else if(search){
-          api = `http://localhost:8080/api/v1/user/search?page=${page}&size=3&sortDir=asc&keyword=${search}`
+          api = `http://localhost:8080/api/v1/book/search?page=${page}&size=5&keyword=${search}`
         }else {
-          api = `http://localhost:8080/api/v1/book?page=${page}&size=3`
+          api = `http://localhost:8080/api/v1/book?page=${page}&size=5`
         }
         const response = await axios.get(api);
         console.log(api, response)
         console.log(!filterList && !search ? response.data.data.content : response.data.data.result.content);
-        setBooks(!filterList && !search ? response.data.data.content : response.data.data.result.content);
+        if(!filterList && !search){
+          setBooks(response.data.data.content)
+          setTotalPage(response.data.data.totalPages)
+        }else{
+          setBooks(response.data.data.result.content)
+          setTotalPage(response.data.data.result.totalPages)
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -73,7 +82,7 @@ const ListBookPage = () => {
 
     {/* phân trang */}
     <div className={styles.pagination}>
-      <Pagination totalPages={10} initialPage={page + 1} setPage={setPage}/> 
+      <Pagination totalPages={totalPage} initialPage={page + 1} setPage={setPage}/> 
     </div>
   </div>
  )

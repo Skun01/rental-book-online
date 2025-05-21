@@ -105,8 +105,8 @@ const BookCard = ({ book, showBookDetail = true, releaseYear, smaller = false}) 
           <p className={styles.bookTitle} style={smaller === true ? {fontSize: "16px"} : {}}>{book.name}</p>
         </Link>
         
-        <Link to={'/authors/thaitruong'}>
-          <p className={styles.bookAuthor}>{book.authorName}</p>
+        <Link to={`authors/${book.author.id}`}>
+          <p className={styles.bookAuthor}>{book.author.name}</p>
         </Link>
         
         <div className={styles.bookPrice}>
@@ -136,8 +136,9 @@ const BookCard = ({ book, showBookDetail = true, releaseYear, smaller = false}) 
           <div className={styles.detailInfor}>
             <div className={styles.basicInfor}>
               <p className={styles.bookTitleDetail}>{book.name}</p>
-              <p className={styles.bookAuthorDetail}>Tác giả: {book.authorName}</p>
-              <p className={styles.bookCategory}>Thể loại: {book.categoryName}</p>
+              <p className={styles.bookAuthorDetail}>Tác giả: {book.author.name}</p>
+              <p className={styles.bookCategory}>Thể loại: {book.category.name}</p>
+              <p className={styles.bookCategory}>Tiền đặt cọc: {book.rentalPrice.toLocaleString('vi-VN')}</p>
               <p className={styles.bookPrice}>Giá thuê: {`${book.depositPrice.toLocaleString('vi-VN')}/Tuần`}</p>
             </div>
             

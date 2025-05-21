@@ -52,6 +52,7 @@
   overflow: hidden;              
   text-overflow: ellipsis; 
   width: 150px;
+  text-align: start;
 }
 
 .bookTitle:hover {
