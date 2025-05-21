@@ -47,6 +47,10 @@ const userRoutes = [
         element: <ListPage pageData={"categories"} />,
       },
       {
+        path: "categories/:id",
+        element: <ListBookPage pageTitle={'category'} />
+      },
+      {
         path: "books/:id",
         element: <BookDetailsPage/>,
       },
@@ -79,7 +83,7 @@ const userRoutes = [
         element: <ReturnBooksPage/>
       },
       {
-        path: '/  ',
+        path: '/return-success',
         element: <ReturnSuccessPage/>
       }
     ],

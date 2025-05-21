@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react"
 import { Link, useNavigate, useLocation } from "react-router-dom"
-import { Search, ShoppingCart, User, ChevronDown, Menu, Bell, X, LogOut, BookOpen, UserCircle, ClipboardList } from "lucide-react"
+import { Search, ShoppingCart, User, ChevronDown, Bell } from "lucide-react"
 import { useAuth } from "../../../contexts/AuthContext"
 import { useCart } from "../../../contexts/CartContext"
 import styles from "./NavBar.module.css"

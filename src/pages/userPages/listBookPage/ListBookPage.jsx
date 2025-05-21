@@ -1,5 +1,5 @@
 // import { useState, useEffect } from "react"
-import { Link, useLocation } from "react-router-dom"
+import { Link, useLocation, useParams } from "react-router-dom"
 import {TextSearch} from 'lucide-react'
 import FilterSection from "../../../components/userComponents/filter/FilterSection"
 import styles from "./ListBookPage.module.css"
@@ -7,11 +7,14 @@ import GridList from "../../../components/userComponents/gridList/GridList"
 import Pagination from "../../../components/userComponents/pagination/Pagination"
 import { useEffect, useState } from "react"
 import axios from "axios"
-const ListBookPage = () => {
+const ListBookPage = ({pageTitle}) => {
   const [books, setBooks] = useState([])
   const [page, setPage] = useState(0)
   const [filterList, setFilterList] = useState(null)
   const [totalPage, setTotalPage] = useState(0)
+  const {id} = useParams()
+  const [title, setTitle] = useState('')
+  const location = useLocation();
   // get data from backend
   useEffect(()=>{
     const fetchData = async () => {
@@ -19,7 +22,6 @@ const ListBookPage = () => {
         const queryParams = new URLSearchParams(location.search)
         const search = queryParams.get("q") || ""
         let api = ""
-        console.log(search)
         if(filterList){
           api = search ? `http://localhost:8080/api/v1/book/search?page=0&size=5&keyword=${search}` :  `http://localhost:8080/api/v1/book/search?page=0&size=5`
           if (filterList.categoryId) api += `&categoryId=${filterList.categoryId}`
@@ -33,8 +35,6 @@ const ListBookPage = () => {
           api = `http://localhost:8080/api/v1/book?page=${page}&size=5`
         }
         const response = await axios.get(api);
-        console.log(api, response)
-        console.log(!filterList && !search ? response.data.data.content : response.data.data.result.content);
         if(!filterList && !search){
           setBooks(response.data.data.content)
           setTotalPage(response.data.data.totalPages)
@@ -46,27 +46,52 @@ const ListBookPage = () => {
         console.error("Error fetching data:", error);
       }
     };
-    fetchData();
-  }, [page, filterList]);
-  const location = useLocation();
+    async function getCategoriesName(){
+      await axios.get(`http://localhost:8080/api/v1/category/${id}`)
+        .then(response=>{
+          setTitle(response.data.data.name)
+        })
+      await axios.get(`http://localhost:8080/api/v1/book/search?page=${page}&size=5&categoryId=${id}`)
+        .then(response=>{
+          setBooks(response.data.data.result.content)
+          setTotalPage(response.data.data.result.totalPages)
+        })
+    }
+    if(!pageTitle) fetchData();
+    else{
+      getCategoriesName()
+    }
+  }, [page, filterList, location]);
   const [searchQuery, setSearchQuery] = useState("");
   useEffect(()=>{
     const queryParams = new URLSearchParams(location.search);
     const search = queryParams.get("q") || "";
     setSearchQuery(search);
   }, [location])
+
+  // scoll lên đầu:
+  useEffect(()=>{
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }, [])
  return(
   <div className={styles.listBookPage}>
     <div className={styles.header}>
       <h2 className={styles.seartTitle}>
-        {location.pathname === "/books" ? "Tất cả sách" : (<><TextSearch /> <span>Kết quả tìm kiếm của {`"${searchQuery}"`}</span></>)}
+        {location.pathname === "/books" ? "Tất cả sách" : pageTitle ? (
+          <span>Thể loại: {title}</span>
+        ):(
+          <>
+            <TextSearch />
+            <span>Kết quả tìm kiếm của {`"${searchQuery}"`}</span>
+          </>)}
       </h2>
     </div>
 
     {/* filter */}
-    <div className={styles.filterSection}>
-      <FilterSection setFilterList={setFilterList}/>
-    </div>
+    {!pageTitle && (
+      <div className={styles.filterSection}>
+        <FilterSection setFilterList={setFilterList}/>
+      </div>)}
 
     {/* list books */}
     {books.length !== 0 ? (

@@ -53,10 +53,10 @@ const HomePage = () => {
   // tự động scoll lên đầu trang khi dữ liệu đã được tải xong
   useEffect(() => {
   if (!isLoading) {
-    window.scrollTo({ top: 0, behavior: "smooth" }) // hoặc "auto"
+    window.scrollTo({ top: 0, behavior: "smooth" })
   }
 }, [isLoading]) 
-  // xử lý submit email khi người dùng đăng ký
+  // submit email khi người dùng đăng ký
   const handleSubmit = (e) => {
     e.preventDefault()
     setEmail("")
@@ -64,7 +64,6 @@ const HomePage = () => {
   }
 
 
-  // giao diện loading để hiển thị khi đang tải dữ liệu
   if (isLoading) {
     return (
       <div className={styles.loadingContainer}>
@@ -87,7 +86,7 @@ const HomePage = () => {
           </div>
           <div className={styles.categoriesGrid}>
             {categories.slice(0, 5).map((category, index) => (
-              <Link key={category.id} to={`/search?category=${category.id}`}>
+              <Link key={category.id} to={`/categories/${category.id}`}>
                 <CategoryCard categoryName={category.name} categoryOrder={index} />
               </Link>
             ))}

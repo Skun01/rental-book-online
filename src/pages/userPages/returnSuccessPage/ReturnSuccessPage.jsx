@@ -102,7 +102,7 @@ const ReturnSuccessPage = () => {
                 </div>
                 <div className={styles.returnDetail}>
                   <span className={styles.detailLabel}>Tổng tiền hoàn trả</span>
-                  <span className={styles.detailValue}>{returnDetails.totalRefund.toLocaleString("vi-VN")}đ</span>
+                  <span className={styles.detailValue}>{returnDetails.totalRefund}đ</span>
                 </div>
               </div>
             </div>
@@ -181,7 +181,7 @@ const ReturnSuccessPage = () => {
                     {book.status === "overdue" && (
                       <div className={styles.itemOverdue}>
                         <span>Quá hạn {book.overdue_days} ngày</span>
-                        <span>Phí phạt: {book.overdue_fee.toLocaleString("vi-VN")}đ</span>
+                        <span>Phí phạt: {book.overdue_fee}đ</span>
                       </div>
                     )}
                   </div>
@@ -195,24 +195,24 @@ const ReturnSuccessPage = () => {
             <div className={styles.summaryContent}>
               <div className={styles.summaryRow}>
                 <span>Tổng tiền cọc:</span>
-                <span>{returnDetails.totalDeposit.toLocaleString("vi-VN")}đ</span>
+                <span>{returnDetails.totalDeposit}đ</span>
               </div>
 
               <div className={styles.summaryRow}>
                 <span>Tổng tiền thuê:</span>
-                <span>-{returnDetails.totalRental.toLocaleString("vi-VN")}đ</span>
+                <span>-{returnDetails.totalRental}đ</span>
               </div>
 
               {returnDetails.totalOverdueFee > 0 && (
                 <div className={styles.summaryRow}>
                   <span>Phí phạt quá hạn:</span>
-                  <span>-{returnDetails.totalOverdueFee.toLocaleString("vi-VN")}đ</span>
+                  <span>-{returnDetails.totalOverdueFee}đ</span>
                 </div>
               )}
 
               <div className={styles.summaryTotal}>
                 <span>Tổng tiền hoàn trả:</span>
-                <span>{returnDetails.totalRefund.toLocaleString("vi-VN")}đ</span>
+                <span>{returnDetails.totalRefund}đ</span>
               </div>
 
               <div className={styles.refundInfo}>

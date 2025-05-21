@@ -49,7 +49,7 @@ const GridList = ({data, listData}) => {
       <div className={styles.gridList}>
         {categories.map((category, index) => (
           <div key={category.id} className={styles.categoryCardContainer}>
-            <Link to ={`/category/${category.id}`} className={styles.categoryCardLink}>
+            <Link to ={`/categories/${category.id}`} className={styles.categoryCardLink}>
               <CategoryCard categoryName = {category.name} categoryOrder={index} />
             </Link>
           </div>
