@@ -3,48 +3,23 @@ import { Link, useNavigate } from "react-router-dom"
 import { ShoppingCart, Heart, Info } from "lucide-react"
 import { useCart } from "../../../contexts/CartContext"
 import { useToast } from "../../../contexts/ToastContext"
-// import { mockImages } from "../../../mockData"
 import styles from "./BookCard.module.css"
 
 const BookCard = ({ book, showBookDetail = true, releaseYear, smaller = false}) => {
   const { addToCart } = useCart()
   const { showToast } = useToast()
-  const [addedToCart, setAddedToCart] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const [hoverTimeout, setHoverTimeout] = useState(null)
   const [detailPosition, setDetailPosition] = useState("center")
   const cardRef = useRef(null)
   const navigate = useNavigate();
   
-  // xử lý khi ấn nút thêm vào giỏ hàng
   const handleAddToCart = (e) => {
     if (e) {
       e.preventDefault()
       e.stopPropagation()
     }
-    if (!addedToCart && book.stock > 0) {
-      addToCart(book)
-      setAddedToCart(true)
-      showToast({
-        type: "success",
-        message: `Đã thêm "${book.title}" vào giỏ hàng`,
-      })
-      setTimeout(() => {
-        setAddedToCart(false)
-      }, 1000)
-    }
-  }
-
-  // xử lý khi ấn vào nút thích
-  const handleAddToFavorite = (e) => {
-    if (e) {
-      e.preventDefault()
-      e.stopPropagation()
-    }
-    showToast({
-      type: "info",
-      message: `Đã thêm "${book.title}" vào danh sách yêu thích`,
-    })
+    addToCart(book)
   }
 
   // xử lý hiển thị book detail khi hover vào card
@@ -123,7 +98,7 @@ const BookCard = ({ book, showBookDetail = true, releaseYear, smaller = false}) 
           {releaseYear && (
               <p className={styles.releaseYear}>{releaseYear}</p>
             )}
-          <img src={book.imageList[0]["url"] ? book.imageList[0]["url"] : "/auth.jpg"} alt="book" className={styles.bookImg} />
+          <img src={!book.imageList ? "/auth.jpg" : book.imageList[0]["url"] ? book.imageList[0]["url"] : "/auth.jpg"} alt="book" className={styles.bookImg} />
         </div>
       </Link>
       
@@ -157,7 +132,7 @@ const BookCard = ({ book, showBookDetail = true, releaseYear, smaller = false}) 
           onMouseLeave={handleMouseLeave}
         >
           <div className={styles.deltaiImgContainer}>
-            <img src={book.imageList[0]["url"] ? book.imageList[0]["url"] : "/auth.jpg"} alt="" className={styles.deltailImg} />
+            <img src={!book.imageList ? "/auth.jpg" : book.imageList[0]["url"] ? book.imageList[0]["url"] : "/auth.jpg"} alt="" className={styles.deltailImg} />
           </div>
           
           <div className={styles.detailInfor}>
@@ -174,12 +149,6 @@ const BookCard = ({ book, showBookDetail = true, releaseYear, smaller = false}) 
                 onClick={handleAddToCart}
               >
                 <ShoppingCart /> Thêm vào giỏ
-              </p>
-              
-              <p className={styles.addToFavoriteBtn}
-                onClick={handleAddToFavorite}
-              >
-                <Heart /> Thích
               </p>
               
               <p className={styles.viewMoreBtn}

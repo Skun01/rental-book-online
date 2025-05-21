@@ -35,18 +35,6 @@ const BookCardOrder = ({ book, showBookDetail = true, orderNumber }) => {
     }
   }
 
-  // xử lý khi ấn vào nút thích
-  const handleAddToFavorite = (e) => {
-    if (e) {
-      e.preventDefault()
-      e.stopPropagation()
-    }
-    showToast({
-      type: "info",
-      message: `Đã thêm "${book.title}" vào danh sách yêu thích`,
-    })
-  }
-
   // xử lý hiển thị book detail khi hover vào card
   useEffect(() => {
     if (isHovered && cardRef.current) {
@@ -164,10 +152,10 @@ const BookCardOrder = ({ book, showBookDetail = true, orderNumber }) => {
           
           <div className={styles.detailInfor}>
             <div className={styles.basicInfor}>
-              <p className={styles.bookTitleDetail}>Sự thật chỉ có một</p>
-              <p className={styles.bookAuthorDetail}>Tác giả: Thái Văn Trường</p>
-              <p className={styles.bookCategory}>Thể loại: Kinh tế</p>
-              <p className={styles.bookPrice}>Giá thuê: 200.000đ/tuần</p>
+              <p className={styles.bookTitleDetail}>{book.name}</p>
+              <p className={styles.bookAuthorDetail}>Tác giả: {book.authorName}</p>
+              <p className={styles.bookCategory}>Thể loại: {book.categoryName}</p>
+              <p className={styles.bookPrice}>Giá thuê: {`${book.depositPrice.toLocaleString('vi-VN')}/Tuần`}</p>
             </div>
             
             <div className={styles.bookFunc}>
@@ -176,12 +164,6 @@ const BookCardOrder = ({ book, showBookDetail = true, orderNumber }) => {
                 onClick={handleAddToCart}
               >
                 <ShoppingCart /> Thêm vào giỏ
-              </p>
-              
-              <p className={styles.addToFavoriteBtn}
-                onClick={handleAddToFavorite}
-              >
-                <Heart /> Thích
               </p>
               
               <p className={styles.viewMoreBtn}

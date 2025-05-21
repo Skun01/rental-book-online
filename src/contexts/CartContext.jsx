@@ -1,10 +1,8 @@
-"use client"
-
 import { createContext, useContext, useState, useEffect } from "react"
 import { useToast } from "./ToastContext"
+import axios from "axios"
 
 const CartContext = createContext()
-
 export function useCart() {
   return useContext(CartContext)
 }
@@ -14,76 +12,66 @@ export function CartProvider({ children }) {
   const [isInitialized, setIsInitialized] = useState(false)
   const { showToast } = useToast()
 
-  // Load cart from localStorage on initial render
+  // get init cart items
   useEffect(() => {
-    const storedCart = localStorage.getItem("cart")
-    if (storedCart) {
+    async function getCart() {
       try {
-        setCartItems(JSON.parse(storedCart))
+        const cart = localStorage.getItem('cart')
+        if (cart) {
+          setCartItems(JSON.parse(cart))
+        } else {
+          //get data from back end but will be handle later
+          setIsInitialized(true)
+        }
       } catch (error) {
-        console.error("Error parsing cart from localStorage:", error)
-        setCartItems([])
+        console.error("Error parsing localStorage cart:", error)
       }
     }
-    setIsInitialized(true)
+    getCart()
   }, [])
 
-  // Save cart to localStorage whenever it changes
+  //handle first time get cart item from database
   useEffect(() => {
     if (isInitialized) {
       localStorage.setItem("cart", JSON.stringify(cartItems))
     }
   }, [cartItems, isInitialized])
 
-  // Add item to cart
-  const addToCart = (book, quantity = 1) => {
-    // Kiểm tra xem sách đã có trong giỏ hàng chưa trước khi thêm
-    const existingItemIndex = cartItems.findIndex((item) => item.id === book.id)
-    const existingItem = existingItemIndex !== -1 ? cartItems[existingItemIndex] : null
-
-    let wasAdded = false
-
+//cart structure:
+//[{book,rentedDay, quantity},....]
+  const addToCart = async (book, rentedDay = 7, quantity = 1) => {
     setCartItems((prevItems) => {
+      const existingItemIndex = prevItems.findIndex((item) => item.book.id === book.id)
       if (existingItemIndex !== -1) {
-        // Nếu sách đã có trong giỏ hàng, cập nhật số lượng
         const updatedItems = [...prevItems]
         const newQuantity = updatedItems[existingItemIndex].quantity + quantity
-
-        // Đảm bảo số lượng không vượt quá số lượng có sẵn
-        updatedItems[existingItemIndex].quantity = Math.min(newQuantity, book.stock || 10)
-
-        // Kiểm tra xem số lượng có thay đổi không
-        wasAdded = updatedItems[existingItemIndex].quantity > prevItems[existingItemIndex].quantity
-
+        updatedItems[existingItemIndex].quantity = Math.min(newQuantity, book.stock)
         return updatedItems
       } else {
-        // Nếu sách chưa có trong giỏ hàng, thêm mới
-        wasAdded = true
-        return [...prevItems, { ...book, quantity }]
+        return [...prevItems, { book, rentedDay, quantity }]
       }
+    })
+    showToast({
+      type: "success",
+      message: `Đã thêm ${book.name} vào giỏ hàng`,
     })
     return true
   }
 
-  // Update item quantity
   const updateQuantity = (bookId, quantity) => {
     if (quantity <= 0) {
       return removeFromCart(bookId)
     }
-
     setCartItems((prevItems) => {
       const updatedItems = prevItems.map((item) => {
-        if (item.id === bookId) {
-          // Make sure the quantity doesn't exceed available quantity
-          const newQuantity = Math.min(quantity, item.stock)
+        if (item.book.id === bookId) {
+          const newQuantity = Math.min(quantity, item.book.stock)
           return { ...item, quantity: newQuantity }
         }
         return item
       })
-
       return updatedItems
     })
-
     showToast({
       type: "info",
       message: "Đã cập nhật số lượng sách trong giỏ hàng",
@@ -92,8 +80,7 @@ export function CartProvider({ children }) {
 
   // Remove item from cart
   const removeFromCart = (bookId) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item.id !== bookId))
-
+    setCartItems((prevItems) => prevItems.filter((item) => item.book.id !== bookId))
     showToast({
       type: "info",
       message: "Đã xóa sách khỏi giỏ hàng",
@@ -103,16 +90,17 @@ export function CartProvider({ children }) {
   // Clear cart
   const clearCart = () => {
     setCartItems([])
+    localStorage.removeItem('cart')
   }
 
   // Calculate total price
   const getTotalPrice = () => {
-    return cartItems.reduce((total, item) => total + item.rental_price * item.quantity, 0)
+    return cartItems.reduce((total, item) => total + item.book.rentalPrice * item.quantity, 0)
   }
 
   // Calculate total deposit
   const getTotalDeposit = () => {
-    return cartItems.reduce((total, item) => total + item.deposit_price * item.quantity, 0)
+    return cartItems.reduce((total, item) => total + item.book.depositPrice * item.quantity, 0)
   }
 
   // Get cart item count
@@ -120,14 +108,12 @@ export function CartProvider({ children }) {
     return cartItems.reduce((count, item) => count + item.quantity, 0)
   }
 
-  // Calculate total for a specific type (rental or deposit)
-  const calculateTotal = (type) => {
-    if (type === "rental") {
-      return cartItems.reduce((total, item) => total + item.book.rental_price * item.quantity, 0)
-    } else if (type === "deposit") {
-      return cartItems.reduce((total, item) => total + item.book.deposit_price * item.quantity, 0)
-    }
-    return 0
+  const updateRentDays = (bookId, days) => {
+    setCartItems((prevItems) =>
+      prevItems.map((item) =>
+        item.book.id === bookId ? { ...item, rentedDay: days } : item
+      )
+    )
   }
 
   const value = {
@@ -139,10 +125,9 @@ export function CartProvider({ children }) {
     getTotalPrice,
     getTotalDeposit,
     getCartItemCount,
-    calculateTotal,
     totalItems: cartItems.length,
     cart: cartItems,
+    updateRentDays
   }
-
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>
 }

@@ -20,4 +20,11 @@
   padding-bottom: 30px;
 }
 
+.notFoundBook{
+  color: white;
+  font-size: 25px;
+  text-align: center;
+  margin: 30px;
+}
+
 

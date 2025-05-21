@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom"
 import { Trash2, ShoppingCart, ArrowRight } from "lucide-react"
 import { useState, useRef } from "react"
 import styles from "./CartPage.module.css"
-
+import { useCart } from "../../../contexts/CartContext"
 // Component chính
 const CartPage = () => {
   const { cartItems, updateQuantity, removeFromCart, getTotalPrice, getTotalDeposit, updateRentDays } = useCart()
@@ -22,7 +22,7 @@ const CartPage = () => {
     navigate("/checkout")
   }
 
-  // Hàm xử lý ngày tháng
+  // xử lý ngày tháng
   const addDays = (days) => {
     const today = new Date()
     today.setDate(today.getDate() + days)
@@ -148,45 +148,6 @@ const mockCartItems = [
   },
 ]
 
-const useCart = () => {
-  const [cartItems, setCartItems] = useState(mockCartItems)
-
-  const updateQuantity = (bookId, quantity) => {
-    if (quantity < 1) return
-
-    setCartItems(
-      cartItems.map((item) =>
-        item.id === bookId ? { ...item, quantity: Math.min(quantity, item.available_quantity) } : item,
-      ),
-    )
-  }
-
-  const updateRentDays = (bookId, days) => {
-    setCartItems(cartItems.map((item) => (item.id === bookId ? { ...item, rent_day: days } : item)))
-  }
-
-  const removeFromCart = (bookId) => {
-    setCartItems(cartItems.filter((item) => item.id !== bookId))
-  }
-
-  const getTotalPrice = () => {
-    return cartItems.reduce((total, item) => total + item.rental_price * item.quantity * item.rent_day, 0)
-  }
-
-  const getTotalDeposit = () => {
-    return cartItems.reduce((total, item) => total + item.deposit_price * item.quantity, 0)
-  }
-
-  return {
-    cartItems,
-    updateQuantity,
-    updateRentDays,
-    removeFromCart,
-    getTotalPrice,
-    getTotalDeposit,
-    setCartItems,
-  }
-}
 
 const EmptyCart = () => (
   <div className={styles.emptyCart}>

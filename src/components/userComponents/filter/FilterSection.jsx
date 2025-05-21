@@ -1,38 +1,40 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { Filter, ChevronDown, X, Star } from "lucide-react"
 import styles from "./FilterSection.module.css"
+import axios from 'axios'
 
-const FilterSection = () => {
-  // Mock data
-  const mockCategories = [
-    { id: 1, name: "Tiểu thuyết" },
-    { id: 2, name: "Khoa học" },
-    { id: 3, name: "Lịch sử" },
-    { id: 4, name: "Kinh tế" },
-    { id: 5, name: "Tâm lý học" },
-  ]
+const FilterSection = ({setFilterList}) => {
+  // Get data
+  const [categories, setCategories] = useState([])
+  const [authors, setAuthors] = useState([])
+  useEffect(()=>{
+    async function getCategories(){
+      await axios.get('http://localhost:8080/api/v1/category?page=0&size=100')
+        .then(response=>{
+          setCategories(response.data.data.content)
+        })
+    }
 
-  const mockAuthors = [
-    { id: 1, name: "Nguyễn Nhật Ánh" },
-    { id: 2, name: "Paulo Coelho" },
-    { id: 3, name: "Dale Carnegie" },
-    { id: 4, name: "Tô Hoài" },
-    { id: 5, name: "Nguyễn Du" },
-  ]
+    async function getAuthors(){
+      await axios.get('http://localhost:8080/api/v1/author?page=0&size=100')
+        .then(response=>{
+          setAuthors(response.data.data.content)
+        })
+    }
+    getCategories()
+    getAuthors()
+  }, [])
 
   // State
   const [showFilters, setShowFilters] = useState(false)
   const [activeFiltersCount, setActiveFiltersCount] = useState(0)
   const [filters, setFilters] = useState({
     query: "",
-    category: "",
-    author: "",
+    categoryId: "",
+    authorId: "",
     sort: "newest",
     minPrice: "",
     maxPrice: "",
-    availability: "",
     rating: "",
   })
   
@@ -46,9 +48,8 @@ const FilterSection = () => {
   useEffect(() => {
     let count = 0
     if (filters.query) count++
-    if (filters.category) count++
-    if (filters.author) count++
-    if (filters.availability) count++
+    if (filters.categoryId) count++
+    if (filters.authorId) count++
     if (filters.minPrice) count++
     if (filters.maxPrice) count++
     if (filters.rating) count++
@@ -77,13 +78,11 @@ const FilterSection = () => {
 
   const clearFilters = () => {
     setFilters({
-      query: "",
-      category: "",
-      author: "",
+      categoryId: "",
+      authorId: "",
       sort: "newest",
       minPrice: "",
       maxPrice: "",
-      availability: "",
       rating: "",
     })
     setPriceInput({
@@ -106,13 +105,30 @@ const FilterSection = () => {
     }
   }
   
-  // Get the category name for display
+  // Get the category and author name for display
   const getCategoryName = () => {
-    if (!filters.category) return null
-    const category = mockCategories.find((c) => c.id === Number.parseInt(filters.category))
+    if (!filters.categoryId) return null
+    const category = categories.find((c) => c.id === +filters.categoryId)
     return category ? category.name : null
   }
 
+  const getAuthorName = () => {
+    if(!filters.authorId) return null
+    const author = authors.find((a) => a.id === +filters.authorId)
+    return author ? author.name : null
+  }
+
+  // handle submit filter
+  function handleSubmitFilter(){
+    setShowFilters(false)
+    setFilterList(filters)
+  }
+
+  // handle cancel filter
+  function handleCancelFilter(){
+    clearFilters()
+    setFilterList(null)
+  }
   return (
     <div className={styles.filterContainer}>
       <div className={styles.searchHeader}>
@@ -126,34 +142,18 @@ const FilterSection = () => {
       {/* Active filters */}
       {activeFiltersCount > 0 && (
         <div className={styles.activeFilters}>
-          {filters.query && (
-            <div className={styles.filterChip}>
-              <span>Từ khóa: {filters.query}</span>
-              <button onClick={() => removeFilter("query")} className={styles.removeFilter}>
-                <X size={14} />
-              </button>
-            </div>
-          )}
-          {filters.category && (
+          {filters.categoryId && (
             <div className={styles.filterChip}>
               <span>Danh mục: {getCategoryName()}</span>
-              <button onClick={() => removeFilter("category")} className={styles.removeFilter}>
+              <button onClick={() => removeFilter("categoryId")} className={styles.removeFilter}>
                 <X size={14} />
               </button>
             </div>
           )}
-          {filters.author && (
+          {filters.authorId && (
             <div className={styles.filterChip}>
-              <span>Tác giả: {filters.author}</span>
-              <button onClick={() => removeFilter("author")} className={styles.removeFilter}>
-                <X size={14} />
-              </button>
-            </div>
-          )}
-          {filters.availability && (
-            <div className={styles.filterChip}>
-              <span>Tình trạng: {filters.availability === "available" ? "Còn sách" : "Hết sách"}</span>
-              <button onClick={() => removeFilter("availability")} className={styles.removeFilter}>
+              <span>Tác giả: {getAuthorName()}</span>
+              <button onClick={() => removeFilter("authorId")} className={styles.removeFilter}>
                 <X size={14} />
               </button>
             </div>
@@ -196,14 +196,14 @@ const FilterSection = () => {
             </label>
             <select
               id="category"
-              name="category"
-              value={filters.category}
+              name="categoryId"
+              value={filters.categoryId}
               onChange={handleFilterChange}
               className={styles.filterSelect}
             >
               <option value="">Tất cả danh mục</option>
-              {mockCategories.map((category) => (
-                <option key={category.id} value={category.id}>
+              {categories.map((category) => (
+                <option key={category.id} value={+category.id}>
                   {category.name}
                 </option>
               ))}
@@ -216,34 +216,17 @@ const FilterSection = () => {
             </label>
             <select
               id="author"
-              name="author"
-              value={filters.author}
+              name="authorId"
+              value={filters.authorId}
               onChange={handleFilterChange}
               className={styles.filterSelect}
             >
               <option value="">Tất cả tác giả</option>
-              {mockAuthors.map((author) => (
-                <option key={author.id} value={author.name}>
+              {authors.map((author) => (
+                <option key={author.id} value={+author.id}>
                   {author.name}
                 </option>
               ))}
-            </select>
-          </div>
-
-          <div className={styles.filterGroup}>
-            <label htmlFor="availability" className={styles.filterLabel}>
-              Tình trạng
-            </label>
-            <select
-              id="availability"
-              name="availability"
-              value={filters.availability}
-              onChange={handleFilterChange}
-              className={styles.filterSelect}
-            >
-              <option value="">Tất cả</option>
-              <option value="available">Còn sách</option>
-              <option value="unavailable">Hết sách</option>
             </select>
           </div>
 
@@ -262,7 +245,6 @@ const FilterSection = () => {
               <option value="oldest">Cũ nhất</option>
               <option value="price-asc">Giá tăng dần</option>
               <option value="price-desc">Giá giảm dần</option>
-              <option value="rating-desc">Đánh giá cao nhất</option>
             </select>
           </div>
           
@@ -311,10 +293,10 @@ const FilterSection = () => {
         </div>
         
         <div className={styles.filterActions}>
-          <button className={styles.clearFiltersButton} onClick={clearFilters}>
+          <button className={styles.clearFiltersButton} onClick={handleCancelFilter}>
             Xóa bộ lọc
           </button>
-          <button className={styles.applyFiltersButton} onClick={() => setShowFilters(false)}>
+          <button className={styles.applyFiltersButton} onClick={handleSubmitFilter}>
             Áp dụng
           </button>
         </div>

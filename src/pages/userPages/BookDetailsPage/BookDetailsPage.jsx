@@ -2,19 +2,36 @@ import styles from "./BookDetailsPage.module.css";
 import BookImageDetail from "../../../components/bookImageDetail/BookImageDetail";
 import { useState,useRef, useEffect } from "react";
 import NavBarTab from "../../../components/userComponents/bookDetailTabs/NavBarTab";
-import {useToast} from "../../../contexts/ToastContext"
+import {useCart} from '../../../contexts/CartContext'
+import { useParams } from "react-router-dom";
+import axios from "axios";
 const BookDetailsPage = () => {
   const [rentNumber, setRentNumber] = useState(1);
   const [rentDate, setRentDate] = useState(7);
   const [showCustomDate, setShowCustomDate] = useState(false);
   const [otherDate, setOtherDate] = useState(-1);
   const inputOtherDate = useRef(null);
-  const [totalPrice, setTotalPrice] = useState(10000*rentDate*rentNumber);
-  const {showToast} = useToast();
-
+  const [totalDepositPrice, setTotalDepositPrice] = useState(0);
+  const [totalRentalPrice, setTotalRentalPrice] = useState(0)
+  const {id} = useParams()
+  const [book, setBook] = useState(null)
+  const {addToCart} = useCart()
   useEffect(()=>{
-    setTotalPrice(10000*rentDate*rentNumber)
-  }, [rentDate, rentNumber])
+    async function getBookById(){
+      await axios.get(`http://localhost:8080/api/v1/book/${id}`)
+        .then(response=>{
+          setBook(response.data.data)
+        })
+    }
+    getBookById()
+  }, [])
+  useEffect(()=>{
+    if(book){
+      setTotalRentalPrice(book['depositPrice']*rentDate*rentNumber)
+      setTotalDepositPrice(book.rentalPrice*rentNumber)
+      console.log(book['depositPrice'], rentDate, rentNumber)
+    }
+  }, [book, rentDate, rentNumber])
 
   // handle click choose rent date
   function handleClickRentDate(date){
@@ -55,10 +72,7 @@ const BookDetailsPage = () => {
 
   // handle click them vao gio hang
   function handleAddToCard(){
-    showToast({
-      type: "success",
-      message: `Đã thêm Hãy là chính mình vào giỏ hàng`,
-    })
+    addToCart(book, rentDate, rentNumber)
   }
 
   return (
@@ -67,45 +81,50 @@ const BookDetailsPage = () => {
       <div className={styles.bookDetailHeader}>
         {/* book images */}
         <div className={styles.bookImageDetailContainer}>
-          <BookImageDetail />
+          <BookImageDetail images = {book && book.imageList ? book.imageList : []} />
         </div>
         {/* book details */}
         <div className={styles.bookInforSection}>
-          <div className={styles.bookName}>Hãy là chính mình</div>
-        
+          <div className={styles.bookName}>{book && book.name ? book.name : 'Đang cập nhật'}</div>
+
           {/* thong tin chi tiet sach */}
           <div className={styles.detailContainer}>
             <div className={styles.bookInforCol}>
               <div className={styles.inforRow}>
-                <span className={styles.inforTitle}>Tác giả: </span>Thái Trường
+                <span className={styles.inforTitle}>Tác giả: </span> {book && book.author ? book.author : 'Đang cập nhật'}
               </div>
               <div className={styles.inforRow}>
-                <span className={styles.inforTitle}>Nhà xuất bản: </span>NXB Kim Đồng
+                <span className={styles.inforTitle}>Nhà xuất bản: </span>{book && book.publisher ? book.publisher : 'Đang cập nhật'}
               </div>
               <div className={styles.inforRow}>
-                <span className={styles.inforTitle}>Số trang: </span>220
+                <span className={styles.inforTitle}>Số trang: </span>{book && book.pages ? book.pages : 'Đang cập nhật'}
               </div>
             </div>
             <div className={styles.bookInforCol}>
               <div className={styles.inforRow}>
-                <span className={styles.inforTitle}>Thể loại: </span>Tâm lý học
+                <span className={styles.inforTitle}>Thể loại: </span>{book && book.category.name ? book.category.name : 'Đang cập nhật'}
               </div>
               <div className={styles.inforRow}>
-                <span className={styles.inforTitle}>Ngôn ngữ: </span>Nhật Bản
+                <span className={styles.inforTitle}>Ngôn ngữ: </span>{book && book.language ? book.language : 'Đang cập nhật'}
               </div>
               <div className={styles.inforRow}>
-                <span className={styles.inforTitle}>Ngày phát hành: </span>30/10/2024
+                <span className={styles.inforTitle}>Ngày phát hành: </span>{book && book.publish_date ? book.publish_date : 'Đang cập nhật'}
               </div>
             </div>
           </div>
           {/* cac lua chon thue va thong tin thue */}
           <div className={styles.bookStock}>
             <span className={styles.inforTitle}>Số lượng sách còn: </span>
-            <span className={styles.stockText}>10</span>
+            <span className={styles.stockText}>{book && book.stock ? book.stock : 0} Quyển</span>
           </div>
           <div className={styles.bookPrice}>
+            <span className={styles.inforTitle}>Tiền đặt cọc sách: </span>
+            <span className={styles.priceText}>{ (book && book.rentalPrice? book.rentalPrice : 0).toLocaleString('vi-VI')}đ/quyển</span>
+          </div>
+
+          <div className={styles.bookPrice}>
             <span className={styles.inforTitle}>Giá cho thuê: </span>
-            <span className={styles.priceText}>30.000đ/Ngày</span>
+            <span className={styles.priceText}>{ (book && book.depositPrice ? book.depositPrice : 0).toLocaleString('vi-VI')}đ/Ngày</span>
           </div>
           {/* lua chuon ngay thue, so luong thue */}
           <div className={styles.rentOption}>
@@ -176,8 +195,12 @@ const BookDetailsPage = () => {
             {/* Phần tổng giá và nút hành động */}
             <div className={styles.rentAction}>
               <div className={styles.totalPrice}>
-                Tổng giá cho thuê:
-                <span className={styles.totalPriceText}>{totalPrice.toLocaleString('vi-VN')}đ</span>
+                Tổng tiền đặt cọc:
+                <span className={styles.totalPriceText}>{totalDepositPrice.toLocaleString('vi-VN')}đ</span>
+              </div>
+              <div className={styles.totalPrice}>
+                Tổng tiền thuê sách:
+                <span className={styles.totalPriceText}>{totalRentalPrice.toLocaleString('vi-VN')}đ</span>
               </div>
               <div className={styles.actionBtn}>
                 <button className={styles.addCartBtn}
@@ -192,7 +215,7 @@ const BookDetailsPage = () => {
         </div>
       </div>
       <div className={styles.navBarTabContainer}>
-        <NavBarTab/>            
+        <NavBarTab book={book}/>            
       </div>
     
     </div>

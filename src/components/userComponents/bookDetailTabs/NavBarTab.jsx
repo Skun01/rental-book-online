@@ -1,8 +1,9 @@
-import { IoReturnUpBackOutline } from 'react-icons/io5';
+import GridList from '../gridList/GridList'
 import styles from './NavBarTab.module.css';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {Star, ThumbsUp, ThumbsDown, Reply, ChevronUp} from 'lucide-react'
-const NavBarTab = ({navList = ['Mô tả sản phẩm', 'Bình luận (10)', 'Sản phẩm liên quan']}) => {
+import axios from 'axios';
+const NavBarTab = ({book, navList = ['Mô tả sản phẩm', 'Bình luận (10)', 'Sản phẩm liên quan']}) => {
   const [tabNumber, setTabNumber] = useState(0);
   function handleTabClick(index){
     if(tabNumber !== index) setTabNumber(index);
@@ -20,25 +21,38 @@ const NavBarTab = ({navList = ['Mô tả sản phẩm', 'Bình luận (10)', 'S�
       <hr className={styles.horizonLine}/>
 
       {/* tab display */}
-      {tabNumber ==  0 ? <BookDescription/> :
-        tabNumber == 1 ? <BookReviewInput/> : ''}
+      {tabNumber ==  0 ? <BookDescription bookDescript={book && book.description}/> :
+        tabNumber == 1 ? <BookReviewInput/> : <BookRelatedList categoryId={book && book.category.id}/>}
     </div>
   );
 };
 
-const BookDescription = ()=>{
+//tab lien quan
+const BookRelatedList = ({categoryId})=>{
+  const [books, setBooks] = useState([])
+  useEffect(()=>{
+    async function getBookRelatedList(){
+      await axios.get(`http://localhost:8080/api/v1/book/search?page=0&size=100&categoryId=${categoryId}`)
+        .then(response=>{
+          setBooks(response.data.data.result.content)
+          console.log(response)
+        })
+    }
+    getBookRelatedList()
+  }, []) 
+  return (
+    <div className={styles.relatedListBook}>
+      <GridList data={books} listData={'books'}/>
+    </div>
+  )
+}
+
+
+// tab mo ta book
+const BookDescription = ({bookDescript})=>{
   return (
     <div className={styles.bookDescription}>
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit laboriosam consequuntur exercitationem laudantium magnam facere non totam, praesentium ipsa repudiandae nostrum debitis aspernatur repellendus a temporibus animi ab dolore facilis.
-      Eum consectetur dicta tempore, minus, cumque nobis officiis libero voluptas id accusantium ab minima sed non amet doloremque veniam nostrum quisquam! Cumque cum odit molestiae placeat ab quos dolor nisi?
-      Sunt id eum aliquam accusamus voluptate est error quibusdam necessitatibus tenetur nisi animi, ipsam tempora dolorum dicta, soluta commodi eligendi itaque odit fugiat voluptatibus obcaecati numquam quo? Cum, dolorum molestiae.
-      Numquam ad ipsum harum nemo rerum sit at. Cumque qui commodi dolore odio? Veritatis ipsum aperiam quo veniam, neque, sequi quibusdam repellat incidunt excepturi magni tempora dolorem cupiditate odio sed.
-      Dolorem ullam, nihil ad quo fugit quasi necessitatibus magnam vero debitis nostrum, possimus quos? Non quas accusantium, quaerat officiis quibusdam a possimus alias beatae, est vel, suscipit commodi incidunt cumque.
-      Laudantium labore dolorum odio, in eos est? Consequatur recusandae maxime dolorem nemo saepe reprehenderit iure ullam repellat officia qui, quo assumenda quaerat, deserunt nostrum sapiente doloribus et necessitatibus, atque omnis.
-      Illum, dolores perferendis. Rem, consectetur pariatur nam voluptates atque, cumque laborum animi magni similique porro dolorem earum officiis necessitatibus ullam at ad delectus modi odio vel ea dicta, adipisci a!
-      Possimus ducimus iste eligendi cumque adipisci non excepturi ab quo repellat minima voluptate ipsam in similique earum nulla iure corporis, enim quisquam maiores pariatur! Possimus nam hic sequi iure pariatur.
-      Dolorem est aut sapiente ipsam quis, eius omnis sequi nihil minima minus, quaerat tempora perspiciatis. Repellendus accusamus consequatur nulla, a quam dolores libero deserunt itaque minus sint laboriosam eligendi officia.
-      A corrupti fugit officia voluptatibus ea asperiores, ex nulla repudiandae officiis impedit, distinctio, aspernatur reiciendis ducimus? Qui quia repellat explicabo mollitia perferendis iusto inventore consequuntur illum? Voluptatibus qui excepturi obcaecati!
+      {bookDescript ? bookDescript : 'Đang cập nhật'}
     </div>
   )
 }

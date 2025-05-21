@@ -1,9 +1,9 @@
 import styles from './BookImageDetail.module.css';
 import { useState } from 'react';
 
-const BookImageDetail = () => {
+const BookImageDetail = ({images}) => {
   const [mainImage, setMainImage] = useState(0);
-  const subImage = ['/auth.jpg', '/auth1.jpg', '/Book.jpg']
+  const subImage = images.map(image=>image.url)
   function handleChangeMainImage(index) {
     if(index !== mainImage) {
       setMainImage(index);
