@@ -1,12 +1,19 @@
-.admin-app-container {
-    display: flex;
-    height: 100vh; 
-    margin-left: 281px;
-  }
-  
-  .admin-main-content {
-    flex: 1;
-    overflow-y: auto; 
-    padding: 16px; 
-  }
+.admin-app-container{
+
+}
+
+.admin-main{
+  display: flex;;
+}
+
+.admin-sidebar{
+  align-self: flex-start;
+  position: fixed;
+}
+
+.admin-main-content{
+  margin: 300px;
+}
+
+
   

@@ -1,0 +1,42 @@
+.sidebar{
+    width: 300px;
+    z-index: 996;
+    transition: all 0.3s;
+    box-shadow: 0px 0px 20px rgba(1, 41, 112, 0.1);
+    background-color: #fff;
+    height: 100vh;
+}
+
+.tabList{
+  list-style: none;
+  background-color: white;
+  color: rgba(1, 41, 7, 0.9);
+  font-size: 18px;
+  font-weight: 500;
+  padding: 1rem;
+  margin: 0;
+}
+
+.navRow{
+  padding: 1rem 2rem;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.navRow:hover{
+  background-color: #f6f9ff;
+  color: #4154f1
+}
+
+.navRow.active{
+  background-color: #f6f9ff;
+  color: #4154f1;
+}
+
+.navLink{
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
