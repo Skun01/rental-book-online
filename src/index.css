@@ -54,6 +54,20 @@ textarea {
   font-size: inherit;
 }
 
+.adminPageTitle{
+  font-size: 1.8rem;
+  font-weight: 500;
+  color: #012970;
+  margin-bottom: 1rem;
+}
+
+.adminTabPage{
+  padding: 2rem 3rem;
+  background-color: #F6F9FF;
+}
+
+
+
 .container {
   width: 100%;
   max-width: 1200px;

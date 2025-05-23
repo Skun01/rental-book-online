@@ -5,8 +5,8 @@ import {BookOpenCheck, MoreHorizontal, CircleDollarSign,
 import { useState } from 'react';
 export default function Home() {
   return (
-    <div className={styles.home}>
-      <div className={styles.homeTitle}>Trang chủ</div>
+    <div className="adminTabPage">
+      <div className="adminPageTitle">Trang chủ</div>
       <div className={styles.homeContent}>
         <div className={styles.homeHeader}>
           <div className={styles.homeCard}>

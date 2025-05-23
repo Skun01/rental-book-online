@@ -1,12 +1,12 @@
 import styles from './SideBar.module.css'
 import { Link } from 'react-router-dom'
 import { LayoutGrid, BookOpen, Users, Library, ShoppingCart, 
-  RotateCcw, ChartBarStacked, BookA
-} from 'lucide-react'
+  RotateCcw, ChartBarStacked, Book, BookA, ChevronUp} from 'lucide-react'
 import { useState } from 'react'
 
 export default function SideBar(){
-  const [activeTab, setActiveTab] = useState('home')
+  const [activeTab, setActiveTab] = useState('home') 
+  const [isSubMenuOpen, setIsSubMenuOpen] = useState(false)
   const handleTabClick = (tab) => {
     setActiveTab(tab)
   }
@@ -15,7 +15,7 @@ export default function SideBar(){
       <ul className={styles.tabList}>
         <li className={`${styles.navRow} ${activeTab === 'home' ? styles.active : ''}`} 
             onClick={() => handleTabClick('home')}>
-          <Link className={styles.navLink}>
+          <Link className={styles.navLink} to="/admin">
             <LayoutGrid strokeWidth={1}/>
             <span>Trang chủ</span>
           </Link>
@@ -37,12 +37,40 @@ export default function SideBar(){
           </Link>
         </li>
 
-        <li className={`${styles.navRow} ${activeTab === 'books' ? styles.active : ''}`} 
-            onClick={() => handleTabClick('books')}>
-          <Link className={styles.navLink}>
+        {/* have sub menu */}
+        <li>
+          <div onClick={()=>setIsSubMenuOpen(!isSubMenuOpen)}
+            className={`${styles.navRow} ${styles.navLink} ${isSubMenuOpen ? styles.active : ''}`}>
             <Library strokeWidth={1}/>
             <span>Quản lý sách</span>
-          </Link>
+            <ChevronUp className={`${styles.chevronUp} ${isSubMenuOpen ? styles.chevronDown : ''}`}/>
+          </div>
+          {isSubMenuOpen && (
+            <ul className={styles.subMenuContainer}>
+              <li className={`${styles.subRow} ${activeTab === 'books' ? styles.subActive : ''}`} 
+                  onClick={() => handleTabClick('books')}>
+                <Link className={styles.navLink} to="/admin/books-manage">
+                  <Book strokeWidth={1}/>
+                  <span>Sách</span>
+                </Link>
+              </li>
+              <li className={`${styles.subRow} ${activeTab === 'categories' ? styles.subActive : ''}`} 
+                onClick={() => handleTabClick('categories')}>
+              <Link className={styles.navLink}>
+                <ChartBarStacked strokeWidth={1}/>
+                <span>Danh mục</span>
+              </Link>
+              </li>
+              <li className={`${styles.subRow} ${activeTab === 'authors' ? styles.subActive : ''}`} 
+                  onClick={() => handleTabClick('authors')}>
+                <Link className={styles.navLink}>
+                  <BookA strokeWidth={1}/>
+                  <span>Tác giả</span>
+                </Link>
+              </li>
+            </ul>
+          )}
+          
         </li>
 
         <li className={`${styles.navRow} ${activeTab === 'rentOrders' ? styles.active : ''}`} 
@@ -61,21 +89,7 @@ export default function SideBar(){
           </Link>
         </li>
 
-        <li className={`${styles.navRow} ${activeTab === 'categories' ? styles.active : ''}`} 
-            onClick={() => handleTabClick('categories')}>
-          <Link className={styles.navLink}>
-            <ChartBarStacked strokeWidth={1}/>
-            <span>Danh mục</span>
-          </Link>
-        </li>
-
-        <li className={`${styles.navRow} ${activeTab === 'authors' ? styles.active : ''}`} 
-            onClick={() => handleTabClick('authors')}>
-          <Link className={styles.navLink}>
-            <BookA strokeWidth={1}/>
-            <span>Tác giả</span>
-          </Link>
-        </li>
+        
       </ul>
     </div>
   )

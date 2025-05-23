@@ -40,3 +40,34 @@
   gap: 6px;
   width: 100%;
 }
+
+.chevronUp{
+  transition: all 0.3s;
+}
+
+.chevronUp.chevronDown{
+  transform: rotate(180deg);
+}
+
+.subMenuContainer{
+  padding-left: 2rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  list-style: none;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.subActive{
+  color: #4154f1;
+}
+
+.subRow{
+  padding: 1rem 2rem;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.subRow:hover{
+  color: #4154f1;
+}

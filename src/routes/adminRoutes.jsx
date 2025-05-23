@@ -1,5 +1,6 @@
 import AdminApp from "../AdminApp";
 import Home from '../pages/adminPages/home/Home';
+import BookManager from '../pages/adminPages/bookManager/BookManager';
 const routes= [
   {
     path:"/admin",
@@ -9,6 +10,10 @@ const routes= [
         index: true,
         element: <Home />,
       },
+      {
+        path: 'books-manage',
+        element: <BookManager />,
+      }
     ]
   }
 ]
