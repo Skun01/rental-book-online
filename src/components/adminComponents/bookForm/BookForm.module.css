@@ -108,28 +108,11 @@
 }
 
 .imageUploadArea {
-  border: 2px dashed #d1d5db;
   border-radius: 8px;
   padding: 2rem;
   text-align: center;
-  background-color: #f9fafb;
-}
-
-.uploadIcon {
-  color: #9ca3af;
-  margin: 0 auto 1rem;
-}
-
-.uploadText {
-  color: #6b7280;
-  font-size: 0.875rem;
-  margin-bottom: 0.5rem;
-}
-
-.uploadHint {
-  color: #9ca3af;
-  font-size: 0.75rem;
-  margin-bottom: 1rem;
+  display: flex;
+  gap: 1rem;
 }
 
 .fileInput {
@@ -137,17 +120,95 @@
 }
 
 .uploadButton {
-  display: inline-block;
-  padding: 0.5rem 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.2rem;
+  width: fit-content;
+  padding: 0.5rem;
   background: #4f46e5;
   color: white;
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.875rem;
+  justify-self: center;
+  height: 35px;
+  transition: all 0.2s ease;
 }
 
 .uploadButton:hover {
   background: #4338ca;
+}
+
+.uploadMainImage,
+.uploadSubImage{
+  width: fit-content;
+  padding: .5rem;
+  border: 2px dashed #d1d5db;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  justify-content: flex-end;
+}
+
+.imagePreviewContainer{
+  display: flex;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+
+
+.imagePreview{
+  width: 150px;
+  border-radius: 8px;
+  position: relative;
+  height: 220px;
+  overflow: hidden;
+}
+
+.imagePreview img{
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.imagePreviewContainer .emptyImage{
+  margin-bottom: 20px;
+}
+
+.emptyImage{
+  width: 150px;
+  height: 200px;
+  background-color: #e0e8fa;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #696565;
+}
+
+.previewImageDelete{
+  position: absolute;
+  top: 0;
+  right: 0;
+  color: #f87171;
+  background-color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.previewImageDelete:hover{
+  color: #e72727;
+  transform: scale(1.1);
 }
 
 .formActions {

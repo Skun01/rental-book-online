@@ -1,15 +1,48 @@
 import { useState, useEffect } from "react"
-import { X, Save, FileText, BookOpen, DollarSign, ImageIcon, Upload } from "lucide-react"
+import { X, Save, FileText, BookOpen, DollarSign, ImageIcon, Upload} from "lucide-react"
 import styles from "./bookForm.module.css"
+import { PiInstagramLogoDuotone } from "react-icons/pi"
 
 const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }) => {
   const [imageList, setImageList] = useState([])
-  const handleAddImage = (e) => {
+  const [imageListFiles, setImageListFiles] = useState([])
+  const [mainImage, setMainImage] = useState(null)
+  const [mainImageFile, setMainImageFile] = useState(null)
+  useEffect(() => {
+    
+  }, [])
+  // xu ly upload main image
+  const handleAddMainImage = (e) => {
+    const file = e.target.files[0]
+    setMainImageFile(file)
+    if (file) {
+      const image = {
+        name: file.name,
+        url: URL.createObjectURL(file),
+      }
+      setMainImage(image)
+    }
+  }
+
+  // xu ly get sub images
+  function handleAddSubImages(e){
     const files = Array.from(e.target.files)
-    const images = files.map((file)=>({
-      name: file.name,
-      url: URL.createObjectURL(file),
-    }))
+    setImageListFiles(files)
+    const images = files.map(file=>{
+      return {
+        name: file.name,
+        url: URL.createObjectURL(file),
+      }
+    })
+    setImageList([...imageList, ...images.slice(0, 3 - imageList.length)])
+  }
+  // xu ly delete main image
+  const handleDeleteImage = (type) => {
+    if (type === "main") {
+      setMainImage(null)
+    }else{
+      setImageList((prev) => prev.filter((_, index) => index !== type))
+    }
   }
   const [formData, setFormData] = useState({
     name: "",
@@ -66,7 +99,6 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
 
   const handleSubmit = (e) => {
     e.preventDefault()
-
     const processedData = {
       ...formData,
       pages: Number.parseInt(formData.pages) || 0,
@@ -79,6 +111,8 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
     }
 
     onSave(processedData)
+    // xu ly upload image
+    const formDataImage = new FormData()
   }
 
   if (!isOpen) return null
@@ -165,7 +199,7 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
             </div>
           </div>
 
-          {/* Book Details*/}
+          {/* Book detail*/}
           <div className={styles.formSection}>
             <h3 className={styles.sectionTitle}>
               <BookOpen size={18} />
@@ -259,7 +293,7 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
             </div>
           </div>
 
-          {/* Inventory & Pricing*/}
+          {/*price and stock*/}
           <div className={styles.formSection}>
             <h3 className={styles.sectionTitle}>
               <DollarSign size={18}/>
@@ -322,7 +356,7 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
             </div>
           </div>
 
-          {/* Image Upload Section*/}
+          {/*image upload*/}
           <div className={styles.formSection}>
             <h3 className={styles.sectionTitle}>
               <ImageIcon size={18} />
@@ -330,14 +364,52 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
             </h3>
 
             <div className={styles.imageUploadArea}>
-              <Upload size={48} className={styles.uploadIcon} />
-              <p className={styles.uploadText}>Click chọn ảnh thêm vào</p>
-              <input type="file" multiple accept="image/*" 
-                className={styles.fileInput} id="image-upload" 
-                onChange={handleAddImage}/>
-              <label htmlFor="image-upload" className={styles.uploadButton}>
-                Chọn ảnh
-              </label>
+              {/* main image */}
+              <div className={styles.uploadMainImage}>
+                <div className={styles.imagePreview}>
+                  {mainImage ? ( <>
+                    <img src={mainImage.url} alt={mainImage.name}/>
+                    <X className={styles.previewImageDelete}
+                      onClick={()=>handleDeleteImage('main')}/>
+                  </>
+                  ): (<div className={styles.emptyImage}>Ảnh chính</div>)}
+                  
+                </div>
+                <div className={styles.uploadButton}>
+                  <input type="file" accept="image/*" 
+                    className={styles.fileInput} id="MainImage-upload" 
+                    onChange={handleAddMainImage}/>
+                  <label htmlFor="MainImage-upload" className={styles.uploadButton}>
+                    <Upload size={20}/>
+                    <span>Chọn ảnh chính</span>
+                  </label>
+                </div>
+              </div>
+              {/* sub image */}
+              <div className={styles.uploadMainImage}>
+                <div className={styles.imagePreviewContainer}>
+                  {imageList.length > 0 && imageList.map((image, index)=>(
+                    <div className={styles.imagePreview} key={index}>
+                      <img src={image.url} alt={image.name}/>
+                      <X className={styles.previewImageDelete} onClick={()=>handleDeleteImage(index)}/>
+                    </div>
+                  ))}
+                  {imageList.length < 3 && [0,0,0].slice(0, 3 - imageList.length).map((_, index)=>(
+                    <div className={styles.emptyImage} key={index}>
+                      Ảnh phụ
+                    </div>
+                  ))}
+                </div>
+                <div className={styles.uploadButton}>
+                  <input type="file" accept="image/*" 
+                    className={styles.fileInput} id="SubImage-upload" 
+                    onChange={handleAddSubImages}/>
+                  <label htmlFor="SubImage-upload" className={styles.uploadButton}>
+                    <Upload size={20}/>
+                    <span>chọn các ảnh phụ</span>
+                  </label>
+                </div>
+              </div>
             </div>
           </div>
         </div>
