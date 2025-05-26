@@ -1,6 +1,19 @@
+"use client"
+
 import styles from "./UserManager.module.css"
-import {Search, FilterIcon as Funnel, ChevronDown, Plus, Trash2, Edit, Ban, CheckCircle, 
-  User, Shield} from "lucide-react"
+import {
+  Search,
+  FilterIcon as Funnel,
+  ChevronDown,
+  Plus,
+  Trash2,
+  Ban,
+  CheckCircle,
+  User,
+  Shield,
+  Eye,
+  ExternalLink,
+} from "lucide-react"
 import { useState } from "react"
 import Notification from "../../../components/adminComponents/notification/Notification"
 
@@ -12,33 +25,22 @@ export default function UserManager() {
     ageRange: "",
     sort: "created_desc",
   })
-  const [editUser, setEditUser] = useState(null)
 
-  // handle add new user
+  const [viewUser, setViewUser] = useState(null)
+
   function handleCancelAddNewUser() {
     setAddNewUser(false)
   }
 
   function handleSaveUser(userData) {
     console.log("Saving user:", userData)
+    // Thêm logic lưu user ở đây
     setAddNewUser(false)
   }
 
-  // handle edit user
-  function handleCancelEditUser() {
-    setEditUser(false)
-  }
-
-  function handleSaveEditUser(userData) {
-    console.log("Updating user role:", userData)
-    setEditUser(null)
-  }
-
-  // Filter users
+  // Filter users based on search and filters
   const filteredUsers = users.filter((user) => {
-    const matchesSearch =
-      user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesSearch = user.fullName.toLowerCase().includes(searchTerm.toLowerCase())
 
     const matchesRole = !filters.role || user.role === filters.role
 
@@ -51,12 +53,12 @@ export default function UserManager() {
         matchesAge = user.age >= min
       }
     }
+
     return matchesSearch && matchesRole && matchesAge
   })
 
   return (
     <div className="adminTabPage">
-      
       <div className="adminPageTitle">Quản lý người dùng</div>
 
       <div className={styles.manageTool}>
@@ -64,7 +66,7 @@ export default function UserManager() {
           <input
             type="text"
             className={styles.searchBar}
-            placeholder="Tìm kiếm theo tên, email..."
+            placeholder="Tìm kiếm theo tên người dùng..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -83,12 +85,12 @@ export default function UserManager() {
       </div>
 
       <div className={styles.tableSection}>
-        <UserTable users={filteredUsers} setEditUser={setEditUser} />
+        <UserTable users={filteredUsers} setViewUser={setViewUser} />
       </div>
 
       {addNewUser && <UserForm onSave={handleSaveUser} onCancel={handleCancelAddNewUser} />}
 
-      {editUser && <EditUserForm user={editUser} onSave={handleSaveEditUser} onCancel={handleCancelEditUser} />}
+      {viewUser && <UserDetailModal user={viewUser} onClose={() => setViewUser(null)} />}
     </div>
   )
 }
@@ -182,9 +184,11 @@ const Filter = ({ filters, setFilters }) => {
   )
 }
 
-const UserTable = ({ users, setEditUser }) => {
+const UserTable = ({ users, setViewUser }) => {
   const [showDeleteNoti, setShowDeleteNoti] = useState({ state: false })
   const [showBlockNoti, setShowBlockNoti] = useState({ state: false })
+  const [editingRole, setEditingRole] = useState(null)
+  const [newRole, setNewRole] = useState("")
 
   function handleShowDeleteNoti(userId, userName) {
     setShowDeleteNoti({ state: true, id: userId, name: userName })
@@ -197,6 +201,22 @@ const UserTable = ({ users, setEditUser }) => {
       name: userName,
       action: currentStatus === "Active" ? "block" : "unblock",
     })
+  }
+
+  function handleEditRole(user) {
+    setEditingRole(user.id)
+    setNewRole(user.role)
+  }
+
+  function handleSaveRole(userId) {
+    console.log(`Update user ${userId} role to: ${newRole}`)
+    // Thêm logic cập nhật role ở đây
+    setEditingRole(null)
+  }
+
+  function handleCancelEditRole() {
+    setEditingRole(null)
+    setNewRole("")
   }
 
   function handleDelete(id) {
@@ -217,17 +237,36 @@ const UserTable = ({ users, setEditUser }) => {
     setShowBlockNoti({ ...showBlockNoti, state: false })
   }
 
-  const getRoleBadge = (role) => {
-    if (role === "admin") {
+  const getRoleBadge = (user) => {
+    if (editingRole === user.id) {
       return (
-        <span className={styles.roleAdmin}>
+        <div className={styles.roleEditContainer}>
+          <select className={styles.roleSelect} value={newRole} onChange={(e) => setNewRole(e.target.value)}>
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+          </select>
+          <div className={styles.roleEditActions}>
+            <button className={styles.saveRoleButton} onClick={() => handleSaveRole(user.id)} title="Lưu">
+              <CheckCircle size={12} />
+            </button>
+            <button className={styles.cancelRoleButton} onClick={handleCancelEditRole} title="Hủy">
+              ×
+            </button>
+          </div>
+        </div>
+      )
+    }
+
+    if (user.role === "admin") {
+      return (
+        <span className={styles.roleAdmin} onClick={() => handleEditRole(user)}>
           <Shield size={12} />
           Admin
         </span>
       )
     }
     return (
-      <span className={styles.roleUser}>
+      <span className={styles.roleUser} onClick={() => handleEditRole(user)}>
         <User size={12} />
         User
       </span>
@@ -265,13 +304,13 @@ const UserTable = ({ users, setEditUser }) => {
             <th>ID</th>
             <th>Ảnh</th>
             <th>Họ tên</th>
-            <th>Email</th>
             <th>Tuổi</th>
             <th>Vai trò</th>
             <th>Đang thuê</th>
             <th>Quá hạn</th>
             <th>Đơn đã đặt</th>
             <th>Đơn chờ</th>
+            <th>Đơn đã trả</th>
             <th>Trạng thái</th>
             <th>Tùy chọn</th>
           </tr>
@@ -290,9 +329,8 @@ const UserTable = ({ users, setEditUser }) => {
                   <h3>{user.fullName}</h3>
                 </div>
               </td>
-              <td>{user.email}</td>
               <td>{user.age}</td>
-              <td>{getRoleBadge(user.role)}</td>
+              <td>{getRoleBadge(user)}</td>
               <td>
                 <span className={styles.rentingCount}>{user.rentingBooks || 0}</span>
               </td>
@@ -307,11 +345,14 @@ const UserTable = ({ users, setEditUser }) => {
               <td>
                 <span className={styles.pendingOrders}>{user.pendingOrders || 0}</span>
               </td>
+              <td>
+                <span className={styles.returnedOrders}>{user.returnedOrders || 0}</span>
+              </td>
               <td>{getStatusBadge(user.status)}</td>
               <td>
                 <div className={styles.actionButtons}>
-                  <button className={styles.editButton} title="Chỉnh sửa vai trò" onClick={() => setEditUser(user)}>
-                    <Edit size={16} />
+                  <button className={styles.viewButton} title="Xem chi tiết" onClick={() => setViewUser(user)}>
+                    <Eye size={16} />
                   </button>
 
                   {user.status === "Active" ? (
@@ -539,53 +580,172 @@ const UserForm = ({ user = null, onSave, onCancel }) => {
   )
 }
 
-const EditUserForm = ({ user, onSave, onCancel }) => {
-  const [role, setRole] = useState(user?.role || "user")
+const UserDetailModal = ({ user, onClose }) => {
+  const handleOrderClick = (orderId) => {
+    console.log("View order details:", orderId)
+    // Bạn sẽ xử lý logic này sau
+  }
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    onSave({ ...user, role })
+  const handleBookClick = (bookId) => {
+    console.log("View book details:", bookId)
+    // Bạn sẽ xử lý logic này sau
   }
 
   return (
-    <div className={styles.formOverlay}>
-      <div className={styles.editFormContainer}>
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <h2 className={styles.formTitle}>Chỉnh sửa vai trò người dùng</h2>
+    <div className={styles.modalOverlay}>
+      <div className={styles.modalContainer}>
+        <div className={styles.modalHeader}>
+          <h2>Chi tiết người dùng</h2>
+          <button onClick={onClose} className={styles.closeButton}>
+            ×
+          </button>
+        </div>
 
-          <div className={styles.userInfoDisplay}>
-            <div className={styles.userImageDisplay}>
-              <img src={user.imageUrl || "/placeholder.svg?height=60&width=60"} alt={user.fullName} />
+        <div className={styles.modalContent}>
+          {/* User Basic Info */}
+          <div className={styles.detailSection}>
+            <h3 className={styles.sectionTitle}>Thông tin cơ bản</h3>
+            <div className={styles.userBasicInfo}>
+              <div className={styles.userAvatar}>
+                <img src={user.imageUrl || "/placeholder.svg?height=80&width=80"} alt={user.fullName} />
+              </div>
+              <div className={styles.userDetails}>
+                <h4>{user.fullName}</h4>
+                <p>Email: {user.email}</p>
+                <p>Tuổi: {user.age}</p>
+                <p>Giới tính: {user.gender === "Male" ? "Nam" : user.gender === "Female" ? "Nữ" : "Khác"}</p>
+                <p>Vai trò: {user.role === "admin" ? "Admin" : "User"}</p>
+                <p>Trạng thái: {user.status === "Active" ? "Hoạt động" : "Không hoạt động"}</p>
+              </div>
             </div>
-            <div>
-              <h3>{user.fullName}</h3>
-              <p>{user.email}</p>
+          </div>
+
+          {/* Statistics */}
+          <div className={styles.detailSection}>
+            <h3 className={styles.sectionTitle}>Thống kê</h3>
+            <div className={styles.statsGrid}>
+              <div className={styles.statItem}>
+                <span className={styles.statNumber}>{user.rentingBooks || 0}</span>
+                <span className={styles.statLabel}>Đang thuê</span>
+              </div>
+              <div className={styles.statItem}>
+                <span className={styles.statNumber}>{user.overdueBooks || 0}</span>
+                <span className={styles.statLabel}>Quá hạn</span>
+              </div>
+              <div className={styles.statItem}>
+                <span className={styles.statNumber}>{user.completedOrders || 0}</span>
+                <span className={styles.statLabel}>Đơn đã đặt</span>
+              </div>
+              <div className={styles.statItem}>
+                <span className={styles.statNumber}>{user.pendingOrders || 0}</span>
+                <span className={styles.statLabel}>Đơn chờ</span>
+              </div>
+              <div className={styles.statItem}>
+                <span className={styles.statNumber}>{user.returnedOrders || 0}</span>
+                <span className={styles.statLabel}>Đơn đã trả</span>
+              </div>
             </div>
           </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>Vai trò *</label>
-            <select
-              name="role"
-              className={styles.formSelect}
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              required
-            >
-              <option value="user">User</option>
-              <option value="admin">Admin</option>
-            </select>
+          {/* Renting Books */}
+          <div className={styles.detailSection}>
+            <h3 className={styles.sectionTitle}>Sách đang thuê ({user.rentingBooks || 0})</h3>
+            <div className={styles.itemsList}>
+              {user.rentingBooksList?.map((book) => (
+                <div key={book.id} className={styles.itemCard}>
+                  <span className={styles.itemName}>{book.title}</span>
+                  <button
+                    className={styles.viewDetailButton}
+                    onClick={() => handleBookClick(book.id)}
+                    title="Xem chi tiết sách"
+                  >
+                    <ExternalLink size={14} />
+                  </button>
+                </div>
+              )) || <p className={styles.noItems}>Không có sách đang thuê</p>}
+            </div>
           </div>
 
-          <div className={styles.formActions}>
-            <button type="button" className={styles.cancelButton} onClick={onCancel}>
-              Hủy
-            </button>
-            <button type="submit" className={styles.saveButton}>
-              Cập nhật vai trò
-            </button>
+          {/* Overdue Books */}
+          <div className={styles.detailSection}>
+            <h3 className={styles.sectionTitle}>Sách quá hạn ({user.overdueBooks || 0})</h3>
+            <div className={styles.itemsList}>
+              {user.overdueBooksList?.map((book) => (
+                <div key={book.id} className={styles.itemCard}>
+                  <span className={styles.itemName}>{book.title}</span>
+                  <span className={styles.overdueInfo}>Quá hạn {book.overdueDays} ngày</span>
+                  <button
+                    className={styles.viewDetailButton}
+                    onClick={() => handleBookClick(book.id)}
+                    title="Xem chi tiết sách"
+                  >
+                    <ExternalLink size={14} />
+                  </button>
+                </div>
+              )) || <p className={styles.noItems}>Không có sách quá hạn</p>}
+            </div>
           </div>
-        </form>
+
+          {/* Completed Orders */}
+          <div className={styles.detailSection}>
+            <h3 className={styles.sectionTitle}>Đơn hàng đã đặt ({user.completedOrders || 0})</h3>
+            <div className={styles.itemsList}>
+              {user.completedOrdersList?.map((order) => (
+                <div key={order.id} className={styles.itemCard}>
+                  <span className={styles.itemName}>#{order.orderId}</span>
+                  <span className={styles.orderDate}>{new Date(order.date).toLocaleDateString("vi-VN")}</span>
+                  <button
+                    className={styles.viewDetailButton}
+                    onClick={() => handleOrderClick(order.orderId)}
+                    title="Xem chi tiết đơn hàng"
+                  >
+                    <ExternalLink size={14} />
+                  </button>
+                </div>
+              )) || <p className={styles.noItems}>Không có đơn hàng đã đặt</p>}
+            </div>
+          </div>
+
+          {/* Pending Orders */}
+          <div className={styles.detailSection}>
+            <h3 className={styles.sectionTitle}>Đơn hàng đang chờ ({user.pendingOrders || 0})</h3>
+            <div className={styles.itemsList}>
+              {user.pendingOrdersList?.map((order) => (
+                <div key={order.id} className={styles.itemCard}>
+                  <span className={styles.itemName}>#{order.orderId}</span>
+                  <span className={styles.orderDate}>{new Date(order.date).toLocaleDateString("vi-VN")}</span>
+                  <button
+                    className={styles.viewDetailButton}
+                    onClick={() => handleOrderClick(order.orderId)}
+                    title="Xem chi tiết đơn hàng"
+                  >
+                    <ExternalLink size={14} />
+                  </button>
+                </div>
+              )) || <p className={styles.noItems}>Không có đơn hàng đang chờ</p>}
+            </div>
+          </div>
+
+          {/* Returned Orders */}
+          <div className={styles.detailSection}>
+            <h3 className={styles.sectionTitle}>Đơn hàng đã trả ({user.returnedOrders || 0})</h3>
+            <div className={styles.itemsList}>
+              {user.returnedOrdersList?.map((order) => (
+                <div key={order.id} className={styles.itemCard}>
+                  <span className={styles.itemName}>#{order.orderId}</span>
+                  <span className={styles.orderDate}>{new Date(order.date).toLocaleDateString("vi-VN")}</span>
+                  <button
+                    className={styles.viewDetailButton}
+                    onClick={() => handleOrderClick(order.orderId)}
+                    title="Xem chi tiết đơn hàng"
+                  >
+                    <ExternalLink size={14} />
+                  </button>
+                </div>
+              )) || <p className={styles.noItems}>Không có đơn hàng đã trả</p>}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )
@@ -606,7 +766,22 @@ const users = [
     overdueBooks: 0,
     completedOrders: 15,
     pendingOrders: 2,
+    returnedOrders: 12,
     createdAt: "2024-01-15",
+    rentingBooksList: [],
+    overdueBooksList: [],
+    completedOrdersList: [
+      { id: 1, orderId: "ORD-001", date: "2024-01-15" },
+      { id: 2, orderId: "ORD-002", date: "2024-01-20" },
+    ],
+    pendingOrdersList: [
+      { id: 3, orderId: "ORD-003", date: "2024-01-25" },
+      { id: 4, orderId: "ORD-004", date: "2024-01-26" },
+    ],
+    returnedOrdersList: [
+      { id: 5, orderId: "RET-001", date: "2024-01-10" },
+      { id: 6, orderId: "RET-002", date: "2024-01-12" },
+    ],
   },
   {
     id: 2,
@@ -621,7 +796,23 @@ const users = [
     overdueBooks: 1,
     completedOrders: 8,
     pendingOrders: 1,
+    returnedOrders: 6,
     createdAt: "2024-01-20",
+    rentingBooksList: [
+      { id: 1, title: "Đắc Nhân Tâm" },
+      { id: 2, title: "Nhà Giả Kim" },
+      { id: 3, title: "Sapiens" },
+    ],
+    overdueBooksList: [{ id: 4, title: "Atomic Habits", overdueDays: 3 }],
+    completedOrdersList: [
+      { id: 7, orderId: "ORD-005", date: "2024-01-18" },
+      { id: 8, orderId: "ORD-006", date: "2024-01-22" },
+    ],
+    pendingOrdersList: [{ id: 9, orderId: "ORD-007", date: "2024-01-27" }],
+    returnedOrdersList: [
+      { id: 10, orderId: "RET-003", date: "2024-01-14" },
+      { id: 11, orderId: "RET-004", date: "2024-01-16" },
+    ],
   },
   {
     id: 3,
@@ -636,7 +827,22 @@ const users = [
     overdueBooks: 0,
     completedOrders: 12,
     pendingOrders: 0,
+    returnedOrders: 10,
     createdAt: "2024-02-10",
+    rentingBooksList: [
+      { id: 5, title: "Thinking Fast and Slow" },
+      { id: 6, title: "The Psychology of Money" },
+    ],
+    overdueBooksList: [],
+    completedOrdersList: [
+      { id: 12, orderId: "ORD-008", date: "2024-02-08" },
+      { id: 13, orderId: "ORD-009", date: "2024-02-12" },
+    ],
+    pendingOrdersList: [],
+    returnedOrdersList: [
+      { id: 14, orderId: "RET-005", date: "2024-02-05" },
+      { id: 15, orderId: "RET-006", date: "2024-02-07" },
+    ],
   },
   {
     id: 4,
@@ -651,7 +857,17 @@ const users = [
     overdueBooks: 3,
     completedOrders: 5,
     pendingOrders: 0,
+    returnedOrders: 2,
     createdAt: "2024-01-25",
+    rentingBooksList: [],
+    overdueBooksList: [
+      { id: 7, title: "Clean Code", overdueDays: 15 },
+      { id: 8, title: "Design Patterns", overdueDays: 8 },
+      { id: 9, title: "Refactoring", overdueDays: 5 },
+    ],
+    completedOrdersList: [{ id: 16, orderId: "ORD-010", date: "2024-01-23" }],
+    pendingOrdersList: [],
+    returnedOrdersList: [{ id: 17, orderId: "RET-007", date: "2024-01-20" }],
   },
   {
     id: 5,
@@ -666,7 +882,23 @@ const users = [
     overdueBooks: 0,
     completedOrders: 20,
     pendingOrders: 3,
+    returnedOrders: 18,
     createdAt: "2024-03-05",
+    rentingBooksList: [{ id: 10, title: "Rich Dad Poor Dad" }],
+    overdueBooksList: [],
+    completedOrdersList: [
+      { id: 18, orderId: "ORD-011", date: "2024-03-03" },
+      { id: 19, orderId: "ORD-012", date: "2024-03-07" },
+    ],
+    pendingOrdersList: [
+      { id: 20, orderId: "ORD-013", date: "2024-03-08" },
+      { id: 21, orderId: "ORD-014", date: "2024-03-09" },
+      { id: 22, orderId: "ORD-015", date: "2024-03-10" },
+    ],
+    returnedOrdersList: [
+      { id: 23, orderId: "RET-008", date: "2024-03-01" },
+      { id: 24, orderId: "RET-009", date: "2024-03-04" },
+    ],
   },
   {
     id: 6,
@@ -681,6 +913,15 @@ const users = [
     overdueBooks: 0,
     completedOrders: 3,
     pendingOrders: 0,
+    returnedOrders: 3,
     createdAt: "2023-12-15",
+    rentingBooksList: [],
+    overdueBooksList: [],
+    completedOrdersList: [{ id: 25, orderId: "ORD-016", date: "2023-12-13" }],
+    pendingOrdersList: [],
+    returnedOrdersList: [
+      { id: 26, orderId: "RET-010", date: "2023-12-10" },
+      { id: 27, orderId: "RET-011", date: "2023-12-12" },
+    ],
   },
 ]
