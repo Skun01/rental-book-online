@@ -75,7 +75,7 @@ export default function SideBar(){
 
         <li className={`${styles.navRow} ${activeTab === 'rentOrders' ? styles.active : ''}`} 
             onClick={() => handleTabClick('rentOrders')}>
-          <Link className={styles.navLink}>
+          <Link className={styles.navLink} to='orders-manage'>
             <ShoppingCart strokeWidth={1}/>
             <span>Đơn thuê sách</span>
           </Link>
