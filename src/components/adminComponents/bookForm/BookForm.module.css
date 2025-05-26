@@ -95,6 +95,45 @@
   color: black;
 }
 
+/* fix loi hien thi date input */
+
+input[type="date"] {
+  color: black !important; 
+  background-color: white !important; 
+}
+
+.formInput[type="date"] {
+  color: #1f2937 !important;
+  background-color: white !important;
+}
+
+.formInput[type="date"]::-webkit-datetime-edit {
+  color: #1f2937;
+}
+
+.formInput[type="date"]::-webkit-datetime-edit-text {
+  color: #1f2937;
+}
+
+.formInput[type="date"]::-webkit-datetime-edit-month-field {
+  color: #1f2937;
+}
+
+.formInput[type="date"]::-webkit-datetime-edit-day-field {
+  color: #1f2937;
+}
+
+.formInput[type="date"]::-webkit-datetime-edit-year-field {
+  color: #1f2937;
+}
+
+.formInput[type="date"]::-webkit-calendar-picker-indicator {
+  color: #1f2937;
+  opacity: 1;
+}
+
+
+
 .formInput:focus,
 .formSelect:focus,
 .formTextarea:focus {
@@ -106,6 +145,9 @@
   resize: vertical;
   min-height: 100px;
 }
+
+
+/* from here */
 
 .imageUploadArea {
   border-radius: 8px;

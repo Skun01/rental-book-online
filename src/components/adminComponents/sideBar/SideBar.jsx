@@ -56,14 +56,14 @@ export default function SideBar(){
               </li>
               <li className={`${styles.subRow} ${activeTab === 'categories' ? styles.subActive : ''}`} 
                 onClick={() => handleTabClick('categories')}>
-              <Link className={styles.navLink} to="category-manage">
+              <Link className={styles.navLink} to="categories-manage">
                 <ChartBarStacked strokeWidth={1}/>
                 <span>Danh mục</span>
               </Link>
               </li>
               <li className={`${styles.subRow} ${activeTab === 'authors' ? styles.subActive : ''}`} 
                   onClick={() => handleTabClick('authors')}>
-                <Link className={styles.navLink} to='author-manage'>
+                <Link className={styles.navLink} to="authors-manage">
                   <BookA strokeWidth={1}/>
                   <span>Tác giả</span>
                 </Link>

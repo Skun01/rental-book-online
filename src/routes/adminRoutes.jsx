@@ -17,11 +17,11 @@ const routes= [
         element: <BookManager />,
       },
       {
-        path: 'category-manage',
+        path: 'categories-manage',
         element: <CategoryManager/>
       },
       {
-        path: 'author-manage',
+        path: 'authors-manage',
         element: <AuthorManager/>
       }
     ]
