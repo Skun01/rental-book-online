@@ -31,7 +31,7 @@ export default function SideBar(){
 
         <li className={`${styles.navRow} ${activeTab === 'users' ? styles.active : ''}`} 
             onClick={() => handleTabClick('users')}>
-          <Link className={styles.navLink}>
+          <Link className={styles.navLink} to="users-manage">
             <Users strokeWidth={1}/>
             <span>Người dùng</span>
           </Link>

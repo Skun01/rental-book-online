@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Calendar, Package, CheckCircle, XCircle, Clock, Truck, Search, ArrowRight, RefreshCw } from "lucide-react"

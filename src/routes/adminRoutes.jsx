@@ -3,6 +3,7 @@ import Home from '../pages/adminPages/home/Home';
 import BookManager from '../pages/adminPages/bookManager/BookManager';
 import CategoryManager from "../pages/adminPages/categoryManager/CategoryManager";
 import AuthorManager from "../pages/adminPages/authorManager/AuthorManager";
+import UserManager from "../pages/adminPages/userManager/UserManager";
 const routes= [
   {
     path:"/admin",
@@ -23,6 +24,10 @@ const routes= [
       {
         path: 'authors-manage',
         element: <AuthorManager/>
+      },
+      {
+        path: 'users-manage',
+        element: <UserManager/>
       }
     ]
   }
