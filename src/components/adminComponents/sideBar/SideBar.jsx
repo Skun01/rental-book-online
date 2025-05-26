@@ -83,7 +83,7 @@ export default function SideBar(){
 
         <li className={`${styles.navRow} ${activeTab === 'returnOrders' ? styles.active : ''}`} 
             onClick={() => handleTabClick('returnOrders')}>
-          <Link className={styles.navLink}>
+          <Link className={styles.navLink} to='returns-manage'>
             <RotateCcw strokeWidth={1}/>
             <span>Đơn trả sách</span>
           </Link>

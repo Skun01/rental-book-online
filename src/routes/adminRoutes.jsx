@@ -5,6 +5,7 @@ import CategoryManager from "../pages/adminPages/categoryManager/CategoryManager
 import AuthorManager from "../pages/adminPages/authorManager/AuthorManager";
 import UserManager from "../pages/adminPages/userManager/UserManager";
 import OrderManager from "../pages/adminPages/orderManager/OrderManager";
+import ReturnManager from "../pages/adminPages/returnManager/ReturnManager";
 const routes= [
   {
     path:"/admin",
@@ -33,6 +34,10 @@ const routes= [
       {
         path: 'orders-manage',
         element: <OrderManager/>  
+      },
+      {
+        path: 'returns-manage',
+        element: <ReturnManager/>
       }
     ]
   }
