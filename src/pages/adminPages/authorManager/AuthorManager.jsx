@@ -12,7 +12,6 @@ export default function AuthorManager() {
 
   function handleSaveAuthor(authorData) {
     console.log("Saving author:", authorData)
-    // Thêm logic lưu tác giả ở đây
     setAddNewAuthor(false)
   }
 
@@ -60,7 +59,7 @@ const authors = [
 
 const AuthorTable = () => {
   const [showDeleteNoti, setShowDeleteNoti] = useState({ state: false })
-
+  const [isEditing, setIsEditing] = useState({state: false})
   function handleShowDeleteNoti(authorId, authorName) {
     setShowDeleteNoti({ state: true, id: authorId, name: authorName })
   }
@@ -74,6 +73,14 @@ const AuthorTable = () => {
     setShowDeleteNoti({ ...showDeleteNoti, state: false })
   }
 
+  function handleEditAuthor(author) {
+    setIsEditing({state: true, author: author})
+  }
+
+  function handleSaveEditedAuthor(authorData) {
+    console.log("Saving edited author:", authorData)
+    setIsEditing({state: false})
+  }
   return (
     <div className={styles.tableContainer}>
       <table className={styles.table}>
@@ -98,7 +105,8 @@ const AuthorTable = () => {
               <td>
                 <div className={styles.actionButtons}>
                   <button className={styles.editButton}>
-                    <Edit size={16} />
+                    <Edit size={16} 
+                      onClick={()=>handleEditAuthor(author)}/>
                   </button>
                   <button className={styles.deleteButton} onClick={() => handleShowDeleteNoti(author.id, author.name)}>
                     <Trash2 size={16} />
@@ -109,12 +117,22 @@ const AuthorTable = () => {
           ))}
         </tbody>
       </table>
-
+      
+      {/* show delete notification */}
       {showDeleteNoti.state && (
         <Notification
           handleConfirm={handleConfirmDelete}
           handleCancel={() => setShowDeleteNoti({ ...showDeleteNoti, state: false })}
           content={`Bạn có chắc chắn muốn xóa tác giả "${showDeleteNoti.name}" không?`}
+        />
+      )}
+
+      {/* show edit form */}
+      {isEditing.state && (
+        <AuthorForm
+          author={isEditing.author}
+          onSave={(authorData) => handleSaveEditedAuthor(authorData)}
+          onCancel={() => setIsEditing({state: false})}
         />
       )}
     </div>
@@ -178,7 +196,7 @@ function AuthorForm({ author, onSave, onCancel }) {
             <input type="file" accept="image/*" onChange={handleImageChange} className={styles.formInput} />
             {preview && (
               <div className={styles.imagePreview}>
-                <img src={preview || "/placeholder.svg"} alt="Preview" />
+                <img src={preview || "/auth.jpg"} alt="Preview" />
               </div>
             )}
           </div>

@@ -13,17 +13,17 @@ export default function BookManager() {
     sort: "publish_date_desc",
   })
 
+  // handle save and cancel book form
   function handleCancelAddNewBook() {
     setAddNewBook(false)
   }
 
   function handleSaveBook(bookData) {
     console.log("Saving book:", bookData)
-    // Thêm logic lưu sách ở đây
     setAddNewBook(false)
   }
 
-  // Filter books based on search and filters
+  // filters books
   const filteredBooks = books.filter((book) => {
     const matchesSearch =
       book.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -41,6 +41,7 @@ export default function BookManager() {
       <div className="adminPageTitle">Quản lý sách</div>
 
       <div className={styles.manageTool}>
+
         <div className={styles.searchContainer}>
           <input
             type="text"
@@ -177,7 +178,9 @@ const Filter = ({ filters, setFilters }) => {
 
 const BookTable = ({ books }) => {
   const [showDeleteNoti, setShowDeleteNoti] = useState({ state: false })
+  const [isEditing, setIsEditing] = useState({ state: false})
 
+  // handle delete funcs 
   function handleShowDeleteNoti(bookId, bookName) {
     setShowDeleteNoti({ state: true, id: bookId, name: bookName })
   }
@@ -191,6 +194,13 @@ const BookTable = ({ books }) => {
     setShowDeleteNoti({ ...showDeleteNoti, state: false })
   }
 
+  // handle edits funcs
+  function handleSaveEditedBook(bookData) {
+    console.log("Saving edited book:", bookData)
+    setIsEditing({ state: false })
+  }
+
+  // get category and author names by id
   const getCategoryName = (categoryId) => {
     const category = categories.find((cat) => cat.id === categoryId)
     return category ? category.name : "Không xác định"
@@ -255,7 +265,8 @@ const BookTable = ({ books }) => {
               <td>
                 <div className={styles.actionButtons}>
                   <button className={styles.editButton}>
-                    <Edit size={16} />
+                    <Edit size={16} 
+                      onClick={()=>setIsEditing({state: true, book: book})}/>
                   </button>
                   <button className={styles.deleteButton} onClick={() => handleShowDeleteNoti(book.id, book.name)}>
                     <Trash2 size={16} />
@@ -266,13 +277,28 @@ const BookTable = ({ books }) => {
           ))}
         </tbody>
       </table>
-
+      
+      {/* show notification */}
       {showDeleteNoti.state && (
         <Notification
           handleConfirm={handleConfirmDelete}
           handleCancel={() => setShowDeleteNoti({ ...showDeleteNoti, state: false })}
           content={`Bạn có chắc chắn muốn xóa sách "${showDeleteNoti.name}" không?`}
         />
+      )}
+
+      {/*show edit form*/}
+      {isEditing.state && (
+        <div className={styles.bookFormContainer}>
+          <BookForm
+            book={isEditing.book}
+            onSave={(bookData) => handleSaveEditedBook(bookData)}
+            onCancel={() => setIsEditing({ state: false })}
+            categories={categories}
+            authors={authors}
+            isOpen={isEditing.state}
+          />
+        </div>
       )}
     </div>
   )

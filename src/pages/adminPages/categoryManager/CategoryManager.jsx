@@ -1,6 +1,6 @@
 import styles from "./CategoryManager.module.css"
 import { Search, Plus, Trash2, Edit } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Notification from "../../../components/adminComponents/notification/Notification"
 
 export default function CategoryManager() {
@@ -60,7 +60,7 @@ const categories = [
 
 const CategoryTable = () => {
   const [showDeleteNoti, setShowDeleteNoti] = useState({ state: false })
-
+  const [isEditing, setIsEditing] = useState({ state: false })
   function handleShowDeleteNoti(id, name) {
     setShowDeleteNoti({ state: true, id, name })
   }
@@ -72,6 +72,11 @@ const CategoryTable = () => {
   function handleConfirmDelete() {
     handleDelete(showDeleteNoti.id)
     setShowDeleteNoti({ ...showDeleteNoti, state: false })
+  }
+
+  function handleSaveEditedCategory(categoryData) {
+    console.log("Saving edited category:", categoryData)
+    setIsEditing({ state: false })
   }
 
   return (
@@ -100,7 +105,8 @@ const CategoryTable = () => {
               <td>
                 <div className={styles.actionButtons}>
                   <button className={styles.editButton}>
-                    <Edit size={16} />
+                    <Edit size={16} 
+                      onClick={()=>setIsEditing({state: true, category: category})}/>
                   </button>
                   <button
                     className={styles.deleteButton}
@@ -114,7 +120,8 @@ const CategoryTable = () => {
           ))}
         </tbody>
       </table>
-
+      
+      {/* show notification */}
       {showDeleteNoti.state && (
         <Notification
           handleConfirm={handleConfirmDelete}
@@ -122,12 +129,28 @@ const CategoryTable = () => {
           content={`Bạn có chắc chắn muốn xóa danh mục "${showDeleteNoti.name}" không?`}
         />
       )}
+
+      {/* show editing form */}
+      {isEditing.state && (
+        <CategoryForm
+          onSave={(categoryData) => handleSaveEditedCategory(categoryData)}
+          onCancel={() => setIsEditing({ state: false })}
+          category={isEditing.category}
+        />
+      )}
     </div>
   )
 }
 
-const CategoryForm = ({ onSave, onCancel }) => {
+const CategoryForm = ({ category, onSave, onCancel }) => {
   const [name, setName] = useState("")
+
+  // if edit category:
+  useEffect(()=>{
+    if(category){
+      setName(category.name)
+    }
+  }, [])
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -149,7 +172,7 @@ const CategoryForm = ({ onSave, onCancel }) => {
     <div className={styles.formOverlay}>
       <div className={styles.formContainer}>
         <form onSubmit={handleSubmit} className={styles.form}>
-          <h2 className={styles.formTitle}>Thêm danh mục mới</h2>
+          <h2 className={styles.formTitle}>{category ? `Chỉnh sửa danh mục` : 'Thêm danh mục mới'}</h2>
 
           <div className={styles.formGroup}>
             <label htmlFor="categoryName" className={styles.formLabel}>

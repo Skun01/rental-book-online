@@ -44,7 +44,7 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
         setImageList(subImages.map((img, index) => ({ name: `sub-${index}`, url: img.url })))
       }
     } else {
-      // Reset form to create book
+      // reset form to create new book
       setFormData({
         name: "",
         description: "",
@@ -98,7 +98,7 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
     setImageList((prev) => [...prev, ...images])
   }
 
-  // Handle image deletion
+  // Handle delete image
   const handleDeleteImage = (type) => {
     if (type === "main") {
       setMainImage(null)
@@ -116,7 +116,7 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
       [name]: value,
     }))
 
-    // Auto-set stock to totalQuantity if stock is empty
+    // set stock if empty
     if (name === "totalQuantity" && !formData.stock) {
       setFormData((prev) => ({
         ...prev,
@@ -125,10 +125,12 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
     }
   }
 
+
+  // handle submit to add or edit books
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    // Validation
+    // Validate 
     if (!formData.name.trim()) {
       alert("Vui lòng nhập tên sách")
       return
@@ -144,9 +146,8 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
       return
     }
 
-    // Prepare image list
+    // get total images
     const processedImageList = []
-
     if (mainImage) {
       processedImageList.push({
         isDefault: true,
@@ -179,9 +180,9 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
   }
 
   if (!isOpen) return null
-
   return (
     <div className={styles.formOverlay}>
+      {/* header */}
       <div className={styles.formContainer}>
         <div className={styles.formHeader}>
           <h2 className={styles.formTitle}>{book ? "Chỉnh sửa sách" : "Thêm sách mới"}</h2>
@@ -192,8 +193,10 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
 
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formSections}>
-            {/* Basic Information */}
+
+            {/* basic information */}
             <div className={styles.formSection}>
+
               <h3 className={styles.sectionTitle}>
                 <FileText size={18} />
                 Thông tin cơ bản
@@ -201,7 +204,7 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
 
               <div className={styles.formRow}>
                 <div className={styles.formGroup}>
-                  <label className={styles.formLabel}>Tên sách *</label>
+                  <label className={styles.formLabel}>Tên sách</label>
                   <input
                     type="text"
                     name="name"
@@ -352,7 +355,7 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
               </div>
             </div>
 
-            {/* Price and Stock */}
+            {/* price and stock */}
             <div className={styles.formSection}>
               <h3 className={styles.sectionTitle}>
                 <DollarSign size={18} />
@@ -428,7 +431,7 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
                   <div className={styles.imagePreview}>
                     {mainImage ? (
                       <>
-                        <img src={mainImage.url || "/placeholder.svg"} alt={mainImage.name} />
+                        <img src={mainImage.url || "/auth.jpg"} alt={mainImage.name} />
                         <X className={styles.previewImageDelete} onClick={() => handleDeleteImage("main")} />
                       </>
                     ) : (
