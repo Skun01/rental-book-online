@@ -1,0 +1,129 @@
+/* Container overlay cho notification */
+.notificationContainer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  /* Notification box chính */
+  .notification {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    min-width: 350px;
+    max-width: 500px;
+    padding: 0;
+    overflow: hidden;
+    animation: slideIn 0.3s ease-out;
+  }
+  
+  /* Animation cho notification */
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-50px) scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  
+  /* Header section */
+  .header {
+    padding: 24px 24px 16px 24px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  /* Title styling */
+  .title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+  
+  /* Content styling */
+  .content {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.5;
+    text-align: center;
+  }
+  
+  /* Button section */
+  .btnSection {
+    padding: 16px 24px 24px 24px;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+  
+  /* Base button styling */
+  .Btn {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 80px;
+  }
+  
+  /* Confirm button (Có) */
+  .confirmBtn {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .confirmBtn:hover {
+    background-color: #0056b3;
+  }
+  
+  .confirmBtn:active {
+    transform: translateY(0);
+  }
+  
+  /* Cancel button (Không) - nếu cần phân biệt */
+  .cancelBtn {
+    background-color: #6c757d;
+    color: white;
+  }
+  
+  .cancelBtn:hover {
+    background-color: #5a6268;
+  }
+  
+  .cancelBtn:active {
+    transform: translateY(0);
+  }
+  
+  /* Responsive design */
+  @media (max-width: 480px) {
+    .notification {
+      min-width: 300px;
+      margin: 20px;
+    }
+    
+    .header {
+      padding: 20px 20px 12px 20px;
+    }
+    
+    .btnSection {
+      padding: 12px 20px 20px 20px;
+      flex-direction: column;
+    }
+    
+    .Btn {
+      width: 100%;
+    }
+  }

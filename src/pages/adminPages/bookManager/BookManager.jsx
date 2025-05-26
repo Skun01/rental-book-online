@@ -3,9 +3,9 @@ import { Search, Funnel, ChevronDown, Plus, Trash2,
   Edit} from 'lucide-react';
 import { useState } from 'react';
 import BookForm from '../../../components/adminComponents/bookForm/BookForm';
+import Notification from '../../../components/adminComponents/notification/Notification';
 export default function BookManager() {
-  const [addNewBook, setAddNewBook] = useState(false);
-
+  const [addNewBook, setAddNewBook] = useState(false)
   // xu ly huy add new book
   function handleCancelAddNewBook(){
     setAddNewBook(false);
@@ -53,18 +53,91 @@ export default function BookManager() {
 }
 
 const Filter = ()=>{
+  const [filterDisplay, setFilterDisplay] = useState(false)
   return (
-    <div className={styles.filter}>
-      <Funnel />
-      <span className={styles.filterTitle}>Bộ lọc</span>
-      <ChevronDown />
+    <div className={styles.filterContainer}>
+      <div className={styles.filter}
+        onClick={()=>setFilterDisplay(!filterDisplay)}>
+        <Funnel />
+        <span className={styles.filterTitle}>Bộ lọc</span>
+        <ChevronDown />
+      </div>
+      {filterDisplay &&(
+        <div className={styles.filterBoard}>
+          <div className={styles.filterGroup}>
+            <label htmlFor="category" className={styles.filterLabel}>
+              Danh mục
+            </label>
+            <select
+              id="category"
+              name="categoryId"
+              className={styles.filterSelect}
+            >
+              <option value="">Tất cả danh mục</option>
+              {categories.map((category) => (
+                <option key={category.id} value={+category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className={styles.filterGroup}>
+            <label htmlFor="author" className={styles.filterLabel}>
+              Tác giả
+            </label>
+            <select
+              id="author"
+              name="authorId"
+              className={styles.filterSelect}
+            >
+              <option value="">Tất cả tác giả</option>
+              {authors.map((author) => (
+                <option key={author.id} value={+author.id}>
+                  {author.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className={styles.filterGroup}>
+            <label htmlFor="sort" className={styles.filterLabel}>
+              Sắp xếp
+            </label>
+            <select
+              id="sort"
+              name="sort"
+              className={styles.filterSelect}
+            >
+              <option value="sortBy=publish_date&sortDir=asc">Mới nhất</option>
+              <option value="sortBy=publish_date&sortDir=desc">Cũ nhất</option>
+              <option value="sortBy=rentalPrice&sortDir=asc">Giá tăng dần</option>
+              <option value="sortBy=rentalPrice&sortDir=desc">Giá giảm dần</option>
+            </select>
+          </div>
+
+          <div className={styles.filterAction}>
+            <button className={styles.filterCancel}>Hủy</button>
+            <button className={styles.filterConfirm}>Xác nhận</button>
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }
 
 const BookTable = ()=>{
+  const [showDeleteNoti, setShowDeleteNoti] = useState({state: false})
+  function handleShowDeleteNoti(bookId, bookName){
+    setShowDeleteNoti({state: true, id: bookId, name: bookName})
+  }
   function handleDelete(id){
     console.log('delete book with id: ', id);
+  }
+  function handleConfirmDelete(){
+    handleDelete(showDeleteNoti.id)
+    setShowDeleteNoti({...showDeleteNoti, state: false})
   }
   return (
     <div className={styles.booksTable}>
@@ -106,7 +179,7 @@ const BookTable = ()=>{
                   <button className={styles.editButton}>
                     <Edit size={16} />
                   </button>
-                  <button className={styles.deleteButton} onClick={() => handleDelete(book.id)}>
+                  <button className={styles.deleteButton} onClick={()=>handleShowDeleteNoti(book.id, book.name)}>
                     <Trash2 size={16} />
                   </button>
                 </div>
@@ -115,6 +188,11 @@ const BookTable = ()=>{
           ))}
         </tbody>
       </table>
+      {showDeleteNoti.state && (
+        <Notification 
+          handleConfirm={()=>handleConfirmDelete()}
+          handleCancel={()=>setShowDeleteNoti({...showDeleteNoti, state: false})}
+          content={`Bạn có chắc chắn muốn xóa sách "${showDeleteNoti.name}" không?`}/>)}
     </div>
   )
 }
@@ -207,6 +285,9 @@ const categories  = [
     {id: 9, name: 'Phạm Văn I'},
     {id: 10, name: 'Hoàng Thị J'}
   ]
+
+
+  // cấu trúc của book: 
 // "name": "string",
 // "description": "string",
 // "title": "string",
