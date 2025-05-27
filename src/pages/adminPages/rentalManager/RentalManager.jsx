@@ -1,22 +1,9 @@
-"use client"
-
 import styles from "./RentalManager.module.css"
-import {
-  Search,
-  FilterIcon as Funnel,
-  ChevronDown,
-  Eye,
-  User,
-  Calendar,
-  Clock,
-  AlertTriangle,
-  BookOpen,
-  Phone,
-  Mail,
-  MapPin,
-  FileText,
-} from "lucide-react"
+import { Search, FilterIcon as Funnel, ChevronDown, Eye, User, Calendar, Clock, 
+  AlertTriangle, BookOpen, Phone, Mail, MapPin, FileText} from "lucide-react"
 import { useState } from "react"
+import UserDetailModal from "../../../components/adminComponents/userDetailModal/UserDetailModal"
+import OrderDetailModal from "../../../components/adminComponents/orderDetailModal/OrderDetailModal"
 
 export default function RentalManager() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -202,7 +189,6 @@ const BookRentalTable = ({ books, setSelectedBook }) => {
           <tr>
             <th>Mã sách</th>
             <th>Sách</th>
-            <th>Số người thuê</th>
             <th>Đã cho thuê</th>
             <th>Đang cho thuê</th>
             <th>Đang hết hạn</th>
@@ -226,9 +212,6 @@ const BookRentalTable = ({ books, setSelectedBook }) => {
                     <span className={styles.category}>{book.category}</span>
                   </div>
                 </div>
-              </td>
-              <td>
-                <span className={styles.renterCount}>{book.totalRenters}</span>
               </td>
               <td>
                 <span className={styles.totalRented}>{book.totalRented}</span>
@@ -261,7 +244,6 @@ const BookRentalTable = ({ books, setSelectedBook }) => {
 }
 
 const BookRentalDetailModal = ({ book, onClose }) => {
-  const [activeTab, setActiveTab] = useState("current") // "current" or "completed"
   const [selectedUser, setSelectedUser] = useState(null)
   const [selectedOrder, setSelectedOrder] = useState(null)
 
@@ -374,10 +356,6 @@ const BookRentalDetailModal = ({ book, onClose }) => {
                   </p>
                   <div className={styles.bookStats}>
                     <div className={styles.statItem}>
-                      <span className={styles.statNumber}>{book.totalRenters}</span>
-                      <span className={styles.statLabel}>Người thuê</span>
-                    </div>
-                    <div className={styles.statItem}>
                       <span className={styles.statNumber}>{book.currentRenting}</span>
                       <span className={styles.statLabel}>Đang thuê</span>
                     </div>
@@ -390,148 +368,75 @@ const BookRentalDetailModal = ({ book, onClose }) => {
               </div>
             </div>
 
-            {/* Tab Navigation */}
-            <div className={styles.tabContainer}>
-              <div className={styles.tabNavigation}>
-                <button
-                  className={`${styles.tabButton} ${activeTab === "current" ? styles.tabButtonActive : ""}`}
-                  onClick={() => setActiveTab("current")}
-                >
-                  <User size={16} />
-                  Đang thuê ({book.currentRenting})
-                </button>
-                <button
-                  className={`${styles.tabButton} ${activeTab === "completed" ? styles.tabButtonActive : ""}`}
-                  onClick={() => setActiveTab("completed")}
-                >
-                  <Calendar size={16} />
-                  Đã thuê ({book.completedRentals?.length || 0})
-                </button>
-              </div>
-
-              <div className={styles.tabContent}>
-                {activeTab === "current" && (
-                  <div className={styles.rentersList}>
-                    {book.currentRenters.map((rental) => (
-                      <div key={rental.id} className={styles.renterCard}>
-                        <div className={styles.renterInfo}>
-                          <div className={styles.renterAvatar}>
-                            <img
-                              src={rental.user.avatar || "/placeholder.svg?height=50&width=50"}
-                              alt={rental.user.name}
-                            />
+            {/* Current Renters */}
+            <div className={styles.detailSection}>
+              <h3 className={styles.sectionTitle}>
+                <User size={18} />
+                Đang thuê ({book.currentRenting})
+              </h3>
+              <div className={styles.rentersList}>
+                {book.currentRenters.map((rental) => (
+                  <div key={rental.id} className={styles.renterCard}>
+                    <div className={styles.renterInfo}>
+                      <div className={styles.renterAvatar}>
+                        <img src={rental.user.avatar || "/placeholder.svg?height=50&width=50"} alt={rental.user.name} />
+                      </div>
+                      <div className={styles.renterDetails}>
+                        <h4>{rental.user.name}</h4>
+                        <div className={styles.contactInfo}>
+                          <div className={styles.contactItem}>
+                            <Mail size={14} />
+                            <span>{rental.user.email}</span>
                           </div>
-                          <div className={styles.renterDetails}>
-                            <h4>{rental.user.name}</h4>
-                            <div className={styles.contactInfo}>
-                              <div className={styles.contactItem}>
-                                <Mail size={14} />
-                                <span>{rental.user.email}</span>
-                              </div>
-                              <div className={styles.contactItem}>
-                                <Phone size={14} />
-                                <span>{rental.user.phone}</span>
-                              </div>
-                              <div className={styles.contactItem}>
-                                <MapPin size={14} />
-                                <span>{rental.user.address}</span>
-                              </div>
-                            </div>
+                          <div className={styles.contactItem}>
+                            <Phone size={14} />
+                            <span>{rental.user.phone}</span>
                           </div>
-                        </div>
-                        <div className={styles.rentalDetails}>
-                          <div className={styles.rentalInfo}>
-                            <p>
-                              <strong>Mã đơn:</strong> #{rental.orderId}
-                            </p>
-                            <p>
-                              <strong>Ngày thuê:</strong> {formatDate(rental.rentalDate)}
-                            </p>
-                            <p>
-                              <strong>Hết hạn:</strong> {formatDate(rental.dueDate)}
-                            </p>
-                            <p>
-                              <strong>Tiền thuê:</strong> {rental.rentalFee.toLocaleString("vi-VN")}đ
-                            </p>
-                            <p>
-                              <strong>Tiền cọc:</strong> {rental.depositFee.toLocaleString("vi-VN")}đ
-                            </p>
-                          </div>
-                          <div className={styles.rentalStatus}>{getStatusBadge(rental)}</div>
-                          <div className={styles.rentalActions}>
-                            <button
-                              className={styles.viewUserButton}
-                              title="Xem chi tiết người dùng"
-                              onClick={() => handleUserClick(rental)}
-                            >
-                              <User size={14} />
-                            </button>
-                            <button
-                              className={styles.viewOrderButton}
-                              title="Xem chi tiết đơn hàng"
-                              onClick={() => handleOrderClick(rental)}
-                            >
-                              <FileText size={14} />
-                            </button>
+                          <div className={styles.contactItem}>
+                            <MapPin size={14} />
+                            <span>{rental.user.address}</span>
                           </div>
                         </div>
                       </div>
-                    ))}
+                    </div>
+                    <div className={styles.rentalDetails}>
+                      <div className={styles.rentalInfo}>
+                        <p>
+                          <strong>Mã đơn:</strong> #{rental.orderId}
+                        </p>
+                        <p>
+                          <strong>Ngày thuê:</strong> {formatDate(rental.rentalDate)}
+                        </p>
+                        <p>
+                          <strong>Hết hạn:</strong> {formatDate(rental.dueDate)}
+                        </p>
+                        <p>
+                          <strong>Tiền thuê:</strong> {rental.rentalFee.toLocaleString("vi-VN")}đ
+                        </p>
+                        <p>
+                          <strong>Tiền cọc:</strong> {rental.depositFee.toLocaleString("vi-VN")}đ
+                        </p>
+                      </div>
+                      <div className={styles.rentalStatus}>{getStatusBadge(rental)}</div>
+                      <div className={styles.rentalActions}>
+                        <button
+                          className={styles.viewUserButton}
+                          title="Xem chi tiết người dùng"
+                          onClick={() => handleUserClick(rental)}
+                        >
+                          <User size={14} />
+                        </button>
+                        <button
+                          className={styles.viewOrderButton}
+                          title="Xem chi tiết đơn hàng"
+                          onClick={() => handleOrderClick(rental)}
+                        >
+                          <FileText size={14} />
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                )}
-
-                {activeTab === "completed" && (
-                  <div className={styles.completedList}>
-                    {book.completedRentals?.map((rental) => (
-                      <div key={rental.id} className={styles.completedCard}>
-                        <div className={styles.completedInfo}>
-                          <div className={styles.completedAvatar}>
-                            <img
-                              src={rental.user.avatar || "/placeholder.svg?height=40&width=40"}
-                              alt={rental.user.name}
-                            />
-                          </div>
-                          <div className={styles.completedDetails}>
-                            <h4>{rental.user.name}</h4>
-                            <p>#{rental.orderId}</p>
-                            <p>
-                              {formatDate(rental.rentalDate)} - {formatDate(rental.returnDate)}
-                            </p>
-                          </div>
-                        </div>
-                        <div className={styles.completedStatus}>
-                          <span
-                            className={
-                              rental.status === "returned" ? styles.statusReturned : styles.statusOverdueReturned
-                            }
-                          >
-                            {rental.status === "returned" ? "Đã trả đúng hạn" : "Trả quá hạn"}
-                          </span>
-                          <div className={styles.completedActions}>
-                            <button
-                              className={styles.viewUserButton}
-                              title="Xem chi tiết người dùng"
-                              onClick={() => handleUserClick(rental)}
-                            >
-                              <User size={14} />
-                            </button>
-                            <button
-                              className={styles.viewOrderButton}
-                              title="Xem chi tiết đơn hàng"
-                              onClick={() => handleOrderClick(rental)}
-                            >
-                              <FileText size={14} />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    )) || (
-                      <div className={styles.noData}>
-                        <p>Chưa có lịch sử thuê nào cho sách này</p>
-                      </div>
-                    )}
-                  </div>
-                )}
+                ))}
               </div>
             </div>
           </div>
@@ -547,249 +452,6 @@ const BookRentalDetailModal = ({ book, onClose }) => {
   )
 }
 
-// User Detail Modal Component
-const UserDetailModal = ({ user, onClose }) => {
-  return (
-    <div className={styles.modalOverlay}>
-      <div className={styles.modalContainer}>
-        <div className={styles.modalHeader}>
-          <h2>Thông tin người thuê</h2>
-          <button onClick={onClose} className={styles.closeButton}>
-            ×
-          </button>
-        </div>
-
-        <div className={styles.modalContent}>
-          {/* User Basic Info */}
-          <div className={styles.detailSection}>
-            <h3 className={styles.sectionTitle}>
-              <User size={18} />
-              Thông tin cá nhân
-            </h3>
-            <div className={styles.userBasicInfo}>
-              <div className={styles.userAvatar}>
-                <img src={user.avatar || "/placeholder.svg?height=80&width=80"} alt={user.name} />
-              </div>
-              <div className={styles.userDetails}>
-                <h4>{user.name}</h4>
-                <div className={styles.contactInfo}>
-                  <div className={styles.contactItem}>
-                    <Mail size={16} />
-                    <span>{user.email}</span>
-                  </div>
-                  <div className={styles.contactItem}>
-                    <Phone size={16} />
-                    <span>{user.phone}</span>
-                  </div>
-                  <div className={styles.contactItem}>
-                    <MapPin size={16} />
-                    <span>{user.address}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Current Rental Info */}
-          {user.currentRental && (
-            <div className={styles.detailSection}>
-              <h3 className={styles.sectionTitle}>
-                <BookOpen size={18} />
-                Thông tin thuê hiện tại
-              </h3>
-              <div className={styles.rentalInfo}>
-                <div className={styles.rentalItem}>
-                  <span className={styles.rentalLabel}>Mã đơn:</span>
-                  <span className={styles.rentalValue}>#{user.currentRental.orderId}</span>
-                </div>
-                <div className={styles.rentalItem}>
-                  <span className={styles.rentalLabel}>Ngày thuê:</span>
-                  <span className={styles.rentalValue}>
-                    {new Date(user.currentRental.rentalDate).toLocaleDateString("vi-VN")}
-                  </span>
-                </div>
-                <div className={styles.rentalItem}>
-                  <span className={styles.rentalLabel}>Hết hạn:</span>
-                  <span className={styles.rentalValue}>
-                    {new Date(user.currentRental.dueDate).toLocaleDateString("vi-VN")}
-                  </span>
-                </div>
-                <div className={styles.rentalItem}>
-                  <span className={styles.rentalLabel}>Tiền thuê:</span>
-                  <span className={styles.rentalValue}>{user.currentRental.rentalFee.toLocaleString("vi-VN")}đ</span>
-                </div>
-                <div className={styles.rentalItem}>
-                  <span className={styles.rentalLabel}>Tiền cọc:</span>
-                  <span className={styles.rentalValue}>{user.currentRental.depositFee.toLocaleString("vi-VN")}đ</span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* User Statistics */}
-          <div className={styles.detailSection}>
-            <h3 className={styles.sectionTitle}>
-              <Eye size={18} />
-              Thống kê
-            </h3>
-            <div className={styles.statsGrid}>
-              <div className={styles.statItem}>
-                <span className={styles.statNumber}>{user.totalRentals || 0}</span>
-                <span className={styles.statLabel}>Tổng lần thuê</span>
-              </div>
-              <div className={styles.statItem}>
-                <span className={styles.statNumber}>{user.currentRentals || 0}</span>
-                <span className={styles.statLabel}>Đang thuê</span>
-              </div>
-              <div className={styles.statItem}>
-                <span className={styles.statNumber}>{user.overdueCount || 0}</span>
-                <span className={styles.statLabel}>Lần quá hạn</span>
-              </div>
-              <div className={styles.statItem}>
-                <span className={styles.statNumber}>{(user.totalSpent || 0).toLocaleString("vi-VN")}đ</span>
-                <span className={styles.statLabel}>Tổng chi tiêu</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// Order Detail Modal Component
-const OrderDetailModal = ({ order, onClose }) => {
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("vi-VN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    })
-  }
-
-  const getPaymentMethodText = (method) => {
-    const methods = {
-      CASH: "Tiền mặt",
-      CARD: "Thẻ ngân hàng",
-      MOMO: "Ví MoMo",
-    }
-    return methods[method] || method
-  }
-
-  const getDeliveryMethodText = (method) => {
-    const methods = {
-      "library-pickup": "Nhận tại thư viện",
-      "home-delivery": "Giao hàng tận nơi",
-    }
-    return methods[method] || method
-  }
-
-  return (
-    <div className={styles.modalOverlay}>
-      <div className={styles.modalContainer}>
-        <div className={styles.modalHeader}>
-          <h2>Chi tiết đơn hàng #{order.orderId}</h2>
-          <button onClick={onClose} className={styles.closeButton}>
-            ×
-          </button>
-        </div>
-
-        <div className={styles.modalContent}>
-          {/* Order Info */}
-          <div className={styles.detailSection}>
-            <h3 className={styles.sectionTitle}>
-              <FileText size={18} />
-              Thông tin đơn hàng
-            </h3>
-            <div className={styles.infoGrid}>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Mã đơn:</span>
-                <span className={styles.infoValue}>#{order.orderId}</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Ngày đặt:</span>
-                <span className={styles.infoValue}>{formatDate(order.orderDate)}</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Phương thức thanh toán:</span>
-                <span className={styles.infoValue}>{getPaymentMethodText(order.paymentMethod)}</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Phương thức giao hàng:</span>
-                <span className={styles.infoValue}>{getDeliveryMethodText(order.deliveryMethod)}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Customer Info */}
-          <div className={styles.detailSection}>
-            <h3 className={styles.sectionTitle}>
-              <User size={18} />
-              Thông tin khách hàng
-            </h3>
-            <div className={styles.infoGrid}>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Họ tên:</span>
-                <span className={styles.infoValue}>{order.customerName}</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Email:</span>
-                <span className={styles.infoValue}>{order.customerEmail}</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Số điện thoại:</span>
-                <span className={styles.infoValue}>{order.customerPhone}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Delivery Address */}
-          {order.deliveryMethod === "home-delivery" && (
-            <div className={styles.detailSection}>
-              <h3 className={styles.sectionTitle}>
-                <MapPin size={18} />
-                Địa chỉ giao hàng
-              </h3>
-              <p className={styles.addressText}>{order.address}</p>
-            </div>
-          )}
-
-          {/* Order Items */}
-          <div className={styles.detailSection}>
-            <h3 className={styles.sectionTitle}>
-              <BookOpen size={18} />
-              Sách trong đơn hàng
-            </h3>
-            <div className={styles.orderItems}>
-              {order.items.map((item) => (
-                <div key={item.id} className={styles.orderItem}>
-                  <div className={styles.itemImage}>
-                    <img src={item.cover_image || "/placeholder.svg"} alt={item.title} />
-                    {item.quantity > 1 && <span className={styles.itemQuantity}>{item.quantity}</span>}
-                  </div>
-                  <div className={styles.itemInfo}>
-                    <h4>{item.title}</h4>
-                    <p>{item.author}</p>
-                    <div className={styles.itemDetails}>
-                      <span>Thời gian thuê: {item.rent_day} ngày</span>
-                      <span>Giá thuê: {item.rental_price.toLocaleString("vi-VN")}đ/ngày</span>
-                      <span>Tiền cọc: {item.deposit_price.toLocaleString("vi-VN")}đ</span>
-                    </div>
-                  </div>
-                  <div className={styles.itemTotal}>
-                    {(item.rental_price * item.quantity * item.rent_day).toLocaleString("vi-VN")}đ
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 // Mock data for books rental overview
 const booksRentalData = [
