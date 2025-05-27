@@ -23,7 +23,7 @@ export default function SideBar(){
 
         <li className={`${styles.navRow} ${activeTab === 'rentingBooks' ? styles.active : ''}`} 
             onClick={() => handleTabClick('rentingBooks')}>
-          <Link className={styles.navLink}>
+          <Link className={styles.navLink} to='rentals-manage'>
             <BookOpen strokeWidth={1}/>
             <span>Sách đang thuê</span>
           </Link>
