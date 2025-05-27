@@ -45,16 +45,16 @@ export default function AuthorManager() {
 }
 
 const authors = [
-  { id: 1, name: "Nguyễn Văn A", imageUrl: "/auth.jpg" },
-  { id: 2, name: "Trần Thị B", imageUrl: "/auth.jpg" },
-  { id: 3, name: "Lê Văn C", imageUrl: "/auth.jpg" },
-  { id: 4, name: "Phạm Thị D", imageUrl: "/auth.jpg" },
-  { id: 5, name: "Hoàng Văn E", imageUrl: "/auth.jpg" },
-  { id: 6, name: "Nguyễn Thị F", imageUrl: "/auth.jpg" },
-  { id: 7, name: "Trần Văn G", imageUrl: "/auth.jpg" },
-  { id: 8, name: "Lê Thị H", imageUrl: "/auth.jpg" },
-  { id: 9, name: "Phạm Văn I", imageUrl: "/auth.jpg" },
-  { id: 10, name: "Hoàng Thị J", imageUrl: "/auth.jpg" },
+  { id: 1, name: "Nguyễn Văn A", imageUrl: "/auth.jpg", bookCount: 15 },
+  { id: 2, name: "Trần Thị B", imageUrl: "/auth.jpg", bookCount: 8 },
+  { id: 3, name: "Lê Văn C", imageUrl: "/auth.jpg", bookCount: 23 },
+  { id: 4, name: "Phạm Thị D", imageUrl: "/auth.jpg", bookCount: 12 },
+  { id: 5, name: "Hoàng Văn E", imageUrl: "/auth.jpg", bookCount: 7 },
+  { id: 6, name: "Nguyễn Thị F", imageUrl: "/auth.jpg", bookCount: 19 },
+  { id: 7, name: "Trần Văn G", imageUrl: "/auth.jpg", bookCount: 5 },
+  { id: 8, name: "Lê Thị H", imageUrl: "/auth.jpg", bookCount: 31 },
+  { id: 9, name: "Phạm Văn I", imageUrl: "/auth.jpg", bookCount: 14 },
+  { id: 10, name: "Hoàng Thị J", imageUrl: "/auth.jpg", bookCount: 9 },
 ]
 
 const AuthorTable = () => {
@@ -89,6 +89,7 @@ const AuthorTable = () => {
             <th>Mã tác giả</th>
             <th>Ảnh</th>
             <th>Tên tác giả</th>
+            <th>Số lượng sách</th>
             <th>Tùy chọn</th>
           </tr>
         </thead>
@@ -102,6 +103,9 @@ const AuthorTable = () => {
                 </div>
               </td>
               <td>{author.name}</td>
+              <td>
+                <span className={styles.bookCount}>{author.bookCount || 0} cuốn</span>
+              </td>
               <td>
                 <div className={styles.actionButtons}>
                   <button className={styles.editButton}>

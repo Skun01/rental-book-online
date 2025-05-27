@@ -583,12 +583,12 @@ const UserForm = ({ user = null, onSave, onCancel }) => {
 const UserDetailModal = ({ user, onClose }) => {
   const handleOrderClick = (orderId) => {
     console.log("View order details:", orderId)
-    // Bạn sẽ xử lý logic này sau
+    
   }
 
   const handleBookClick = (bookId) => {
     console.log("View book details:", bookId)
-    // Bạn sẽ xử lý logic này sau
+    
   }
 
   return (
