@@ -15,7 +15,7 @@ const BookDetailsPage = () => {
   const [totalRentalPrice, setTotalRentalPrice] = useState(0)
   const {id} = useParams()
   const [book, setBook] = useState(null)
-  const {addToCart, clearCart} = useCart()
+  const {addToCart} = useCart()
   useEffect(()=>{
     async function getBookById(){
       await axios.get(`http://localhost:8080/api/v1/book/${id}`)
@@ -91,7 +91,7 @@ const BookDetailsPage = () => {
           <div className={styles.detailContainer}>
             <div className={styles.bookInforCol}>
               <div className={styles.inforRow}>
-                <span className={styles.inforTitle}>Tác giả: </span> {book && book.author ? book.author : 'Đang cập nhật'}
+                <span className={styles.inforTitle}>Tác giả: </span> {book && book.author ? book.author.name : 'Đang cập nhật'}
               </div>
               <div className={styles.inforRow}>
                 <span className={styles.inforTitle}>Nhà xuất bản: </span>{book && book.publisher ? book.publisher : 'Đang cập nhật'}
@@ -190,7 +190,7 @@ const BookDetailsPage = () => {
                 </div>
               </div>
             </div>
-            <div className={styles.rentDateResult}>Ngày trả sách: {addDays(rentDate)}</div>
+            <div className={styles.rentDateResult}>Ngày trả sách dự kiến: {addDays(rentDate)}</div>
         
             {/* Phần tổng giá và nút hành động */}
             <div className={styles.rentAction}>

@@ -2,16 +2,9 @@ import { useState, useEffect } from "react"
 import { User, Mail, MapPin, Lock, Edit2, Plus, Trash2 } from 'lucide-react'
 import styles from "./ProfilePage.module.css"
 import { useAuth } from "../../../contexts/AuthContext"
+import {useToast} from "../../../contexts/ToastContext"
 import axios from "axios"
 import { useNavigate } from "react-router-dom"
-
-const mockUserData = {
-  fullName: "Nguyễn Văn A",
-  email: "nguyenvana@example.com",
-  gender: "MALE",
-  age: 28,
-  avatar: null
-}
 
 const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("info")
@@ -25,14 +18,13 @@ const ProfilePage = () => {
     password: ""
   })
 
-  const [addresses, setAddresses] = useState([])
-  const [newAddress, setNewAddress] = useState({
-    city: "",
-    district: "",
-    ward: "",
-    street: "",
-    isDefault: false
-  })
+  // const [addresses, setAddresses] = useState([])
+  // const [newAddress, setNewAddress] = useState({
+  //   city: "",
+  //   district: "",
+  //   ward: "",
+  //   street: ""
+  // })
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -47,17 +39,17 @@ const ProfilePage = () => {
       navigate('/')
     }
     // user address
-    async function getUserAddress(){
-      await axios.get(`http://localhost:8080/api/v1/address/user/${currentUser.id}?page=0&size=5`, {
-        headers: {
-          Authorization: `${bearer}`
-        }
-      })
-        .then(response=>{
-          setAddresses(response.data.data.content)
-        })
-    }
-    getUserAddress()
+    // async function getUserAddress(){
+    //   await axios.get(`http://localhost:8080/api/v1/address/user/${currentUser.id}?page=0&size=5`, {
+    //     headers: {
+    //       Authorization: `${bearer}`
+    //     }
+    //   })
+    //     .then(response=>{
+    //       setAddresses(response.data.data.content)
+    //     })
+    // }
+    // getUserAddress()
 
     // full user infor
     async function getFullUserInfor(){
@@ -81,7 +73,6 @@ const ProfilePage = () => {
   }, [])
 
   // update userInfor 
-
   async function updateUser(){
     await axios.put(`http://localhost:8080/api/v1/user/${currentUser.id}`, 
     {
@@ -135,10 +126,11 @@ const ProfilePage = () => {
 
             {activeTab === "address" && (
               <AddressTab 
-                addresses={addresses} 
-                setAddresses={setAddresses}
-                newAddress={newAddress}
-                setNewAddress={setNewAddress}
+                // addresses={addresses} 
+                // setAddresses={setAddresses}
+                // newAddress={newAddress}
+                // setNewAddress={setNewAddress}
+                userId={currentUser.id}
                 editMode={editMode}
                 setEditMode={setEditMode}
                 setMessage={setMessage}
@@ -359,30 +351,52 @@ const PersonalInfoTab = ({ editMode, formData, setFormData, handleEditToggle, se
 }
 
 // tab địa chỉ
-const AddressTab = ({ addresses, setAddresses, newAddress, setNewAddress, editMode, setEditMode, setMessage }) => {
-  const {currentUser} = useAuth()
+const AddressTab = ({ userId, editMode, setEditMode }) => {
+  const [reloadAddress, setReloadAddress] = useState(false)
+  const [addresses, setAddresses] = useState([])
+  const [newAddress, setNewAddress] = useState({
+    city: "",
+    district: "",
+    ward: "",
+    street: ""
+  })
+  const {showToast} = useToast()
+
+  // get all user address
+  useEffect(()=>{
+    const bearer = localStorage.getItem('token')
+    async function getUserAddress(){
+      await axios.get(`http://localhost:8080/api/v1/address/user/${userId}?page=0&size=10`, {
+        headers: {
+          Authorization: `${bearer}`
+        }
+      })
+        .then(response=>{
+          setAddresses(response.data.data.content)
+          console.log(response)
+        })
+    }
+    getUserAddress()
+  }, [reloadAddress])
+
+  // handle address change
   const handleAddressChange = (e) => {
-    const { name, value, type, checked } = e.target
+    const { name, value } = e.target
     setNewAddress((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }))
-  }
+      [name] : value,
+    })
+  )}
 
+  // handle submit
   const handleAddressSubmit = async (e) => {
     e.preventDefault()
+
+    // query create address
     try {
-      if (newAddress.isDefault) {
-        setAddresses(addresses.map(addr => ({
-          ...addr,
-          isDefault: false
-        })))
-      }
-      
-      // query create address
       await axios.post('http://localhost:8080/api/v1/address',
         {
-          userId: currentUser.id,
+          userId: userId,
           ...newAddress,
         },
         {
@@ -390,41 +404,59 @@ const AddressTab = ({ addresses, setAddresses, newAddress, setNewAddress, editMo
             Authorization: `${localStorage.getItem('token')}`
           }
         }
-      )
-
-      setAddresses([...addresses, newAddress])
+      ).then(response =>{
+        setAddresses([...addresses, response.data.data])
+      })
+      
       setNewAddress({
         city: "",
         district: "",
-        province: "",
+        ward: "",
         street: "",
-        isDefault: false
       })
       setEditMode(false)
-      setMessage({ type: "success", text: "Địa chỉ mới đã được thêm thành công!" })
+      showToast({type: 'success', message: "Địa chỉ đã được thêm thành công!"})
     } catch (error) {
-      setMessage({ type: error, text: "Có lỗi xảy ra khi thêm địa chỉ!" })
+      showToast({type: 'error', message: "Có lỗi xảy ra khi thêm địa chỉ!"})
+      console.error("Error adding address:", error)
     }
   }
 
   const handleDeleteAddress = async (addressId) => {
     try {
-      setAddresses(addresses.filter(addr => addr.id !== addressId))
-      setMessage({ type: "success", text: "Địa chỉ đã được xóa thành công!" })
+      await axios.delete(`http://localhost:8080/api/v1/address/${addressId}`,
+        {
+          headers: {
+            Authorization: `${localStorage.getItem('token')}`
+          }
+        }
+      )
+      setReloadAddress(!reloadAddress)
+      showToast({ type: "success", message: "Địa chỉ đã được xóa thành công!" })
     } catch (error) {
-      setMessage({ type: error, text: "Có lỗi xảy ra khi xóa địa chỉ!" })
+      showToast({ type: 'error', message: "Có lỗi xảy ra khi xóa địa chỉ!" })
+      console.error("Error deleting address:", error)
     }
   }
 
   const handleSetDefaultAddress = async (addressId) => {
     try {
-      setAddresses(addresses.map(addr => ({
-        ...addr,
-        isDefault: addr.id === addressId
-      })))
-      setMessage({ type: "success", text: "Đã cập nhật địa chỉ mặc định!" })
+      await axios.put(`http://localhost:8080/api/v1/address`,
+        {
+          userId: userId,
+          addressId: addressId,
+        },
+        {
+          headers: {
+            Authorization: `${localStorage.getItem('token')}`
+          }
+        }
+      )
+      setReloadAddress(!reloadAddress)
+      showToast({ type: "success", message: "Đã cập nhật địa chỉ mặc định!" })
     } catch (error) {
-      setMessage({ type: error, text: "Có lỗi xảy ra khi cập nhật địa chỉ mặc định!" })
+      showToast({ type: 'error', message: "Có lỗi xảy ra khi cập nhật địa chỉ mặc định!" })
+      console.error("Error setting default address:", error)
     }
   }
 
@@ -447,13 +479,8 @@ const AddressTab = ({ addresses, setAddresses, newAddress, setNewAddress, editMo
               Tỉnh/Thành phố
             </label>
             <input 
-              type="text" 
-              id="city" 
-              name="city" 
-              value={newAddress.city}
-              onChange={handleAddressChange}
-              className={styles.formControl} 
-              required 
+              type="text" id="city" name="city" value={newAddress.city}
+              onChange={handleAddressChange} className={styles.formControl} required 
             />
           </div>
 
@@ -461,14 +488,8 @@ const AddressTab = ({ addresses, setAddresses, newAddress, setNewAddress, editMo
             <label htmlFor="district" className={styles.formLabel}>
               Quận/Huyện
             </label>
-            <input 
-              type="text" 
-              id="district" 
-              name="district" 
-              value={newAddress.district}
-              onChange={handleAddressChange}
-              className={styles.formControl} 
-              required 
+            <input type="text" id="district" name="district" value={newAddress.district}
+              onChange={handleAddressChange} className={styles.formControl} required 
             />
           </div>
 
@@ -476,41 +497,18 @@ const AddressTab = ({ addresses, setAddresses, newAddress, setNewAddress, editMo
             <label htmlFor="ward" className={styles.formLabel}>
               Phường/Xã
             </label>
-            <input 
-              type="text" 
-              id="ward" 
-              name="ward" 
-              value={newAddress.ward}
-              onChange={handleAddressChange}
-              className={styles.formControl} 
-              required 
+            <input type="text" id="ward" name="ward" value={newAddress.ward}
+              onChange={handleAddressChange} className={styles.formControl} required 
             />
           </div>
 
           <div className={styles.formGroup}>
             <label htmlFor="street" className={styles.formLabel}>
-              Tên đường
+              Tên đường, số nhà
             </label>
-            <input 
-              type="text" 
-              id="street" 
-              name="street" 
-              value={newAddress.street}
-              onChange={handleAddressChange}
-              className={styles.formControl} 
-              required 
+            <input type="text" id="street" name="street" value={newAddress.street}
+              onChange={handleAddressChange} className={styles.formControl} required 
             />
-          </div>
-
-          <div className={styles.formCheckbox}>
-            <input 
-              type="checkbox" 
-              id="isDefault" 
-              name="isDefault"
-              checked={newAddress.isDefault}
-              onChange={handleAddressChange}
-            />
-            <label htmlFor="isDefault">Đặt làm địa chỉ mặc định</label>
           </div>
 
           <div className={styles.formActions}>
@@ -529,11 +527,11 @@ const AddressTab = ({ addresses, setAddresses, newAddress, setNewAddress, editMo
               <div key={address.id} className={styles.addressCard}>
                 <div className={styles.addressHeader}>
                   <h3 className={styles.addressTitle}>
-                    {address.isDefault && <span className={styles.defaultBadge}>Mặc định</span>}
-                    Địa chỉ {address.isDefault ? "mặc định" : ""}
+                    {address.isDefault === "true" && <span className={styles.defaultBadge}>Mặc định</span>}
+                    Địa chỉ {address.isDefault === "true" ? "mặc định" : ""}
                   </h3>
                   <div className={styles.addressActions}>
-                    {!address.isDefault && (
+                    {address.isDefault === 'false' && (
                       <button 
                         className={styles.setDefaultButton}
                         onClick={() => handleSetDefaultAddress(address.id)}
@@ -551,7 +549,7 @@ const AddressTab = ({ addresses, setAddresses, newAddress, setNewAddress, editMo
                 </div>
                 <div className={styles.addressDetails}>
                   <p>
-                    {address.district}, {address.city}, {address.province}
+                    {address.city}, {address.district}, {address.ward}, {address.street}
                   </p>
                 </div>
               </div>
