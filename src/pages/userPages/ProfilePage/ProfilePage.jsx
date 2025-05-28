@@ -338,7 +338,6 @@ const AddressTab = ({ userId, editMode, setEditMode }) => {
       })
         .then(response=>{
           setAddresses(response.data.data.content)
-          console.log(response)
         })
     }
     getUserAddress()
@@ -567,7 +566,7 @@ const PasswordTab = ({ userId, setMessage }) => {
         {
           userId: userId,
           currentPassword : passwordData.currentPassword,
-          newPassword: passwordData.currentPassword
+          newPassword: passwordData.newPassword
         }
       )
       showToast({ type: "success", message: "Mật khẩu đã được cập nhật thành công!" })

@@ -1,72 +1,113 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import {useCart} from '../../../contexts/CartContext'
+import { useCart } from "../../../contexts/CartContext"
 import styles from "./CheckoutPage.module.css"
+import { useAuth } from "../../../contexts/AuthContext"
+import { useToast } from "../../../contexts/ToastContext"
+import axios from "axios"
 
 const CheckoutPage = () => {
   const navigate = useNavigate()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     fullName: "",
-    email: "",
     phone: "",
     deliveryMethod: "library-pickup",
     pickupLocation: "main-library",
+    pickupDate: "",
     address: "",
     city: "",
     district: "",
-    paymentMethod: "e-wallet",
+    ward: "",
+    street: "",
+    notes: "",
+    paymentMethod: "EWallet",
+    shippingMethod: "Standard",
     accountNumber: "",
   })
   const [errors, setErrors] = useState({})
   const [addresses, setAddresses] = useState([])
   const [selectedAddressId, setSelectedAddressId] = useState(null)
   const [showNewAddressForm, setShowNewAddressForm] = useState(false)
-  const {getTotalPrice, getTotalDeposit, getCartItemCount, cartItems} =  useCart()
+  const { getTotalPrice, getTotalDeposit, getCartItemCount, cartItems } = useCart()
+  const { currentUser } = useAuth()
+  const { showToast } = useToast()
 
-  const addDays = (days) => {
-    const today = new Date()
-    today.setDate(today.getDate() + days)
-    return today.toLocaleDateString("vi-VN")
+  // Tạo lịch chọn 3 ngày liên tục để đến nhận sách khi nhận tại thư viện
+  const getAvailablePickupDates = () => {
+    const dates = []
+    for (let i = 1; i <= 3; i++) {
+      const date = new Date()
+      date.setDate(date.getDate() + i)
+      dates.push({
+        value: date.toISOString().split("T")[0],
+        label: date.toLocaleDateString("vi-VN", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
+      })
+    }
+    return dates
   }
 
-  useEffect(() => {
-    const fetchAddresses = async () => {
-      try {
-        // Mock addresses data
-        const mockAddresses = [
-          {
-            id: 1,
-            address: "Số nhà 25/156 đường phú minh, Văn trì, Minh khai",
-            city: "Hà Nội",
-            district: "Bắc từ liêm",
-            is_default: true,
-          },
-          {
-            id: 2,
-            address: "Xóm Rú Đất, Xã Long Thành",
-            city: "Hà Nội",
-            district: "Yên Thành",
-            is_default: false,
-          },
-        ]
-        setAddresses(mockAddresses)
-        const defaultAddress = mockAddresses.find((addr) => addr.is_default)
-        if (defaultAddress) {
-          setSelectedAddressId(defaultAddress.id)
-          setFormData((prev) => ({
-            ...prev,
-            address: defaultAddress.address,
-            city: defaultAddress.city,
-            district: defaultAddress.district,
-          }))
-        }
-      } catch (error) {
-        console.error("Error fetching addresses:", error)
-      }
-    }
 
-    fetchAddresses()
+  // xử lý lấy ngày nhận dự kiến
+  const getExpectedDate = () => {
+    if (formData.deliveryMethod === "library-pickup") {
+      if (formData.pickupDate) {
+        const date = new Date(formData.pickupDate)
+        return `${date.toLocaleDateString("vi-VN", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+        })}`
+      }
+      return "Chưa chọn thời gian"
+    } else {
+      const days = formData.shippingMethod === "Express" ? 1 : 3
+      const date = new Date()
+      date.setDate(date.getDate() + days)
+      return date.toLocaleDateString("vi-VN", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+      })
+    }
+  }
+
+  // get user address
+  useEffect(() => {
+    try {
+      const bearer = localStorage.getItem("token")
+      async function getUserAddress() {
+        await axios
+          .get(`http://localhost:8080/api/v1/address/user/${currentUser.id}?page=0&size=10`, {
+            headers: {
+              Authorization: `${bearer}`,
+            },
+          })
+          .then((response) => {
+            setAddresses(response.data.data.content)
+            const defaultAddress = response.data.data.content.find((addr) => addr.is_default)
+            if (defaultAddress) {
+              setSelectedAddressId(defaultAddress.id)
+              setFormData((prev) => ({
+                ...prev,
+                address: defaultAddress.address,
+                city: defaultAddress.city,
+                district: defaultAddress.district,
+                ward: defaultAddress.ward,
+                street: defaultAddress.street,
+              }))
+            }
+          })
+      }
+      getUserAddress()
+    } catch (error) {
+      console.error("Error fetching addresses:", error)
+    }
   }, [])
 
   const handleInputChange = (e) => {
@@ -84,9 +125,9 @@ const CheckoutPage = () => {
     }
   }
 
+  // validate form before sending
   const validateForm = () => {
     const newErrors = {}
-
     if (!formData.fullName.trim()) newErrors.fullName = "Họ và tên là bắt buộc"
 
     if (!formData.phone.trim()) {
@@ -95,13 +136,20 @@ const CheckoutPage = () => {
       newErrors.phone = "Số điện thoại không hợp lệ"
     }
 
+    if (formData.deliveryMethod === "library-pickup") {
+      if (!formData.pickupDate) newErrors.pickupDate = "Vui lòng chọn ngày nhận sách"
+      if (!formData.pickupTime) newErrors.pickupTime = "Vui lòng chọn giờ nhận sách"
+    }
+
     if (formData.deliveryMethod === "home-delivery") {
       if (!formData.address.trim()) newErrors.address = "Địa chỉ là bắt buộc"
       if (!formData.city.trim()) newErrors.city = "Thành phố là bắt buộc"
       if (!formData.district.trim()) newErrors.district = "Quận/Huyện là bắt buộc"
+      if (!formData.ward.trim()) newErrors.ward = "Phường/Xã là bắt buộc"
+      if (!formData.street.trim()) newErrors.street = "Đường/Phố là bắt buộc"
     }
 
-    if (formData.paymentMethod === "bank-transfer" && !formData.accountNumber.trim()) {
+    if (formData.paymentMethod === "BankTransfer" && !formData.accountNumber.trim()) {
       newErrors.accountNumber = "Số tài khoản là bắt buộc"
     }
 
@@ -109,16 +157,65 @@ const CheckoutPage = () => {
     return Object.keys(newErrors).length === 0
   }
 
+  //check data
+  const prepareCheckoutData = () => {
+    const shippingFee =
+      formData.deliveryMethod === "home-delivery" ? (formData.shippingMethod === "Express" ? 10000 : 0) : 0
+    const totalPrice = getTotalPrice() + shippingFee
+    const depositPrice = getTotalDeposit()
+
+    const items = cartItems.map((item) => ({
+      bookId: item.id,
+      quantity: item.quantity,
+      rentedDay: item.rentedDay,
+    }))
+
+    const checkoutData = {
+      userId: currentUser.id,
+      city: formData.city,
+      district: formData.district,
+      ward: formData.ward,
+      street: formData.street,
+      notes: formData.notes,
+      totalPrice: totalPrice,
+      depositPrice: depositPrice,
+      paymentStatus: "Unpaid",
+      paymentMethod: formData.paymentMethod,
+      shippingMethod: formData.shippingMethod,
+      items: items,
+    }
+
+    // Add pickup scheduling if library pickup
+    if (formData.deliveryMethod === "library-pickup") {
+      // xu ly sau 
+    }
+
+    return checkoutData
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
+    navigate("/checkout/success")
     if (validateForm()) {
       setIsSubmitting(true)
       try {
-        await new Promise((resolve) => setTimeout(resolve, 1500))
+        const checkoutData = prepareCheckoutData()
+        console.log("Checkout data to send:", checkoutData)
+
+        const bearer = localStorage.getItem("token")
+        const response = await axios.post("http://localhost:8080/api/v1/checkout", checkoutData, {
+          headers: {
+            Authorization: `${bearer}`,
+            "Content-Type": "application/json",
+          },
+        })
+
+        console.log("Checkout response:", response.data)
+        showToast({ type: "success", message: "Đặt hàng thành công!" })
         navigate("/checkout/success")
       } catch (error) {
         console.error("Lỗi khi xử lý đơn hàng:", error)
-        setErrors({ submit: "Có lỗi khi xử lý đơn hàng. Vui lòng thử lại." })
+        showToast({ type: "error", message: "Có lỗi khi xử lý đơn hàng" })
       } finally {
         setIsSubmitting(false)
       }
@@ -134,6 +231,8 @@ const CheckoutPage = () => {
         address: "",
         city: "",
         district: "",
+        ward: "",
+        street: "",
       }))
     } else {
       const selectedAddress = addresses.find((addr) => addr.id === addressId)
@@ -145,6 +244,8 @@ const CheckoutPage = () => {
           address: selectedAddress.address,
           city: selectedAddress.city,
           district: selectedAddress.district,
+          ward: selectedAddress.ward,
+          street: selectedAddress.street,
         }))
       }
     }
@@ -202,10 +303,8 @@ const CheckoutPage = () => {
                       onChange={handleInputChange}
                     />
                     <label htmlFor="library-pickup">
-                      <span className={styles.optionTitle}>Nhận tại tại thư viện sách</span>
-                      <span className={styles.optionDescription}>
-                        Nhận sách tại một trong những địa điểm thư viện
-                      </span>
+                      <span className={styles.optionTitle}>Nhận tại thư viện sách</span>
+                      <span className={styles.optionDescription}>Nhận sách tại một trong những địa điểm thư viện</span>
                     </label>
                   </div>
 
@@ -224,18 +323,65 @@ const CheckoutPage = () => {
                     </label>
                   </div>
                 </div>
-
+                
+                {/* xu ly chon ngay den nhan sach khi chon den thu vien */}
                 {formData.deliveryMethod === "library-pickup" && (
+                  <div className={styles.deliverySection}>
+                    <div className={styles.formGroup}>
+                      <label htmlFor="pickupLocation">Địa điểm nhận sách</label>
+                      <select
+                        id="pickupLocation"
+                        name="pickupLocation"
+                        value={formData.pickupLocation}
+                        onChange={handleInputChange}
+                      >
+                        <option value="main-library">
+                          Thư viện tòa A11 cơ sở 1 Đại Học Công Nghiệp Hà nội, Minh Khai, Bắc Từ Liêm Hà Nội
+                        </option>
+                        <option value="branch-library">
+                          Thư viện tòa C3 cơ sở 3 Đại Học Công Nghiệp Hà nội, Phủ lý, Hà Nam
+                        </option>
+                      </select>
+                    </div>
+
+                    <h3>Thời gian hẹn nhận sách</h3>
+                    <p className={styles.pickupNote}>Vui lòng chọn thời gian trong vòng 3 ngày kể từ hôm nay. Nếu bạn không đến nhận sách sau ngày bạn chọn, đơn hàng sẽ bị hủy</p>
+
+                    <div className={styles.formRow}>
+                      <div className={styles.formGroup}>
+                        <label htmlFor="pickupDate">Ngày nhận</label>
+                        <select
+                          id="pickupDate"
+                          name="pickupDate"
+                          value={formData.pickupDate}
+                          onChange={handleInputChange}
+                          className={errors.pickupDate ? styles.error : ""}
+                        >
+                          <option value="">Chọn ngày</option>
+                          {getAvailablePickupDates().map((date) => (
+                            <option key={date.value} value={date.value}>
+                              {date.label}
+                            </option>
+                          ))}
+                        </select>
+                        {errors.pickupDate && <span className={styles.errorMessage}>{errors.pickupDate}</span>}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Shipping Method Selection */}
+                {formData.deliveryMethod === "home-delivery" && (
                   <div className={styles.formGroup}>
-                    <label htmlFor="pickupLocation">Địa điểm nhận sách</label>
+                    <label htmlFor="shippingMethod">Phương thức vận chuyển</label>
                     <select
-                      id="pickupLocation"
-                      name="pickupLocation"
-                      value={formData.pickupLocation}
+                      id="shippingMethod"
+                      name="shippingMethod"
+                      value={formData.shippingMethod}
                       onChange={handleInputChange}
                     >
-                      <option value="main-library">Thư viện tòa A11 cơ sở 1 Đại Học Công Nghiệp Hà nội, Minh Khai, Bắc Từ Liêm Hà Nội</option>
-                      <option value="branch-library">Thư viện tòa C3 cơ sở 3 Đại Học Công Nghiệp Hà nội, Phủ lý, Hà Nam</option>
+                      <option value="Standard">Tiêu chuẩn (3 ngày)</option>
+                      <option value="Express">Nhanh (1 ngày)</option>
                     </select>
                   </div>
                 )}
@@ -257,9 +403,9 @@ const CheckoutPage = () => {
                               <div className={styles.addressInfo}>
                                 <p>{addr.address}</p>
                                 <p>
-                                  {addr.district}, {addr.city}
+                                  {addr.street}, {addr.ward}, {addr.district}, {addr.city}
                                 </p>
-                                {addr.is_default && <span className={styles.defaultBadge}>Mặc định</span>}
+                                {addr.isDefault === "true" && <span className={styles.defaultBadge}>Mặc định</span>}
                               </div>
                             </div>
                           ))}
@@ -279,7 +425,7 @@ const CheckoutPage = () => {
                       <div className={styles.addressForm}>
                         <h4>Địa chỉ mới</h4>
                         <div className={styles.formGroup}>
-                          <label htmlFor="address">Địa chỉ</label>
+                          <label htmlFor="address">Địa chỉ chi tiết</label>
                           <input
                             type="text"
                             id="address"
@@ -287,6 +433,7 @@ const CheckoutPage = () => {
                             value={formData.address}
                             onChange={handleInputChange}
                             className={errors.address ? styles.error : ""}
+                            placeholder="Số nhà, tên đường..."
                           />
                           {errors.address && <span className={styles.errorMessage}>{errors.address}</span>}
                         </div>
@@ -318,10 +465,55 @@ const CheckoutPage = () => {
                             {errors.district && <span className={styles.errorMessage}>{errors.district}</span>}
                           </div>
                         </div>
+
+                        <div className={styles.formRow}>
+                          <div className={styles.formGroup}>
+                            <label htmlFor="ward">Phường/Xã</label>
+                            <input
+                              type="text"
+                              id="ward"
+                              name="ward"
+                              value={formData.ward}
+                              onChange={handleInputChange}
+                              className={errors.ward ? styles.error : ""}
+                            />
+                            {errors.ward && <span className={styles.errorMessage}>{errors.ward}</span>}
+                          </div>
+
+                          <div className={styles.formGroup}>
+                            <label htmlFor="street">Đường/Phố</label>
+                            <input
+                              type="text"
+                              id="street"
+                              name="street"
+                              value={formData.street}
+                              onChange={handleInputChange}
+                              className={errors.street ? styles.error : ""}
+                            />
+                            {errors.street && <span className={styles.errorMessage}>{errors.street}</span>}
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>
                 )}
+              </div>
+
+              {/* Ghi chú */}
+              <div className={styles.formSection}>
+                <h2>Ghi chú</h2>
+                <div className={styles.formGroup}>
+                  <label htmlFor="notes">Ghi chú đơn hàng (tùy chọn)</label>
+                  <textarea
+                    id="notes"
+                    name="notes"
+                    value={formData.notes}
+                    onChange={handleInputChange}
+                    rows={3}
+                    placeholder="Thêm ghi chú cho đơn hàng..."
+                    className={styles.orderNote}
+                  />
+                </div>
               </div>
 
               {/* Phương Thức Thanh Toán */}
@@ -333,8 +525,8 @@ const CheckoutPage = () => {
                       type="radio"
                       id="e-wallet"
                       name="paymentMethod"
-                      value="e-wallet"
-                      checked={formData.paymentMethod === "e-wallet"}
+                      value="EWallet"
+                      checked={formData.paymentMethod === "EWallet"}
                       onChange={handleInputChange}
                     />
                     <label htmlFor="e-wallet">
@@ -347,13 +539,27 @@ const CheckoutPage = () => {
                       type="radio"
                       id="cash"
                       name="paymentMethod"
-                      value="cash"
-                      checked={formData.paymentMethod === "cash"}
+                      value="Cash"
+                      checked={formData.paymentMethod === "Cash"}
                       onChange={handleInputChange}
                     />
                     <label htmlFor="cash">
                       <span className={styles.optionTitle}>Thanh toán khi nhận hàng</span>
                       <span className={styles.optionDescription}>Thanh toán khi nhận sách</span>
+                    </label>
+                  </div>
+                  <div className={styles.paymentOption}>
+                    <input
+                      type="radio"
+                      id="bank-transfer"
+                      name="paymentMethod"
+                      value="BankTransfer"
+                      checked={formData.paymentMethod === "BankTransfer"}
+                      onChange={handleInputChange}
+                    />
+                    <label htmlFor="bank-transfer">
+                      <span className={styles.optionTitle}>Chuyển khoản ngân hàng</span>
+                      <span className={styles.optionDescription}>Chuyển khoản qua ngân hàng</span>
                     </label>
                   </div>
                 </div>
@@ -367,7 +573,8 @@ const CheckoutPage = () => {
           </div>
 
           <div className={styles.orderSummaryContainer}>
-            {/* Tóm Tắt Đơn Hàng */}
+
+            {/* Hiển thị các item trong đơn hàng*/}
             <div className={styles.orderSummary}>
               <h2 className={styles.summaryTitle}>Tóm tắt đơn hàng</h2>
 
@@ -375,7 +582,7 @@ const CheckoutPage = () => {
                 {cartItems.map((item) => (
                   <div key={item.id} className={styles.cartItem}>
                     <div className={styles.itemImage}>
-                      <img src={"/auth.jpg"} alt={item.title} className={styles.itemThumbnail} />
+                      <img src={item.imageList ? item.imageList[0].url : '/auth.jpg'} alt={item.title} className={styles.itemThumbnail} />
                       {item.quantity > 1 && <span className={styles.itemQuantity}>{item.quantity}</span>}
                     </div>
                     <div className={styles.itemInfo}>
@@ -383,11 +590,13 @@ const CheckoutPage = () => {
                       <p className={styles.itemAuthor}>{item.author && item.author.name}</p>
                       <div className={styles.itemRentDetails}>
                         <span className={styles.itemRentDays}>Thời gian thuê: {item.rentedDay} ngày</span>
-                        <span className={styles.itemReturnDate}>Ngày trả: {addDays(item.rentedDay)}</span>
                       </div>
                       <div className={styles.itemPrice}>
-                        {(item.rentalPrice * item.quantity * item.rentedDay).toLocaleString("vi-VN")}đ
-                        <span className={styles.depositAmount}> (Đặt cọc: {item.depositPrice.toLocaleString("vi-VN")}đ)</span>
+                        {(item.rentalPrice * item.quantity * Math.floor(item.rentedDay/7)).toLocaleString("vi-VN")}đ
+                        <span className={styles.depositAmount}>
+                          {" "}
+                          (Tiền cọc: {(item.depositPrice*item.quantity).toLocaleString("vi-VN")}đ)
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -409,19 +618,38 @@ const CheckoutPage = () => {
                 </div>
                 {formData.deliveryMethod === "home-delivery" && (
                   <div className={styles.summaryRow}>
-                    <span>Phí vận chuyển:</span>
-                    <span>30.000đ</span>
+                    <span>Phí vận chuyển ({formData.shippingMethod === "Express" ? "Nhanh" : "Tiêu chuẩn"}):</span>
+                    <span>{formData.shippingMethod === "Express" ? "10.000đ" : "Miễn phí"}</span>
                   </div>
                 )}
+
+                {/* Expected Date Display */}
+                <div className={styles.summaryRow}>
+                  <span>{formData.deliveryMethod === "library-pickup" ? "Thời gian nhận:" : "Ngày nhận hàng:"}</span>
+                  <span className={styles.expectedDate}>{getExpectedDate()}</span>
+                </div>
+
                 <div className={`${styles.summaryRow} ${styles.summaryRowTotal}`}>
                   <span>Tổng thanh toán:</span>
-                  <span>{(getTotalPrice() + (formData.deliveryMethod === "home-delivery" ? 30000 : 0)).toLocaleString("vi-VN")}đ</span>
+                  <span>
+                    {(
+                      getTotalPrice() + (getTotalDeposit()) + 
+                      (formData.deliveryMethod === "home-delivery"
+                        ? formData.shippingMethod === "Express"
+                          ? 10000
+                          : 0
+                        : 0)
+                    ).toLocaleString("vi-VN")}
+                    đ
+                  </span>
                 </div>
               </div>
 
               <div className={styles.rentalNote}>
                 <p>
-                  <strong>Lưu ý:</strong> Số tiền cọc sẽ được hoàn lại khi bạn trả sách trong tình trạng tốt.
+                  <strong>Lưu ý:</strong> <br/>
+                  - Số tiền cọc sẽ được hoàn lại khi bạn trả sách trong tình trạng tốt.<br/>
+                  - Thời gian thuê sách sẽ được tính từ ngày nhận hàng
                 </p>
               </div>
             </div>

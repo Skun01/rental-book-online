@@ -27,8 +27,8 @@ const BookDetailsPage = () => {
   }, [])
   useEffect(()=>{
     if(book){
-      setTotalRentalPrice(book['depositPrice']*rentDate*rentNumber)
-      setTotalDepositPrice(book.rentalPrice*rentNumber)
+      setTotalRentalPrice(book.rentalPrice*Math.floor(rentDate/7)*rentNumber)
+      setTotalDepositPrice(book.depositPrice*rentNumber)
     }
   }, [book, rentDate, rentNumber])
 
@@ -43,11 +43,11 @@ const BookDetailsPage = () => {
   }
 
   // ham xu ly ngay thang
-  function addDays(days) {
-    const today = new Date();
-    today.setDate(today.getDate() + days);
-    return today.toLocaleDateString('vi-VN');
-  }
+  // function addDays(days) {
+  //   const today = new Date();
+  //   today.setDate(today.getDate() + days);
+  //   return today.toLocaleDateString('vi-VN');
+  // }
 
   // xu ly lay ngay khi chon ngay khac
   function handleGetOtherDay(){
@@ -119,12 +119,12 @@ const BookDetailsPage = () => {
           </div>
           <div className={styles.bookPrice}>
             <span className={styles.inforTitle}>Tiền đặt cọc sách: </span>
-            <span className={styles.priceText}>{ (book && book.rentalPrice? book.rentalPrice : 0).toLocaleString('vi-VI')}đ/quyển</span>
+            <span className={styles.priceText}>{ (book && book.depositPrice? book.depositPrice : 0).toLocaleString('vi-VI')}đ/quyển</span>
           </div>
 
           <div className={styles.bookPrice}>
             <span className={styles.inforTitle}>Giá cho thuê: </span>
-            <span className={styles.priceText}>{ (book && book.depositPrice ? book.depositPrice : 0).toLocaleString('vi-VI')}đ/Ngày</span>
+            <span className={styles.priceText}>{ (book && book.rentalPrice ? book.rentalPrice : 0).toLocaleString('vi-VI')}đ/7 Ngày</span>
           </div>
           {/* lua chuon ngay thue, so luong thue */}
           <div className={styles.rentOption}>
@@ -162,7 +162,7 @@ const BookDetailsPage = () => {
 
                   {otherDate == -1 || ([7, 14, 30].includes(otherDate))? '' : (
                     <div className={`${styles.rentDateOption} ${rentDate === otherDate? styles.active : ''}`}
-                      onClick = {()=>handleClickRentDate(30)}>
+                      onClick = {()=>handleClickRentDate(otherDate)}>
                       {otherDate} ngày
                     </div>
                   )}
@@ -190,7 +190,6 @@ const BookDetailsPage = () => {
                 </div>
               </div>
             </div>
-            <div className={styles.rentDateResult}>Ngày trả sách dự kiến: {addDays(rentDate)}</div>
         
             {/* Phần tổng giá và nút hành động */}
             <div className={styles.rentAction}>

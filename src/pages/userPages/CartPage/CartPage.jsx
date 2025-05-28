@@ -204,7 +204,7 @@ const CartItem = ({ item, onQuantityChange, onRemoveItem, updateRentDays, addDay
 
         <div className={styles.priceCol}>
           <div className={styles.productPrice}>
-            {item.rentalPrice.toLocaleString("vi-VN")}đ<span className={styles.pricePeriod}>/Ngày</span>
+            {item.rentalPrice.toLocaleString("vi-VN")}đ<span className={styles.pricePeriod}>/Tuần</span>
           </div>
         </div>
 
@@ -217,17 +217,11 @@ const CartItem = ({ item, onQuantityChange, onRemoveItem, updateRentDays, addDay
             >
               -
             </button>
-            <input
-              type="number"
-              min="1"
-              max={item.stock}
-              value={item.quantity}
+            <input type="number" min="1" max={item.stock} value={item.quantity}
               onChange={(e) => onQuantityChange(item.id, Number.parseInt(e.target.value) || 1)}
               className={styles.quantityInput}
             />
-            <button
-              className={styles.quantityButton}
-              onClick={() => onQuantityChange(item.id, item.quantity + 1)}
+            <button className={styles.quantityButton} onClick={() => onQuantityChange(item.id, item.quantity + 1)}
               disabled={item.quantity >= item.stock}
             >
               +
@@ -237,7 +231,7 @@ const CartItem = ({ item, onQuantityChange, onRemoveItem, updateRentDays, addDay
 
         <div className={styles.totalCol}>
           <div className={styles.itemTotal}>
-            {(item.rentalPrice * item.quantity * item.rentedDay).toLocaleString("vi-VN")}đ
+            {(item.rentalPrice * item.quantity * Math.floor(item.rentedDay/7)).toLocaleString("vi-VN")}đ
           </div>
         </div>
 
@@ -301,7 +295,6 @@ const CartItem = ({ item, onQuantityChange, onRemoveItem, updateRentDays, addDay
             </div>
           </div>
         </div>
-        <div className={styles.rentDateResult}>Ngày trả sách: {addDays(item.rentedDay)}</div>
       </div>
     </div>
   )
@@ -313,7 +306,7 @@ const CartItemsList = ({ cartItems, onQuantityChange, onRemoveItem, updateRentDa
       <div className={styles.productCol}>Sản phẩm</div>
       <div className={styles.priceCol}>Giá thuê</div>
       <div className={styles.quantityCol}>Số lượng</div>
-      <div className={styles.totalCol}>Tổng cộng</div>
+      <div className={styles.totalCol}>Tổng thuê</div>
       <div className={styles.actionCol}></div>
     </div>
 
@@ -345,18 +338,13 @@ const CartSummary = ({ totalPrice, totalDeposit, onCheckout }) => (
       <span>{totalDeposit.toLocaleString("vi-VN")}đ</span>
     </div>
 
-    <div className={styles.summaryRow}>
-      <span>Phí vận chuyển:</span>
-      <span>Tính khi thanh toán</span>
-    </div>
-
     <div className={styles.summaryTotal}>
       <span>Tổng thanh toán:</span>
-      <span>{totalPrice.toLocaleString("vi-VN")}đ</span>
+      <span>{(totalPrice + totalDeposit).toLocaleString("vi-VN")}đ</span>
     </div>
 
     <div className={styles.summaryNote}>
-      <p>* Chưa bao gồm tiền đặt cọc và phí vận chuyển</p>
+      <p>Lưu ý: Tiền cọc sẽ được hoàn trả khi người dùng trả sách</p>
     </div>
 
     <div className={styles.cartButtons}>
