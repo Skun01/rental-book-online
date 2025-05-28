@@ -271,7 +271,7 @@ const CartItem = ({ item, onQuantityChange, onRemoveItem, updateRentDays, addDay
               30 ngày
             </div>
 
-            {otherDate == -1 ? '' : (
+            {otherDate == -1 || ([7, 14, 30].includes(otherDate))? '' : (
               <div className={`${styles.rentDateOption} ${item.rentedDay === otherDate? styles.active : ''}`}
                 onClick = {()=>handleClickRentDate(otherDate)}>
                 {otherDate} ngày

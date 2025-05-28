@@ -160,7 +160,7 @@ const BookDetailsPage = () => {
                     30 ngày
                   </div>
 
-                  {otherDate == -1 ? '' : (
+                  {otherDate == -1 || ([7, 14, 30].includes(otherDate))? '' : (
                     <div className={`${styles.rentDateOption} ${rentDate === otherDate? styles.active : ''}`}
                       onClick = {()=>handleClickRentDate(30)}>
                       {otherDate} ngày

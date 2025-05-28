@@ -18,38 +18,11 @@ const ProfilePage = () => {
     password: ""
   })
 
-  // const [addresses, setAddresses] = useState([])
-  // const [newAddress, setNewAddress] = useState({
-  //   city: "",
-  //   district: "",
-  //   ward: "",
-  //   street: ""
-  // })
-
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  })
+  
   const [message, setMessage] = useState({ type: "", text: "" })
   const navigate = useNavigate();
   useEffect(() => {
     const bearer = localStorage.getItem('token')
-    if(!bearer){
-      navigate('/')
-    }
-    // user address
-    // async function getUserAddress(){
-    //   await axios.get(`http://localhost:8080/api/v1/address/user/${currentUser.id}?page=0&size=5`, {
-    //     headers: {
-    //       Authorization: `${bearer}`
-    //     }
-    //   })
-    //     .then(response=>{
-    //       setAddresses(response.data.data.content)
-    //     })
-    // }
-    // getUserAddress()
 
     // full user infor
     async function getFullUserInfor(){
@@ -71,7 +44,10 @@ const ProfilePage = () => {
     }
     getFullUserInfor();
   }, [])
-
+  // checking:
+  if(!currentUser){
+      navigate('/')
+    }
   // update userInfor 
   async function updateUser(){
     await axios.put(`http://localhost:8080/api/v1/user/${currentUser.id}`, 
@@ -125,24 +101,13 @@ const ProfilePage = () => {
             )}
 
             {activeTab === "address" && (
-              <AddressTab 
-                // addresses={addresses} 
-                // setAddresses={setAddresses}
-                // newAddress={newAddress}
-                // setNewAddress={setNewAddress}
-                userId={currentUser.id}
-                editMode={editMode}
-                setEditMode={setEditMode}
+              <AddressTab userId={currentUser.id} editMode={editMode} setEditMode={setEditMode} 
                 setMessage={setMessage}
               />
             )}
 
             {activeTab === "password" && (
-              <PasswordTab 
-                passwordData={passwordData} 
-                setPasswordData={setPasswordData}
-                setMessage={setMessage}
-              />
+              <PasswordTab userId={currentUser.id} setMessage={setMessage}/>
             )}
           </div>
         </div>
@@ -569,7 +534,13 @@ const AddressTab = ({ userId, editMode, setEditMode }) => {
 }
 
 // tab đổi mật khẩu
-const PasswordTab = ({ passwordData, setPasswordData, setMessage }) => {
+const PasswordTab = ({ userId, setMessage }) => {
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  })
+  const {showToast} = useToast()
   const handlePasswordChange = (e) => {
     const { name, value } = e.target
     setPasswordData((prev) => ({
@@ -592,14 +563,27 @@ const PasswordTab = ({ passwordData, setPasswordData, setMessage }) => {
     }
 
     try {
-      setMessage({ type: "success", text: "Mật khẩu đã được cập nhật thành công!" })
+      await axios.put('http://localhost:8080/api/v1/user/password',
+        {
+          userId: userId,
+          currentPassword : passwordData.currentPassword,
+          newPassword: passwordData.currentPassword
+        }
+      )
+      showToast({ type: "success", message: "Mật khẩu đã được cập nhật thành công!" })
       setPasswordData({
         currentPassword: "",
         newPassword: "",
         confirmPassword: "",
       })
+      setMessage({ type: "", text: "" })
     } catch (error) {
-      setMessage({ type: error, text: "Có lỗi xảy ra khi đổi mật khẩu!" })
+      if(error.response && error.response.status === 400){
+        setMessage({type: "error", text: "Mật khẩu cũ không chính xác"})
+      }else{
+        showToast({type: "error", message: "Có lỗi xảy ra khi đổi mật khẩu!"})
+        console.error("there is a password change error", error)
+      }
     }
   }
 
