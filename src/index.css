@@ -1,20 +1,12 @@
 @import url('./styles/adminStyles/App.css');
 @import url('./styles/authorize.css');
 
-:root {
-  --primary-color: #4f46e5;
-  --primary-hover: #4338ca;
-  --secondary-color: #f59e0b;
-  --text-color: #1f2937;
-  --text-light: #6b7280;
-  --background-color: #ffffff;
-  --background-light: #f9fafb;
-  --border-color: #e5e7eb;
-  --error-color: #ef4444;
-  --success-color: #10b981;
+
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
-
-
 
 .app {
   min-height: 100vh;
@@ -134,10 +126,4 @@ textarea {
   border-radius: 0.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-}
-
-*{
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
 }

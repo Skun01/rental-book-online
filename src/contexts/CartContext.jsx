@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react"
 import { useToast } from "./ToastContext"
-import axios from "axios"
 
 const CartContext = createContext()
 export function useCart() {
@@ -12,7 +11,6 @@ export function CartProvider({ children }) {
   const [isInitialized, setIsInitialized] = useState(false)
   const { showToast } = useToast()
   
-  // get init cart items
   useEffect(() => {
     async function getCart() {
       try {
@@ -20,7 +18,6 @@ export function CartProvider({ children }) {
         if (cart) {
           setCartItems(JSON.parse(cart))
         } else {
-          //get data from back end but will be handle later
           setIsInitialized(true)
         }
       } catch (error) {
@@ -86,23 +83,19 @@ export function CartProvider({ children }) {
     })
   }
 
-  // Clear cart
   const clearCart = () => {
     setCartItems([])
     localStorage.removeItem('cart')
   }
 
-  // Calculate total price
   const getTotalPrice = () => {
     return cartItems.reduce((total, item) => total + item.rentalPrice * item.quantity, 0)
   }
 
-  // Calculate total deposit
   const getTotalDeposit = () => {
     return cartItems.reduce((total, item) => total + item.depositPrice * item.quantity, 0)
   }
 
-  // Get cart item count
   const getCartItemCount = () => {
     return cartItems.reduce((count, item) => count + item.quantity, 0)
   }
@@ -124,9 +117,8 @@ export function CartProvider({ children }) {
     getTotalPrice,
     getTotalDeposit,
     getCartItemCount,
-    totalItems: cartItems.length,
-    cart: cartItems,
-    updateRentDays
+    updateRentDays,
+    setCartItems
   }
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>
 }

@@ -10,7 +10,7 @@ const CartPage = () => {
   const [showCommonDatePicker, setShowCommonDatePicker] = useState(false)
   const commonDateInputRef = useRef(null)
   const [commonDate, setCommonDate] = useState(-1)
-
+  
   const handleQuantityChange = (bookId, quantity) => {
     updateQuantity(bookId, quantity)
   }
@@ -135,7 +135,7 @@ const EmptyCart = () => (
   </div>
 )
 
-const CartItem = ({ item, onQuantityChange, onRemoveItem, updateRentDays, addDays, commonDate }) => {
+const CartItem = ({ item, onQuantityChange, onRemoveItem, updateRentDays, commonDate }) => {
   const [showCustomDate, setShowCustomDate] = useState(false)
   const [otherDate, setOtherDate] = useState(1)
   const inputOtherDate = useRef(null)

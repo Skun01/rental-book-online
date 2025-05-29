@@ -3,7 +3,7 @@ import BookImageDetail from "../../../components/bookImageDetail/BookImageDetail
 import { useState,useRef, useEffect } from "react";
 import NavBarTab from "../../../components/userComponents/bookDetailTabs/NavBarTab";
 import {useCart} from '../../../contexts/CartContext'
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 const BookDetailsPage = () => {
   const [rentNumber, setRentNumber] = useState(1);
@@ -15,7 +15,8 @@ const BookDetailsPage = () => {
   const [totalRentalPrice, setTotalRentalPrice] = useState(0)
   const {id} = useParams()
   const [book, setBook] = useState(null)
-  const {addToCart} = useCart()
+  const {addToCart, clearCart, setCartItems} = useCart()
+  const navigate = useNavigate()
   useEffect(()=>{
     async function getBookById(){
       await axios.get(`http://localhost:8080/api/v1/book/${id}`)
@@ -47,12 +48,11 @@ const BookDetailsPage = () => {
     setShowCustomDate(!showCustomDate);
   }
 
-  // ham xu ly ngay thang
-  // function addDays(days) {
-  //   const today = new Date();
-  //   today.setDate(today.getDate() + days);
-  //   return today.toLocaleDateString('vi-VN');
-  // }
+  function handleRentNow(){
+    clearCart()
+    setCartItems([{...book, rentedDay: rentDate, quantity: rentNumber}])
+    navigate('/checkout')
+  }
 
   // xu ly lay ngay khi chon ngay khac
   function handleGetOtherDay(){
@@ -77,7 +77,6 @@ const BookDetailsPage = () => {
   // handle click them vao gio hang
   function handleAddToCart(){
     addToCart(book, rentDate, rentNumber)
-    // clearCart()
   }
 
   return (
@@ -211,7 +210,8 @@ const BookDetailsPage = () => {
                   onClick={handleAddToCart}>
                   Thêm vào giỏ hàng
                 </button>
-                <button className={styles.rentButton}>
+                <button className={styles.rentButton}
+                  onClick={handleRentNow}>
                   Thuê ngay
                 </button>
               </div>

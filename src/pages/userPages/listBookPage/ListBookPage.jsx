@@ -15,10 +15,6 @@ const ListBookPage = ({pageTitle}) => {
   const {id} = useParams()
   const [title, setTitle] = useState('')
   const location = useLocation();
-
-  useEffect(() => {
-      window.scrollTo({top: 0, behavior: 'smooth'});
-  }, []) 
   
   // get data from backend
   useEffect(()=>{

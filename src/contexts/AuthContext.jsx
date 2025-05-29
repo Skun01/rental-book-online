@@ -1,5 +1,3 @@
-"use client"
-
 import { createContext, useContext, useState, useEffect } from "react"
 
 const AuthContext = createContext()
@@ -10,7 +8,6 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null)
-  const [token, setToken] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -29,7 +26,6 @@ export function AuthProvider({ children }) {
   // Login function
   const login = (userData, authToken) => {
     setCurrentUser(userData)
-    setToken(authToken)
     try {
       localStorage.setItem("user", JSON.stringify(userData))
       localStorage.setItem("token", authToken)
@@ -40,11 +36,11 @@ export function AuthProvider({ children }) {
 
   const logout = () => {
     setCurrentUser(null)
-    setToken(null)
 
     try {
       localStorage.removeItem("user")
       localStorage.removeItem("token")
+      localStorage.removeItem("cart")
     } catch (error) {
       console.error("Error removing user data from localStorage:", error)
     }

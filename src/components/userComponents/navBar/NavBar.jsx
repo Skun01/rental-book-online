@@ -172,6 +172,9 @@ function NavBar(){
           <li className={styles.menuItem}>
             <Link to="/authors">Tác giả</Link>
           </li>
+          <li className={styles.menuItem}>
+            <Link to="/rented-books">Sách đang thuê</Link>
+          </li>
         </ul>
 
         {/* notification */}
