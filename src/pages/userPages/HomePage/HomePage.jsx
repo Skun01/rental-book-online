@@ -1,17 +1,20 @@
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
-import { ChevronRight, ArrowRight, BookOpen, Clock, Award, Users, Send } from "lucide-react"
+import { Send } from "lucide-react"
 import BookCard from "../../../components/userComponents/bookCard/BookCard"
 import BookCardOrder from "../../../components/userComponents/bookCardOrder/BookCardOrder"
 import CategoryCard from "../../../components/userComponents/categoryCard/CategoryCard" 
 import BookSlider from "./BookSlider"
-import ViewMoreBtn from "../../../components/userComponents/viewMorebtn/ViewMoreBtn"
 import styles from "./HomePage.module.css"
 import axios from "axios"
 
 const HomePage = () => {
   const [books, setBooks] = useState([])
   const [categories, setCategories] = useState([])
+  // const [newReleaseBooks, setNewReleaseBooks] = useState([])
+  // const [topRentedBooks, setTopRentedBooks] = useState([])
+  // const [teenBooks, setTeenBooks] = useState([])
+  // const [recommendedBooks, setRecommendedBooks] = useState([])
   const [email, setEmail] = useState("")
   const [isLoading, setIsLoading] = useState(true)
 
@@ -19,50 +22,58 @@ const HomePage = () => {
   useEffect(()=>{
     const fetchData = async () => {
       try {
-       await axios.get("http://localhost:8080/api/v1/book?page=0&size=12")
-        .then(response=>{
-          setBooks(response.data.data.content)
-        })
-        .finally(()=>{
-          setIsLoading(false)
-        })
+        // Lấy sách mặc định
+        const booksResponse = await axios.get("http://localhost:8080/api/v1/book?page=0&size=12")
+        setBooks(booksResponse.data.data.content)
+
+        // const newBooksResponse = await axios.get("http://localhost:8080/api/v1/book/search?page=0&size=4&sort=publishDate,desc")
+        // setNewReleaseBooks(newBooksResponse.data.data.result.content)
+
+        // const topRentedResponse = await axios.get("http://localhost:8080/api/v1/book/search?page=0&size=5&sort=rentCount,desc")
+        // setTopRentedBooks(topRentedResponse.data.data.result.content)
+
+        // const teenBooksResponse = await axios.get("http://localhost:8080/api/v1/book/search?page=0&size=4&categoryId=TEEN_CATEGORY_ID")
+        // setTeenBooks(teenBooksResponse.data.data.result.content)
+
+        // const recommendedResponse = await axios.get("http://localhost:8080/api/v1/book/search?page=0&size=4&sort=rating,desc")
+        // setRecommendedBooks(recommendedResponse.data.data.result.content)
+
       } catch (error) {
-        console.error("Error fetching data:", error)
+        console.error("Error fetching books data:", error)
+      } finally {
+        setIsLoading(false)
       }
     };
     fetchData();
   }, []);
 
   //get category backend
-   useEffect(()=>{
+  useEffect(()=>{
     const fetchData = async () => {
       try {
        await axios.get("http://localhost:8080/api/v1/category?page=0&size=10")
         .then(response=>{
           setCategories(response.data.data.content)
         })
-        .finally(()=>{
-          setIsLoading(false)
-        })
       } catch (error) {
-        console.error("Error fetching data:", error)
+        console.error("Error fetching categories:", error)
       }
     };
     fetchData();
   }, []);
-  // tự động scoll lên đầu trang khi dữ liệu đã được tải xong
+
+  // tự động scroll lên đầu trang khi dữ liệu đã được tải xong
   useEffect(() => {
-  if (!isLoading) {
-    window.scrollTo({ top: 0, behavior: "smooth" })
-  }
-}, [isLoading]) 
-  // submit email khi người dùng đăng ký
+    if (!isLoading) {
+      window.scrollTo({ top: 0, behavior: "smooth" })
+    }
+  }, [isLoading]) 
+
   const handleSubmit = (e) => {
     e.preventDefault()
     setEmail("")
     alert("Đăng ký nhận thông báo thành công!")
   }
-
 
   if (isLoading) {
     return (
@@ -72,6 +83,7 @@ const HomePage = () => {
       </div>
     )
   }
+
   return (
     <div className={styles.homePage}>
 
@@ -98,7 +110,6 @@ const HomePage = () => {
             </Link>
           )}
           </div>
-          
         </div>
       </section>
 
@@ -107,29 +118,23 @@ const HomePage = () => {
         <div className={styles.container}>
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>Mới phát hành</h2>
-            <Link to="/search?featured=true" className={styles.viewAllLink}>
-              <ViewMoreBtn text="Xem tất cả" />
-            </Link>
           </div>
           <div className={styles.booksGrid}>
-            {books.slice(0, 4).map((book) => (
+            {books.map((book) => (
               <BookCard key={book.id} book={book} releaseYear={2025}/>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Top 5 sách bán chạy */}
+      {/* Top 10 sách bán chạy */}
       <section className={styles.section}>
         <div className={styles.container}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Top 5 được thuê nhiều nhất</h2>
-            <Link to="/search?featured=true" className={styles.viewAllLink}>
-              <ViewMoreBtn text="Xem tất cả" />
-            </Link>
+            <h2 className={styles.sectionTitle}>Top 10 được thuê nhiều nhất</h2>
           </div>
           <div className={styles.booksGrid}>
-            {books.slice(0, 5).map((book, index) => (
+            {books.slice(0, 10).map((book, index) => (
               <BookCardOrder key={book.id} book={book} orderNumber={index + 1} />
             ))}
           </div>
@@ -141,29 +146,25 @@ const HomePage = () => {
         <div className={styles.container}>
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>Dành cho tuổi teen</h2>
-            <Link to="/search?featured=true" className={styles.viewAllLink}>
-              <ViewMoreBtn text="Xem tất cả" />
-            </Link>
           </div>
           <div className={styles.booksGrid}>
-            {books.slice(0, 4).map((book) => (
+            {books.length > 0 ? books.map((book) => (
+              <BookCard key={book.id} book={book}/>
+            )) : books.slice(0, 4).map((book) => (
               <BookCard key={book.id} book={book}/>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Mới phát hành */}
+      {/* Gợi ý cho bạn */}
       <section className={styles.section}>
         <div className={styles.container}>
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>Gợi ý cho bạn</h2>
-            <Link to="/search?featured=true" className={styles.viewAllLink}>
-              <ViewMoreBtn text="Xem tất cả" />
-            </Link>
           </div>
           <div className={styles.booksGrid}>
-            {books.slice(0, 4).map((book) => (
+            {books.map((book) => (
               <BookCard key={book.id} book={book}/>
             ))}
           </div>

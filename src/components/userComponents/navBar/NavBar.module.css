@@ -94,11 +94,11 @@
 /* submenu item */
 .subMenu{
   display: none;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 5px;
   list-style: none;
   position: absolute;
-  top: 50px;
+  top: 25px;
   left: 0;
   background-color: rgba(15, 17, 26, 0.95);
   padding: 10px;
@@ -111,7 +111,7 @@
 .subMenu .subMenuItem{
   color: white;
   cursor: pointer;
-  width: 85px;
+  width: 200px;
   padding: 5px 10px;
   transition: all 0.2s ease;
   white-space: nowrap;
@@ -155,7 +155,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 30px;
+  padding: 20px 30px;
   border-radius: 40px;
   background-color: white;
   color: black;

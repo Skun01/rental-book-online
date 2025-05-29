@@ -161,7 +161,7 @@ function NavBar(){
               <ul className={styles.subMenu}>
                 {categories && categories.map((item) => (
                   <li key={item.id} className={styles.subMenuItem}>
-                    <Link to={`/search?category=${item.name}`}>{item.name}</Link>
+                    <Link to={`/search?q=${item.name}`}>{item.name}</Link>
                   </li>
                 ))}
               </ul>

@@ -1,9 +1,8 @@
 import { useState, useRef, useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { ShoppingCart, Heart, Info } from "lucide-react"
+import { ShoppingCart, Info } from "lucide-react"
 import { useCart } from "../../../contexts/CartContext"
 import { useToast } from "../../../contexts/ToastContext"
-// import { mockImages } from "../../../mockData"
 import styles from "./BookCardOrder.module.css"
 
 const BookCardOrder = ({ book, showBookDetail = true, orderNumber }) => {
@@ -11,9 +10,10 @@ const BookCardOrder = ({ book, showBookDetail = true, orderNumber }) => {
   const { showToast } = useToast()
   const [addedToCart, setAddedToCart] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
-  const [hoverTimeout, setHoverTimeout] = useState(null)
+  const [showDetail, setShowDetail] = useState(false)
   const [detailPosition, setDetailPosition] = useState("center")
   const cardRef = useRef(null)
+  const hoverTimeoutRef = useRef(null)
   const navigate = useNavigate();
   
   // xử lý khi ấn nút thêm vào giỏ hàng
@@ -37,7 +37,7 @@ const BookCardOrder = ({ book, showBookDetail = true, orderNumber }) => {
 
   // xử lý hiển thị book detail khi hover vào card
   useEffect(() => {
-    if (isHovered && cardRef.current) {
+    if (showDetail && cardRef.current) {
       const cardRect = cardRef.current.getBoundingClientRect()
       const windowWidth = window.innerWidth
       if (cardRect.left < 270) {
@@ -50,37 +50,44 @@ const BookCardOrder = ({ book, showBookDetail = true, orderNumber }) => {
         setDetailPosition("center")
       }
     }
-  }, [isHovered])
+  }, [showDetail])
 
   const handleMouseEnter = () => {
-    if (hoverTimeout) {
-      clearTimeout(hoverTimeout)
+    setIsHovered(true)
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current)
     }
-    const timeout = setTimeout(() => {
-      setIsHovered(true)
-    }, 200)
-    setHoverTimeout(timeout)
+    hoverTimeoutRef.current = setTimeout(() => {
+      setShowDetail(true)
+    }, 1000)
   }
 
   const handleMouseLeave = () => {
-    if (hoverTimeout) {
-      clearTimeout(hoverTimeout)
-      setHoverTimeout(null)
+    setIsHovered(false)
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current)
     }
-    setTimeout(() => {
-      const cardElement = cardRef.current
-      const detailElement = document.querySelector(`.${styles.bookDetail}`)
-      if (cardElement && detailElement) {
-        const isHoveringCard = cardElement.matches(':hover')
-        const isHoveringDetail = detailElement.matches(':hover')
-        if (!isHoveringCard && !isHoveringDetail) {
-          setIsHovered(false)
-        }
-      } else {
-        setIsHovered(false)
-      }
-    }, 50)
+    if (!showDetail) {
+      return
+    }
   }
+
+  const handleDetailMouseEnter = () => {
+    setIsHovered(true)
+  }
+
+  const handleDetailMouseLeave = () => {
+    setIsHovered(false)
+    setShowDetail(false)
+  }
+
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current)
+      }
+    }
+  }, [])
 
   const getDetailStyle = () => {
     let transformValue = "translate(-50%, -50%)";
@@ -90,13 +97,9 @@ const BookCardOrder = ({ book, showBookDetail = true, orderNumber }) => {
       transformValue = "translate(-10%, -50%)";
     }
     return {
-      opacity: isHovered ? 1 : 0,
-      transform: `${transformValue} scale(${isHovered ? 1 : 0.95})`,
-      visibility: isHovered ? "visible" : "hidden",
-      transition: isHovered 
-        ? "opacity 0.25s ease-in-out, transform 0.25s ease-in-out" 
-        : "opacity 0.25s ease-in-out, transform 0.25s ease-in-out, visibility 0s linear 0.25s",
-      willChange: 'transform, opacity'
+      opacity: showDetail ? 1 : 0,
+      transform: transformValue,
+      visibility: showDetail ? "visible" : "hidden"
     }
   }
 
@@ -108,7 +111,11 @@ const BookCardOrder = ({ book, showBookDetail = true, orderNumber }) => {
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
         >
-          <img src={book.imageList[0]["url"] ? book.imageList[0]["url"] : "/auth.jpg"} alt="book" className={styles.bookImg} />
+          <img 
+            src={book.imageList && book.imageList[0] && book.imageList[0]["url"] ? book.imageList[0]["url"] : "/auth.jpg"} 
+            alt="book" 
+            className={styles.bookImg} 
+          />
         </div>
       </Link>
       
@@ -121,12 +128,14 @@ const BookCardOrder = ({ book, showBookDetail = true, orderNumber }) => {
             <p className={styles.bookTitle}>{book.name}</p>
           </Link>
         
-          <Link to={`/authors/${book.author.id}`}>
-            <p className={styles.bookAuthor}>{book.author.name}</p>
+          <Link to={`/authors/${book.author?.id}`}>
+            <p className={styles.bookAuthor}>{book.author?.name}</p>
           </Link>
         
           <div className={styles.bookPrice}>
-            <span className={styles.normalPrice}>{book.depositPrice.toLocaleString("vi-VN")}đ</span>
+            <span className={styles.normalPrice}>
+              {book.depositPrice ? book.rentalPrice.toLocaleString("vi-VN") : '0'}đ
+            </span>
             <span className={styles.rentalPeriod}>/tuần</span>
           </div>
         </div>
@@ -137,26 +146,28 @@ const BookCardOrder = ({ book, showBookDetail = true, orderNumber }) => {
         <div 
           className={styles.bookDetail}
           style={getDetailStyle()}
-          onMouseEnter={() => {
-            if (hoverTimeout) {
-              clearTimeout(hoverTimeout)
-              setHoverTimeout(null)
-            }
-            setIsHovered(true)
-          }}
-          onMouseLeave={handleMouseLeave}
+          onMouseEnter={handleDetailMouseEnter}
+          onMouseLeave={handleDetailMouseLeave}
         >
           <div className={styles.deltaiImgContainer}>
-            <img src={book.imageList[0]["url"] ? book.imageList[0]["url"] : "/auth.jpg"} alt="" className={styles.deltailImg} />
+            <img 
+              src={book.imageList && book.imageList[0] && book.imageList[0]["url"] ? book.imageList[0]["url"] : "/auth.jpg"} 
+              alt="" 
+              className={styles.deltailImg} 
+            />
           </div>
           
           <div className={styles.detailInfor}>
             <div className={styles.basicInfor}>
               <p className={styles.bookTitleDetail}>{book.name}</p>
-              <p className={styles.bookAuthorDetail}>Tác giả: {book.author.name}</p>
-              <p className={styles.bookCategory}>Thể loại: {book.category.name}</p>
-              <p className={styles.bookCategory}>Tiền đặt cọc: {book.depositPrice.toLocaleString('vi-VN')}</p>
-              <p className={styles.bookPrice}>Giá thuê: {`${book.depositPrice.toLocaleString('vi-VN')}/Ngày`}</p>
+              <p className={styles.bookAuthorDetail}>Tác giả: {book.author?.name}</p>
+              <p className={styles.bookCategory}>Thể loại: {book.category?.name}</p>
+              <p className={styles.bookCategory}>
+                Tiền đặt cọc: {book.depositPrice ? book.depositPrice.toLocaleString('vi-VN') : '0'}đ
+              </p>
+              <p className={styles.bookPrice} style={{color: '#2563eb'}}>
+                Giá thuê: {book.depositPrice ? `${book.rentalPrice.toLocaleString('vi-VN')}đ/Tuần` : '0đ/Tuần'}
+              </p>
             </div>
             
             <div className={styles.bookFunc}>
@@ -164,12 +175,14 @@ const BookCardOrder = ({ book, showBookDetail = true, orderNumber }) => {
                 className={styles.addToCardBtn} 
                 onClick={handleAddToCart}
               >
-                <ShoppingCart /> Thêm vào giỏ
+                <ShoppingCart size={18} /> Thêm vào giỏ
               </p>
               
-              <p className={styles.viewMoreBtn}
-                onClick={()=> navigate(`/books/${book?.id}`)}>
-                <Info /> Xem thêm
+              <p 
+                className={styles.viewMoreBtn}
+                onClick={() => navigate(`/books/${book?.id}`)}
+              >
+                <Info size={18} /> Xem thêm
               </p>
             </div>
           </div>

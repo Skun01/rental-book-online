@@ -7,9 +7,10 @@ import styles from "./BookCard.module.css"
 const BookCard = ({ book, showBookDetail = true, releaseYear, smaller = false}) => {
   const { addToCart } = useCart()
   const [isHovered, setIsHovered] = useState(false)
-  const [hoverTimeout, setHoverTimeout] = useState(null)
+  const [showDetail, setShowDetail] = useState(false)
   const [detailPosition, setDetailPosition] = useState("center")
   const cardRef = useRef(null)
+  const hoverTimeoutRef = useRef(null)
   const navigate = useNavigate();
   
   const handleAddToCart = (e) => {
@@ -17,12 +18,12 @@ const BookCard = ({ book, showBookDetail = true, releaseYear, smaller = false}) 
       e.preventDefault()
       e.stopPropagation()
     }
-    addToCart(book)
+    addToCart(book, 7, 1)
   }
 
-  // xử lý hiển thị book detail khi hover vào card
+  // Xử lý vị trí hiển thị book detail
   useEffect(() => {
-    if (isHovered && cardRef.current) {
+    if (showDetail && cardRef.current) {
       const cardRect = cardRef.current.getBoundingClientRect()
       const windowWidth = window.innerWidth
       if (cardRect.left < 270) {
@@ -35,37 +36,44 @@ const BookCard = ({ book, showBookDetail = true, releaseYear, smaller = false}) 
         setDetailPosition("center")
       }
     }
-  }, [isHovered])
+  }, [showDetail])
 
   const handleMouseEnter = () => {
-    if (hoverTimeout) {
-      clearTimeout(hoverTimeout)
+    setIsHovered(true)
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current)
     }
-    const timeout = setTimeout(() => {
-      setIsHovered(true)
-    }, 200)
-    setHoverTimeout(timeout)
+    hoverTimeoutRef.current = setTimeout(() => {
+      setShowDetail(true)
+    }, 1000)
   }
 
   const handleMouseLeave = () => {
-    if (hoverTimeout) {
-      clearTimeout(hoverTimeout)
-      setHoverTimeout(null)
+    setIsHovered(false)
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current)
     }
-    setTimeout(() => {
-      const cardElement = cardRef.current
-      const detailElement = document.querySelector(`.${styles.bookDetail}`)
-      if (cardElement && detailElement) {
-        const isHoveringCard = cardElement.matches(':hover')
-        const isHoveringDetail = detailElement.matches(':hover')
-        if (!isHoveringCard && !isHoveringDetail) {
-          setIsHovered(false)
-        }
-      } else {
-        setIsHovered(false)
-      }
-    }, 50)
+    if (!showDetail) {
+      return
+    }
   }
+
+  const handleDetailMouseEnter = () => {
+    setIsHovered(true)
+  }
+
+  const handleDetailMouseLeave = () => {
+    setIsHovered(false)
+    setShowDetail(false)
+  }
+
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current)
+      }
+    }
+  }, [])
 
   const getDetailStyle = () => {
     let transformValue = "translate(-50%, -50%)";
@@ -75,14 +83,24 @@ const BookCard = ({ book, showBookDetail = true, releaseYear, smaller = false}) 
       transformValue = "translate(-10%, -50%)";
     }
     return {
-      opacity: isHovered ? 1 : 0,
-      transform: `${transformValue} scale(${isHovered ? 1 : 0.95})`,
-      visibility: isHovered ? "visible" : "hidden",
-      transition: isHovered 
-        ? "opacity 0.25s ease-in-out, transform 0.25s ease-in-out" 
-        : "opacity 0.25s ease-in-out, transform 0.25s ease-in-out, visibility 0s linear 0.25s",
-      willChange: 'transform, opacity'
+      opacity: showDetail ? 1 : 0,
+      transform: transformValue,
+      visibility: showDetail ? "visible" : "hidden"
     }
+  }
+
+  // Format giá tiền theo chuẩn Việt Nam
+  const formatPrice = (price) => {
+    return price ? price.toLocaleString('vi-VN') : '0'
+  }
+
+  // Tính toán ngày phát hành nếu có
+  const getPublishYear = () => {
+    if (releaseYear) return releaseYear
+    if (book.publish_date) {
+      return new Date(book.publish_date).getFullYear()
+    }
+    return null
   }
 
   return (
@@ -93,25 +111,47 @@ const BookCard = ({ book, showBookDetail = true, releaseYear, smaller = false}) 
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
         >
-          {releaseYear && (
-              <p className={styles.releaseYear}>{releaseYear}</p>
-            )}
-          <img src={!book.imageList ? "/auth.jpg" : book.imageList[0]["url"] ? book.imageList[0]["url"] : "/auth.jpg"} alt="book" className={styles.bookImg} />
+          {getPublishYear() && (
+            <p className={styles.releaseYear}>{getPublishYear()}</p>
+          )}
+          <img 
+            src={
+              book.imageList && book.imageList.length > 0 && book.imageList[0].url 
+                ? book.imageList[0].url 
+                : "/auth.jpg"
+            } 
+            alt={book.name || "Book cover"} 
+            className={styles.bookImg} 
+            loading="lazy"
+          />
         </div>
       </Link>
       
       <div className={styles.bookInfo}>
         <Link to={`/books/${book?.id}`} className={styles.bookLink}>
-          <p className={styles.bookTitle} style={smaller === true ? {fontSize: "16px"} : {}}>{book.name}</p>
+          <p 
+            className={styles.bookTitle} 
+            style={smaller ? {fontSize: "16px"} : {}}
+            title={book.name}
+          >
+            {book.name || 'Đang cập nhật'}
+          </p>
         </Link>
         
-        <Link to={`authors/${book.author.id}`}>
-          <p className={styles.bookAuthor}>{book.author.name}</p>
+        <Link to={`/authors/${book.author?.id}`}>
+          <p 
+            className={styles.bookAuthor}
+            title={book.author?.name}
+          >
+            {book.author?.name || 'Đang cập nhật'}
+          </p>
         </Link>
         
         <div className={styles.bookPrice}>
-          <span className={styles.normalPrice}>{book.depositPrice.toLocaleString('vi-VN')}đ</span>
-          <span className={styles.rentalPeriod}>/Ngày</span>
+          <span className={styles.normalPrice}>
+            {formatPrice(book.rentalPrice)}đ
+          </span>
+          <span className={styles.rentalPeriod}>/Tuần</span>
         </div>
       </div>
 
@@ -120,26 +160,41 @@ const BookCard = ({ book, showBookDetail = true, releaseYear, smaller = false}) 
         <div 
           className={styles.bookDetail}
           style={getDetailStyle()}
-          onMouseEnter={() => {
-            if (hoverTimeout) {
-              clearTimeout(hoverTimeout)
-              setHoverTimeout(null)
-            }
-            setIsHovered(true)
-          }}
-          onMouseLeave={handleMouseLeave}
+          onMouseEnter={handleDetailMouseEnter}
+          onMouseLeave={handleDetailMouseLeave}
         >
           <div className={styles.deltaiImgContainer}>
-            <img src={!book.imageList ? "/auth.jpg" : book.imageList[0]["url"] ? book.imageList[0]["url"] : "/auth.jpg"} alt="" className={styles.deltailImg} />
+            <img 
+              src={
+                book.imageList && book.imageList.length > 0 && book.imageList[0].url 
+                  ? book.imageList[0].url 
+                  : "/auth.jpg"
+              } 
+              alt={book.name || "Book detail"} 
+              className={styles.deltailImg} 
+            />
           </div>
           
           <div className={styles.detailInfor}>
             <div className={styles.basicInfor}>
-              <p className={styles.bookTitleDetail}>{book.name}</p>
-              <p className={styles.bookAuthorDetail}>Tác giả: {book.author.name}</p>
-              <p className={styles.bookCategory}>Thể loại: {book.category.name}</p>
-              <p className={styles.bookCategory}>Tiền đặt cọc: {book.rentalPrice.toLocaleString('vi-VN')}</p>
-              <p className={styles.bookPrice}>Giá thuê: {`${book.depositPrice.toLocaleString('vi-VN')}/Tuần`}</p>
+              <p className={styles.bookTitleDetail}>{book.name || 'Đang cập nhật'}</p>
+              <p className={styles.bookAuthorDetail}>
+                Tác giả: {book.author?.name || 'Đang cập nhật'}
+              </p>
+              <p className={styles.bookCategory}>
+                Thể loại: {book.category?.name || 'Đang cập nhật'}
+              </p>
+              {book.stock !== undefined && (
+                <p className={styles.bookCategory}>
+                  Còn lại: {book.stock} quyển
+                </p>
+              )}
+              <p className={styles.bookCategory}>
+                Tiền đặt cọc: {formatPrice(book.depositPrice)}đ/quyển
+              </p>
+              <p className={styles.bookPrice} style={{color: '#2563eb'}}>
+                Giá thuê: {formatPrice(book.rentalPrice)}đ/tuần
+              </p>
             </div>
             
             <div className={styles.bookFunc}>
@@ -147,12 +202,14 @@ const BookCard = ({ book, showBookDetail = true, releaseYear, smaller = false}) 
                 className={styles.addToCardBtn} 
                 onClick={handleAddToCart}
               >
-                <ShoppingCart /> Thêm vào giỏ
+                <ShoppingCart size={18} /> Thêm vào giỏ
               </p>
               
-              <p className={styles.viewMoreBtn}
-                onClick={()=> navigate(`/books/${book?.id}`)}>
-                <Info /> Xem thêm
+              <p 
+                className={styles.viewMoreBtn}
+                onClick={() => navigate(`/books/${book?.id}`)}
+              >
+                <Info size={18} /> Xem thêm
               </p>
             </div>
           </div>

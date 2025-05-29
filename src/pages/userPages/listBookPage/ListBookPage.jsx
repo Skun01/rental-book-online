@@ -1,5 +1,4 @@
-// import { useState, useEffect } from "react"
-import { Link, useLocation, useParams } from "react-router-dom"
+import { useLocation, useParams } from "react-router-dom"
 import {TextSearch} from 'lucide-react'
 import FilterSection from "../../../components/userComponents/filter/FilterSection"
 import styles from "./ListBookPage.module.css"
@@ -7,6 +6,7 @@ import GridList from "../../../components/userComponents/gridList/GridList"
 import Pagination from "../../../components/userComponents/pagination/Pagination"
 import { useEffect, useState } from "react"
 import axios from "axios"
+
 const ListBookPage = ({pageTitle}) => {
   const [books, setBooks] = useState([])
   const [page, setPage] = useState(0)
@@ -15,9 +15,14 @@ const ListBookPage = ({pageTitle}) => {
   const {id} = useParams()
   const [title, setTitle] = useState('')
   const location = useLocation();
+
+  useEffect(() => {
+      window.scrollTo({top: 0, behavior: 'smooth'});
+  }, []) 
+  
   // get data from backend
   useEffect(()=>{
-    const fetchData = async () => {
+    const getBooksData = async () => {
       try {
         const queryParams = new URLSearchParams(location.search)
         const search = queryParams.get("q") || ""
@@ -46,22 +51,42 @@ const ListBookPage = ({pageTitle}) => {
         console.error("Error fetching data:", error);
       }
     };
-    async function getCategoriesName(){
-      await axios.get(`http://localhost:8080/api/v1/category/${id}`)
-        .then(response=>{
-          setTitle(response.data.data.name)
-        })
-      await axios.get(`http://localhost:8080/api/v1/book/search?page=${page}&size=5&categoryId=${id}`)
-        .then(response=>{
-          setBooks(response.data.data.result.content)
-          setTotalPage(response.data.data.result.totalPages)
-        })
+
+    async function getSpecificData(){
+      try {
+        if(pageTitle === "category") {
+          await axios.get(`http://localhost:8080/api/v1/category/${id}`)
+            .then(response=>{
+              setTitle(response.data.data.name)
+            })
+          await axios.get(`http://localhost:8080/api/v1/book/search?page=${page}&size=5&categoryId=${id}`)
+            .then(response=>{
+              setBooks(response.data.data.result.content)
+              setTotalPage(response.data.data.result.totalPages)
+            })
+        } else if(pageTitle === "author") {
+          await axios.get(`http://localhost:8080/api/v1/author/${id}`)
+            .then(response=>{
+              setTitle(response.data.data.name)
+            })
+          await axios.get(`http://localhost:8080/api/v1/book/search?page=${page}&size=5&authorId=${id}`)
+            .then(response=>{
+              setBooks(response.data.data.result.content)
+              setTotalPage(response.data.data.result.totalPages)
+            })
+        }
+      } catch (error) {
+        console.error("Error fetching specific data:", error);
+      }
     }
-    if(!pageTitle) fetchData();
-    else{
-      getCategoriesName()
+
+    if(!pageTitle) {
+      getBooksData();
+    } else {
+      getSpecificData()
     }
-  }, [page, filterList, location]);
+  }, [page, filterList, location, pageTitle, id]);
+
   const [searchQuery, setSearchQuery] = useState("");
   useEffect(()=>{
     const queryParams = new URLSearchParams(location.search);
@@ -69,26 +94,44 @@ const ListBookPage = ({pageTitle}) => {
     setSearchQuery(search);
   }, [location])
 
-  // scoll lên đầu:
+  // scroll lên đầu:
   useEffect(()=>{
     window.scrollTo({ top: 0, behavior: "smooth" })
   }, [])
+
+  const getHeaderTitle = () => {
+    if (location.pathname === "/books") {
+      return "Tất cả sách"
+    } else if (location.pathname === "/search") {
+      return (
+        <>
+          <TextSearch />
+          <span>Kết quả tìm kiếm của {`"${searchQuery}"`}</span>
+        </>
+      )
+    } else if (pageTitle === "category") {
+      return <span>Thể loại: {title}</span>
+    } else if (pageTitle === "author") {
+      return <span>Các sách của tác giả: {title}</span>
+    }
+    return (
+      <>
+        <TextSearch />
+        <span>Kết quả tìm kiếm của {`"${searchQuery}"`}</span>
+      </>
+    )
+  }
+
  return(
   <div className={styles.listBookPage}>
     <div className={styles.header}>
       <h2 className={styles.seartTitle}>
-        {location.pathname === "/books" ? "Tất cả sách" : pageTitle ? (
-          <span>Thể loại: {title}</span>
-        ):(
-          <>
-            <TextSearch />
-            <span>Kết quả tìm kiếm của {`"${searchQuery}"`}</span>
-          </>)}
+        {getHeaderTitle()}
       </h2>
     </div>
 
     {/* filter */}
-    {!pageTitle && (
+    {(!pageTitle || location.pathname === "/search") && (
       <div className={styles.filterSection}>
         <FilterSection setFilterList={setFilterList}/>
       </div>)}

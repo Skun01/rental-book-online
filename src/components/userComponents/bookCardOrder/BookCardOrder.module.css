@@ -1,3 +1,4 @@
+/* Simplified BookCardOrder Styles */
 
 .bookCard {
   text-align: center;
@@ -11,7 +12,7 @@
   height: 300px;
   overflow: hidden;
   border-radius: 12px;
-  transition: all 0.2s ease;
+  transition: opacity 0.2s ease;
 }
 
 .imageContain:hover {
@@ -25,64 +26,72 @@
   display: block;
 }
 
-.bookInfoContainer{
+.bookInfoContainer {
   display: flex;
   margin-top: 15px;
   justify-content: space-around;
 }
 
-.bookOrderNumber{
+.bookOrderNumber {
   font-size: 50px;
   font-weight: bold;
   color: #FFDC82;
   margin: 0;
 }
-.bookInfo{
+
+.bookInfo {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
 }
 
-.bookTitle{
+.bookTitle {
   font-size: 16px;
   font-weight: bold;
   margin: 5px 0 5px 0;
   transition: color 0.2s ease;
-  white-space: nowrap;          
-  overflow: hidden;              
-  text-overflow: ellipsis; 
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   width: 150px;
   text-align: start;
+  color: rgb(229, 231, 235);
 }
 
 .bookTitle:hover {
   color: #f59e0b;
 }
 
-.bookAuthor{
+.bookAuthor {
   font-size: 16px;
-  color: #555;
+  color: #9ca3af;
   margin: 0;
-  transition: all 0.2s ease;
+  transition: color 0.2s ease;
 }
 
 .bookAuthor:hover {
-  font-style: italic;
-  color: #a8a5a5
+  color: #d1d5db;
 }
 
-.bookPrice{
+.bookPrice {
   font-size: 16px;
-  color: white;
+  color: #f59e0b;
+  font-weight: 600;
+}
+
+.rentalPeriod {
+  color: #9ca3af;
+  font-size: 0.9rem;
+  font-weight: normal;
 }
 
 .bookPrice,
 .bookCategory,
-.bookAuthorDetail{
+.bookAuthorDetail {
   margin: 0;
 }
 
-/* book detail - thêm transition và hiệu ứng mới */
+/* Book Detail - Simplified */
 .bookDetail {
   position: absolute;
   top: 50%;
@@ -94,37 +103,65 @@
   text-align: left;
   border-radius: 12px;
   padding-bottom: 20px;
-  /* Những style mới cho transition và animation */
   opacity: 0;
   visibility: hidden;
-  transform: translate(-50%, -50%) scale(0.95);
-  transition: 
-    opacity 0.25s ease-in-out, 
-    transform 0.25s ease-in-out, 
-    visibility 0s linear 0.25s;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.2s ease, visibility 0.2s ease;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  pointer-events: none; /* Mặc định không nhận sự kiện chuột khi ẩn */
+  pointer-events: none;
 }
 
-/* Khi hiển thị, cho phép nhận sự kiện chuột */
 .bookDetail[style*="visibility: visible"] {
   pointer-events: auto;
 }
 
-.detailInfor{
+.detailInfor {
   padding: 20px;
+  color: white;
 }
 
-.deltaiImgContainer{
+.deltaiImgContainer {
   width: 100%;
   height: 250px;
   overflow: hidden;
-  border-radius: 12px;
+  border-radius: 12px 12px 0 0;
 }
 
 .deltailImg {
   width: 100%;
+  height: 100%;
   object-fit: cover;
+}
+
+.basicInfor {
+  margin-bottom: 15px;
+}
+
+.bookTitleDetail {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0 0 10px 0;
+  color: #f59e0b;
+}
+
+.bookAuthorDetail {
+  font-size: 1rem;
+  color: #d1d5db;
+  margin: 6px 0;
+  font-weight: 500;
+}
+
+.bookCategory {
+  font-size: 1rem;
+  color: #9ca3af;
+  margin: 4px 0;
+}
+
+.bookDetail .bookPrice {
+  font-size: 1rem;
+  color: #10b981;
+  font-weight: 500;
+  margin: 6px 0;
 }
 
 .bookFunc {
@@ -143,15 +180,8 @@
   border-radius: 8px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
   font-size: 0.95rem;
-}
-
-.bookTitleDetail {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin: 0;
-  color: #f59e0b;
 }
 
 .addToCardBtn {
@@ -164,20 +194,42 @@
 .addToCardBtn:hover {
   color: #2C2F45;
   background-color: #f59e0b;
-  border: 1px solid transparent;
 }
 
-.addToFavoriteBtn,
 .viewMoreBtn {
   background-color: transparent;
   color: white;
   border: 1px solid white;
 }
 
-.addToFavoriteBtn:hover {
-  color: #f13838
+.viewMoreBtn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
 }
 
-.viewMoreBtn:hover {
-  color: rgba(255, 255, 255, 0.7);
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .bookDetail {
+    width: 95vw;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
+  .deltaiImgContainer {
+    height: 200px;
+  }
+  
+  .detailInfor {
+    padding: 16px;
+  }
+  
+  .bookFunc {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .bookFunc p {
+    justify-content: center;
+    padding: 10px 14px;
+  }
 }

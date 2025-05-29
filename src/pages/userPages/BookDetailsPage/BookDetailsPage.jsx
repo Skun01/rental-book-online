@@ -25,6 +25,11 @@ const BookDetailsPage = () => {
     }
     getBookById()
   }, [])
+
+   useEffect(() => {
+      window.scrollTo({top: 0, behavior: 'smooth'});
+  }, []) 
+
   useEffect(()=>{
     if(book){
       setTotalRentalPrice(book.rentalPrice*Math.floor(rentDate/7)*rentNumber)

@@ -38,6 +38,10 @@ const userRoutes = [
         element: <ListPage pageData={"authors"} />,
       },
       {
+        path: "authors/:id",
+        element: <ListBookPage pageTitle={'author'} />
+      },
+      {
         path: "categories",
         element: <ListPage pageData={"categories"} />,
       },
