@@ -51,7 +51,7 @@ const CartPage = () => {
 
     // Cập nhật số ngày thuê cho tất cả sách
     cartItems.forEach((item) => {
-      updateRentDays(item.id, diffDays)
+      updateRentDays(item.book.id, diffDays)
     })
 
     setCommonDate(diffDays)
@@ -150,7 +150,7 @@ const CartItem = ({ item, onQuantityChange, onRemoveItem, updateRentDays, common
   // Xử lý chọn số ngày thuê
   const handleClickRentDate = (date) => {
     if (item.rentedDay !== date) {
-      updateRentDays(item.id, date)
+      updateRentDays(item.book.id, date)
     }
     if (showCustomDate && (date === 7 || date === 14 || date === 30 || date === otherDate)) {
       setShowCustomDate(false)
@@ -175,11 +175,11 @@ const CartItem = ({ item, onQuantityChange, onRemoveItem, updateRentDays, common
 
     if (diffDays < 7) {
       alert("Bạn phải thuê ít nhất 7 ngày!")
-      updateRentDays(item.id, 7)
+      updateRentDays(item.book.id, 7)
       return
     }
 
-    updateRentDays(item.id, diffDays)
+    updateRentDays(item.book.id, diffDays)
     setOtherDate(diffDays)
     setShowCustomDate(false)
   }
@@ -189,22 +189,22 @@ const CartItem = ({ item, onQuantityChange, onRemoveItem, updateRentDays, common
       <div className={styles.cartItemMain}>
         <div className={styles.productCol}>
           <div className={styles.productInfo}>
-            <Link to={`/books/${item.id}`} className={styles.productImageLink}>
-              <img src={item.imageList[0].url || "/placeholder.svg"} alt={item.name} className={styles.productImage} />
+            <Link to={`/books/${item.book.id}`} className={styles.productImageLink}>
+              <img src={item.book.imageList[0].url || "/placeholder.svg"} alt={item.book.name} className={styles.productImage} />
             </Link>
             <div className={styles.productDetails}>
-              <Link to={`/books/${item.id}`} className={styles.productTitle}>
-                {item.name}
+              <Link to={`/books/${item.book.id}`} className={styles.productTitle}>
+                {item.book.name}
               </Link>
-              <div className={styles.productAuthor}>{item.author ? item.author.name : "Đang cập nhật"}</div>
-              <div className={styles.productDeposit}>Đặt cọc: {item.depositPrice ? item.depositPrice.toLocaleString("vi-VN"): 0}đ</div>
+              <div className={styles.productAuthor}>{item.book.author ? item.book.author.name : "Đang cập nhật"}</div>
+              <div className={styles.productDeposit}>Đặt cọc: {item.book.depositPrice ? item.book.depositPrice.toLocaleString("vi-VN"): 0}đ</div>
             </div>
           </div>
         </div>
 
         <div className={styles.priceCol}>
           <div className={styles.productPrice}>
-            {item.rentalPrice.toLocaleString("vi-VN")}đ<span className={styles.pricePeriod}>/Tuần</span>
+            {item.book.rentalPrice.toLocaleString("vi-VN")}đ<span className={styles.pricePeriod}>/Tuần</span>
           </div>
         </div>
 
@@ -212,17 +212,17 @@ const CartItem = ({ item, onQuantityChange, onRemoveItem, updateRentDays, common
           <div className={styles.quantityControl}>
             <button
               className={styles.quantityButton}
-              onClick={() => onQuantityChange(item.id, item.quantity - 1)}
+              onClick={() => onQuantityChange(item.book.id, item.quantity - 1)}
               disabled={item.quantity <= 1}
             >
               -
             </button>
-            <input type="number" min="1" max={item.stock} value={item.quantity}
-              onChange={(e) => onQuantityChange(item.id, Number.parseInt(e.target.value) || 1)}
+            <input type="number" min="1" max={item.book.stock} value={item.quantity}
+              onChange={(e) => onQuantityChange(item.book.id, Number.parseInt(e.target.value) || 1)}
               className={styles.quantityInput}
             />
-            <button className={styles.quantityButton} onClick={() => onQuantityChange(item.id, item.quantity + 1)}
-              disabled={item.quantity >= item.stock}
+            <button className={styles.quantityButton} onClick={() => onQuantityChange(item.book.id, item.quantity + 1)}
+              disabled={item.quantity >= item.book.stock}
             >
               +
             </button>
@@ -231,12 +231,12 @@ const CartItem = ({ item, onQuantityChange, onRemoveItem, updateRentDays, common
 
         <div className={styles.totalCol}>
           <div className={styles.itemTotal}>
-            {(item.rentalPrice * item.quantity * Math.floor(item.rentedDay/7)).toLocaleString("vi-VN")}đ
+            {(item.book.rentalPrice * item.quantity * Math.floor(item.rentedDay/7)).toLocaleString("vi-VN")}đ
           </div>
         </div>
 
         <div className={styles.actionCol}>
-          <button className={styles.removeButton} onClick={() => onRemoveItem(item.id)}>
+          <button className={styles.removeButton} onClick={() => onRemoveItem(item.book.id)}>
             <Trash2 size={18} />
           </button>
         </div>
@@ -312,7 +312,7 @@ const CartItemsList = ({ cartItems, onQuantityChange, onRemoveItem, updateRentDa
 
     {cartItems.map((item) => (
       <CartItem
-        key={item.id}
+        key={item.book.id}
         item={item}
         onQuantityChange={onQuantityChange}
         onRemoveItem={onRemoveItem}

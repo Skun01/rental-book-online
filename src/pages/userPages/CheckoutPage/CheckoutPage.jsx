@@ -165,7 +165,7 @@ const CheckoutPage = () => {
     const depositPrice = getTotalDeposit()
 
     const items = cartItems.map((item) => ({
-      bookId: item.id,
+      bookId: item.book.id,
       quantity: item.quantity,
       rentedDay: item.rentedDay,
     }))
@@ -580,22 +580,22 @@ const CheckoutPage = () => {
 
               <div className={styles.cartItems}>
                 {cartItems.map((item) => (
-                  <div key={item.id} className={styles.cartItem}>
+                  <div key={item.book.id} className={styles.cartItem}>
                     <div className={styles.itemImage}>
-                      <img src={item.imageList ? item.imageList[0].url : '/auth.jpg'} alt={item.title} className={styles.itemThumbnail} />
+                      <img src={item.book.imageList ? item.book.imageList[0].url : '/auth.jpg'} alt={item.title} className={styles.itemThumbnail} />
                       {item.quantity > 1 && <span className={styles.itemQuantity}>{item.quantity}</span>}
                     </div>
                     <div className={styles.itemInfo}>
-                      <h3 className={styles.itemTitle}>{item && item.name}</h3>
-                      <p className={styles.itemAuthor}>{item.author && item.author.name}</p>
+                      <h3 className={styles.itemTitle}>{item && item.book.name}</h3>
+                      <p className={styles.itemAuthor}>{item.author && item.book.author.name}</p>
                       <div className={styles.itemRentDetails}>
                         <span className={styles.itemRentDays}>Thời gian thuê: {item.rentedDay} ngày</span>
                       </div>
                       <div className={styles.itemPrice}>
-                        {(item.rentalPrice * item.quantity * Math.floor(item.rentedDay/7)).toLocaleString("vi-VN")}đ
+                        {(item.book.rentalPrice * item.quantity * Math.floor(item.rentedDay/7)).toLocaleString("vi-VN")}đ
                         <span className={styles.depositAmount}>
                           {" "}
-                          (Tiền cọc: {(item.depositPrice*item.quantity).toLocaleString("vi-VN")}đ)
+                          (Tiền cọc: {(item.book.depositPrice*item.quantity).toLocaleString("vi-VN")}đ)
                         </span>
                       </div>
                     </div>

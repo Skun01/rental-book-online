@@ -1,7 +1,7 @@
 import styles from "./UserMenu.module.css";
 import { User, BookOpen, LogOut, ClipboardList } from "lucide-react";
 import {Link} from 'react-router-dom'
-const UserMenu = ({ username = "truongg", onLogout }) => {
+const UserMenu = ({ username = "truongg", handleLogout }) => {
   return (
     <div className={styles.menu}>
       <div className={styles.header}>
@@ -13,7 +13,7 @@ const UserMenu = ({ username = "truongg", onLogout }) => {
       <div className={styles.menuItem}><ClipboardList size={18} /> <Link to ="orders">Đơn hàng</Link></div>
       <div className={styles.menuItem}><User size={18} /> <Link to='/profile'>Tài khoản</Link></div>
       <div className={styles.separator} />
-      <div className={styles.menuItem} onClick={onLogout}><LogOut size={18} />Đăng xuất</div>
+      <div className={styles.menuItem} onClick={handleLogout}><LogOut size={18} />Đăng xuất</div>
     </div>
   );
 };

@@ -19,7 +19,7 @@ function NavBar(){
   const [showAuth, setShowAuth] = useState(false);
   const [authMode, setAuthMode] = useState("login");
   const { currentUser, logout } = useAuth();
-  const { getCartItemCount } = useCart();
+  const { getCartItemCount, handlePostCart } = useCart();
   const [categories, setCategories] = useState()
   const navigate = useNavigate();
   const location = useLocation();
@@ -41,6 +41,7 @@ function NavBar(){
     };
     
   }, []);
+
   // Sync search query with URL when on search page
   useEffect(() => {
     if (location.pathname === "/search") {
@@ -119,6 +120,12 @@ function NavBar(){
   const switchAuthMode = (mode) => {
     setAuthMode(mode);
   };
+
+  // handle logout
+  const handleLogout = () =>{
+    logout();
+    handlePostCart();
+  }
 
   return(
     <>
@@ -200,7 +207,7 @@ function NavBar(){
                 </div>
                 <ChevronDown className={styles.chevronDown}/>
                 {userMenuOpen && (
-                  <UserMenu username={currentUser.name} onLogout={logout} />
+                  <UserMenu username={currentUser.name} handleLogout={handleLogout} />
                 )}
               </div>
             </div>

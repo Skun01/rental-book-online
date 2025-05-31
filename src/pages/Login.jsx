@@ -1,5 +1,4 @@
-import { useState } from "react"
-import { Link } from "react-router-dom"
+import { useState } from "react" 
 import { BookOpen, EyeOff, Eye, Loader, LogIn, Home } from "lucide-react"
 import { useAuth } from "../contexts/AuthContext"
 import axios from "axios"
@@ -71,10 +70,9 @@ function Login({ onClose, switchToRegister }) {
         password: password,
       })
       .then(res => {
-        const { accessToken, user, message } = res.data.data;
+        const { accessToken, user } = res.data.data;
         login(user, accessToken);
-        console.log(message);
-        onClose(); // Close the modal after successful login
+        onClose();
       });
       
     } catch (err) {
