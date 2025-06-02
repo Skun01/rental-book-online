@@ -1,48 +1,33 @@
 import { useState, useEffect } from "react"
-import { useLocation, useNavigate, Link, useSearchParams } from "react-router-dom"
+import { Link, useParams } from "react-router-dom"
 import { CheckCircle, ArrowRight, ShoppingBag, Calendar, MapPin, CreditCard, AlertTriangle, X,
-  Loader2, Truck, XCircle, HelpCircle, Check, DollarSign, RotateCcw, Clock} from "lucide-react"
-import { useAuth } from "../../../contexts/AuthContext"
+  Truck, XCircle, HelpCircle, Check, Clock} from "lucide-react"
 import { useToast } from "../../../contexts/ToastContext"
 import axios from "axios"
 import styles from "./OrderSuccessPage.module.css"
 
 const OrderSuccessPage = () => {
-  const location = useLocation()
-  const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
-  const { currentUser } = useAuth()
   const { showToast } = useToast()
-
   const [orderData, setOrderData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [cancelling, setCancelling] = useState(false)
   const [showCancelModal, setShowCancelModal] = useState(false)
 
-  // Get order ID from URL params or location state
-  const orderId = searchParams.get("orderId") || location.state?.orderId
-
+  const {orderId} = useParams()
   useEffect(() => {
     const fetchOrderDetails = async () => {
-      if (!orderId) {
-        // Use sample data if no order ID
-        setOrderData(getSampleOrderData())
-        setLoading(false)
-        return
-      }
-
       try {
-        const bearer = localStorage.getItem("token")
-        const response = await axios.get(`http://localhost:8080/api/v1/orders/${orderId}`, {
-          headers: {
-            Authorization: `${bearer}`,
-          },
-        })
-        setOrderData(response.data.data)
+        // const bearer = localStorage.getItem("token")
+        // const response = await axios.get(`http://localhost:8080/api/v1/order/rental/${orderId}`, {
+        //   headers: {
+        //     Authorization: `${bearer}`,
+        //   },
+        // })
+        // console.log(response.data.data)
+        // setOrderData(response.data.data)
+        setOrderData(getSampleOrderData2())
       } catch (error) {
         console.error("Error fetching order details:", error)
-        // Fallback to sample data
-        setOrderData(getSampleOrderData())
         showToast({ type: "error", message: "Không thể tải thông tin đơn hàng, hiển thị dữ liệu mẫu" })
       } finally {
         setLoading(false)
@@ -52,57 +37,17 @@ const OrderSuccessPage = () => {
     fetchOrderDetails()
   }, [orderId])
 
-  // Sample data that matches API response structure
-  const getSampleOrderData = () => ({
-    id: 12345,
-    totalPrice: 430000,
-    depositPrice: 320000,
-    city: "Hà Nội",
-    district: "Bắc Từ Liêm",
-    ward: "Minh Khai",
-    street: "123 Đường ABC",
-    notes: "Giao hàng vào buổi chiều",
-    orderStatus: "PROCESSING", // Processing, Confirmed, Delivering, Cancelled
-    paymentStatus: "PAID", // Unpaid, Partial, Paid, Refunded
-    paymentMethod: "E_WALLET", // Cash, BankTransfer, EWallet
-    userId: currentUser?.id || 1,
-    items: [
-      {
-        id: 1,
-        bookId: 101,
-        bookTitle: "Đắc Nhân Tâm",
-        bookAuthor: "Dale Carnegie",
-        bookImage: "/auth.jpg",
-        quantity: 2,
-        rentedDay: 14,
-        rentalPrice: 25000,
-        depositPrice: 100000,
-      },
-      {
-        id: 2,
-        bookId: 102,
-        bookTitle: "Nhà Giả Kim",
-        bookAuthor: "Paulo Coelho",
-        bookImage: "/auth.jpg",
-        quantity: 1,
-        rentedDay: 21,
-        rentalPrice: 30000,
-        depositPrice: 120000,
-      },
-    ],
-    createAt: new Date().toISOString(),
-    updateAt: new Date().toISOString(),
-    createBy: "user",
-    updateBy: "user",
-  })
-
   // Get status info with correct statuses
   const getStatusInfo = (status) => {
     const statusMap = {
       PROCESSING: { class: "processing", text: "Đang xử lý", icon: <Clock size={16} />, canCancel: true },
+      Processing: { class: "processing", text: "Đang xử lý", icon: <Clock size={16} />, canCancel: true },
       CONFIRMED: { class: "confirmed", text: "Đã xác nhận", icon: <Check size={16} />, canCancel: false },
+      Confirmed: { class: "confirmed", text: "Đã xác nhận", icon: <Check size={16} />, canCancel: false },
       DELIVERING: { class: "delivering", text: "Đang giao hàng", icon: <Truck size={16} />, canCancel: false },
+      Delivering: { class: "delivering", text: "Đang giao hàng", icon: <Truck size={16} />, canCancel: false },
       CANCELLED: { class: "cancelled", text: "Đã hủy", icon: <XCircle size={16} />, canCancel: false },
+      Cancelled: { class: "cancelled", text: "Đã hủy", icon: <XCircle size={16} />, canCancel: false },
     }
     return statusMap[status] || { class: "unknown", text: status, icon: <HelpCircle size={16} />, canCancel: false }
   }
@@ -111,9 +56,9 @@ const OrderSuccessPage = () => {
   const getPaymentStatusInfo = (status) => {
     const statusMap = {
       UNPAID: { class: "unpaid", text: "Chưa thanh toán", icon: <CreditCard size={16} /> },
-      PARTIAL: { class: "partial", text: "Thanh toán một phần", icon: <DollarSign size={16} /> },
+      Unpaid: { class: "unpaid", text: "Chưa thanh toán", icon: <CreditCard size={16} /> },
       PAID: { class: "paid", text: "Đã thanh toán", icon: <Check size={16} /> },
-      REFUNDED: { class: "refunded", text: "Đã hoàn tiền", icon: <RotateCcw size={16} /> },
+      Paid: { class: "paid", text: "Đã thanh toán", icon: <Check size={16} /> },
     }
     return statusMap[status] || { class: "unknown", text: status, icon: <HelpCircle size={16} /> }
   }
@@ -132,24 +77,25 @@ const OrderSuccessPage = () => {
   const getPaymentMethodText = (method) => {
     const methodMap = {
       CASH: "Tiền mặt",
+      Cash: "Tiền mặt",
       BANK_TRANSFER: "Chuyển khoản ngân hàng",
+      BankTransfer: "Chuyển khoản ngân hàng",
       E_WALLET: "Ví điện tử",
+      EWallet: "Ví điện tử",
     }
     return methodMap[method] || method
   }
 
   const getDeliveryMethodText = (order) => {
-    // Check if it's library pickup (no address details)
-    if (!order.city && !order.district && !order.ward && !order.street) {
+    if (order.deliveryMethod === 'Offline') {
       return "Nhận tại thư viện"
     }
     return "Giao hàng tận nơi"
   }
 
-  // Calculate estimated delivery date
   const getEstimatedDeliveryDate = (order) => {
     const orderDate = new Date(order.createAt)
-    const isLibraryPickup = !order.city && !order.district && !order.ward && !order.street
+    const isLibraryPickup = order.deliveryMethod === 'Offline'
 
     if (isLibraryPickup) {
       orderDate.setDate(orderDate.getDate() + 2) // 2 days for library pickup
@@ -160,13 +106,21 @@ const OrderSuccessPage = () => {
     return orderDate.toISOString()
   }
 
+  // Calculate rental days for each item
+  const calculateRentalDays = (rentalDate, rentedDate) => {
+    const startDate = new Date(rentalDate)
+    const endDate = new Date(rentedDate)
+    const timeDiff = endDate.getTime() - startDate.getTime()
+    return Math.ceil(timeDiff / (1000 * 3600 * 24))
+  }
+
   // Handle order cancellation
   const handleCancelOrder = async () => {
     setCancelling(true)
     try {
       const bearer = localStorage.getItem("token")
       await axios.put(
-        `http://localhost:8080/api/v1/orders/${orderData.id}/cancel`,
+        `http://localhost:8080/api/v1/order/rental/cancel/${orderData.id}`,
         {},
         {
           headers: {
@@ -174,13 +128,10 @@ const OrderSuccessPage = () => {
           },
         },
       )
-
-      // Update order status locally
       setOrderData((prev) => ({
         ...prev,
         orderStatus: "CANCELLED",
       }))
-
       showToast({ type: "success", message: "Đơn hàng đã được hủy thành công" })
       setShowCancelModal(false)
     } catch (error) {
@@ -230,7 +181,7 @@ const OrderSuccessPage = () => {
 
   const statusInfo = getStatusInfo(orderData.orderStatus)
   const paymentInfo = getPaymentStatusInfo(orderData.paymentStatus)
-  const isLibraryPickup = !orderData.city && !orderData.district && !orderData.ward && !orderData.street
+  const isLibraryPickup = orderData.deliveryMethod === 'Offline'
 
   return (
     <div className={styles.successPage}>
@@ -238,13 +189,15 @@ const OrderSuccessPage = () => {
         <div className={styles.successCard}>
           <div className={styles.successHeader}>
             <div className={styles.successIcon}>
-              {orderData.orderStatus === "CANCELLED" ? <X size={64} color="#ef4444" /> : <CheckCircle size={64} />}
+              {orderData.orderStatus === "Cancelled" || orderData.orderStatus === "CANCELLED" ? 
+                <X size={64} color="#ef4444" /> : <CheckCircle size={64} />}
             </div>
             <h1 className={styles.successTitle}>
-              {orderData.orderStatus === "CANCELLED" ? "Đơn hàng đã bị hủy" : "Đặt hàng thành công!"}
+              {orderData.orderStatus === "Cancelled" || orderData.orderStatus === "CANCELLED" ? 
+                "Đơn hàng đã bị hủy" : "Đặt hàng thành công!"}
             </h1>
             <p className={styles.successMessage}>
-              {orderData.orderStatus === "CANCELLED"
+              {orderData.orderStatus === "Cancelled" || orderData.orderStatus === "CANCELLED"
                 ? "Đơn hàng của bạn đã được hủy. Nếu bạn đã thanh toán, chúng tôi sẽ hoàn tiền trong 3-5 ngày làm việc."
                 : "Cảm ơn bạn đã đặt hàng. Đơn hàng của bạn đã được xác nhận và đang được xử lý."}
             </p>
@@ -253,7 +206,7 @@ const OrderSuccessPage = () => {
           <div className={styles.orderInfoSection}>
             <div className={styles.orderHeaderWithActions}>
               <h2 className={styles.sectionTitle}>Thông tin đơn hàng</h2>
-              {statusInfo.canCancel && orderData.orderStatus !== "CANCELLED" && (
+              {statusInfo.canCancel && orderData.orderStatus !== "CANCELLED" && orderData.orderStatus !== "Cancelled" && (
                 <button className={styles.cancelButton} onClick={() => setShowCancelModal(true)} disabled={cancelling}>
                   {cancelling ? "Đang hủy..." : "Hủy đơn hàng"}
                 </button>
@@ -320,28 +273,34 @@ const OrderSuccessPage = () => {
           <div className={styles.orderItemsSection}>
             <h2 className={styles.sectionTitle}>Sách đã thuê</h2>
             <div className={styles.orderItems}>
-              {orderData.items.map((item) => (
-                <div key={item.id} className={styles.orderItem}>
-                  <div className={styles.itemImage}>
-                    <img src={item.bookImage || "/auth.jpg"} alt={item.bookTitle} className={styles.itemThumbnail} />
-                    {item.quantity > 1 && <span className={styles.itemQuantity}>{item.quantity}</span>}
-                  </div>
-                  <div className={styles.itemInfo}>
-                    <h3 className={styles.itemTitle}>{item.bookTitle}</h3>
-                    <p className={styles.itemAuthor}>{item.bookAuthor}</p>
-                    <div className={styles.itemRentDetails}>
-                      <span className={styles.itemRentDays}>Thời gian thuê: {item.rentedDay} ngày</span>
+              {orderData.items.map((item) => {
+                const rentalDays = calculateRentalDays(item.rentalDate, item.rentedDate)
+                return (
+                  <div key={item.id} className={styles.orderItem}>
+                    <div className={styles.itemImage}>
+                      <img src={item.bookImage || "/auth.jpg"} alt={item.bookName} className={styles.itemThumbnail} />
+                      {item.quantity > 1 && <span className={styles.itemQuantity}>{item.quantity}</span>}
                     </div>
-                    <div className={styles.itemPrice}>
-                      {(item.rentalPrice * item.quantity * Math.floor(item.rentedDay / 7)).toLocaleString("vi-VN")}đ
-                      <span className={styles.depositAmount}>
-                        {" "}
-                        (Tiền cọc: {(item.depositPrice * item.quantity).toLocaleString("vi-VN")}đ)
-                      </span>
+                    <div className={styles.itemInfo}>
+                      <h3 className={styles.itemTitle}>{item.bookName}</h3>
+                      <p className={styles.itemAuthor}>{item.bookAuthor || "Tác giả không xác định"}</p>
+                      <div className={styles.itemRentDetails}>
+                        <span className={styles.itemRentDays}>Thời gian thuê: {rentalDays} ngày</span>
+                        <span className={styles.itemRentPeriod}>
+                          ({formatDate(item.rentalDate)} - {formatDate(item.rentedDate)})
+                        </span>
+                      </div>
+                      <div className={styles.itemPrice}>
+                        {item.totalRental.toLocaleString("vi-VN")}đ
+                        <span className={styles.depositAmount}>
+                          {" "}
+                          (Tiền cọc: {item.totalDeposit.toLocaleString("vi-VN")}đ)
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
 
@@ -394,9 +353,21 @@ const OrderSuccessPage = () => {
                     <span className={styles.deliveryLabel}>Thời gian mở cửa:</span>
                     <span className={styles.deliveryValue}>Thứ 2 - Thứ 6: 8:00 - 17:30</span>
                   </div>
+                  <div className={styles.deliveryDetail}>
+                    <span className={styles.deliveryLabel}>Ngày có thể nhận:</span>
+                    <span className={styles.deliveryValue}>{formatDate(getEstimatedDeliveryDate(orderData))}</span>
+                  </div>
                 </>
               ) : (
                 <>
+                  <div className={styles.deliveryDetail}>
+                    <span className={styles.deliveryLabel}>Người nhận:</span>
+                    <span className={styles.deliveryValue}>{orderData.fullName}</span>
+                  </div>
+                  <div className={styles.deliveryDetail}>
+                    <span className={styles.deliveryLabel}>Số điện thoại:</span>
+                    <span className={styles.deliveryValue}>{orderData.phone}</span>
+                  </div>
                   <div className={styles.deliveryDetail}>
                     <span className={styles.deliveryLabel}>Địa chỉ giao hàng:</span>
                     <span className={styles.deliveryValue}>
@@ -469,3 +440,173 @@ const OrderSuccessPage = () => {
 }
 
 export default OrderSuccessPage
+
+const getSampleOrderData1 = () => ({
+  "id": 1,
+  "totalPrice": 60700,
+  "depositPrice": 343000,
+  "city": "Ha noi",
+  "district": "Bắc Từ Liêm",
+  "ward": "Minh Khai",
+  "street": "Văn trì",
+  "notes": "Yeu em",
+  "fullName": 'thai van Truong',
+  "phone": '0374963082',
+  "deliveryMethod": "Online",
+  "orderStatus": "Processing",
+  "paymentStatus": "Unpaid",
+  "paymentMethod": "Cash",
+  "userId": 2,
+  "branchId": null,
+  "items": [
+    {
+      "id": 1,
+      "rentalDate": "2025-05-31T05:49:54.016607Z",
+      "rentedDate": "2025-06-20T05:49:54.016607Z",
+      "bookName": "Cho tôi xin một vé đi tuổi thơ",
+      "rentalPrice": 4000,
+      "depositPrice": 25000,
+      "quantity": 4,
+      "totalRental": 304000,
+      "totalDeposit": 100000,
+      "createAt": "2025-05-31T05:49:54.461077Z",
+      "updateAt": null,
+      "createBy": "anonymousUser",
+      "updateBy": null
+    },
+    {
+      "id": 2,
+      "rentalDate": "2025-05-31T05:49:54.016607Z",
+      "rentedDate": "2025-06-20T05:49:54.016607Z",
+      "bookName": "Mắt biếc",
+      "rentalPrice": 3500,
+      "depositPrice": 22000,
+      "quantity": 5,
+      "totalRental": 332500,
+      "totalDeposit": 110000,
+      "createAt": "2025-05-31T05:49:54.564416Z",
+      "updateAt": null,
+      "createBy": "anonymousUser",
+      "updateBy": null
+    },
+    {
+      "id": 3,
+      "rentalDate": "2025-05-31T05:49:54.016607Z",
+      "rentedDate": "2025-06-30T05:49:54.016607Z",
+      "bookName": "Kính vạn hoa",
+      "rentalPrice": 4500,
+      "depositPrice": 28000,
+      "quantity": 1,
+      "totalRental": 130500,
+      "totalDeposit": 28000,
+      "createAt": "2025-05-31T05:49:54.574501Z",
+      "updateAt": null,
+      "createBy": "anonymousUser",
+      "updateBy": null
+    },
+    {
+      "id": 4,
+      "rentalDate": "2025-05-31T05:49:54.016607Z",
+      "rentedDate": "2025-06-14T05:49:54.016607Z",
+      "bookName": "Rừng Na Uy",
+      "rentalPrice": 4700,
+      "depositPrice": 40000,
+      "quantity": 1,
+      "totalRental": 61100,
+      "totalDeposit": 40000,
+      "createAt": "2025-05-31T05:49:54.584081Z",
+      "updateAt": null,
+      "createBy": "anonymousUser",
+      "updateBy": null
+    },
+  ],
+  "createAt": "2025-05-31T05:49:54.145001Z",
+  "updateAt": null,
+  "createBy": "anonymousUser",
+  "updateBy": null
+})
+
+const getSampleOrderData2 = () => ({
+  "id": 3,
+  "totalPrice": 50700,
+  "depositPrice": 343000,
+  "city": null,
+  "district": null,
+  "ward": null,
+  "street": null,
+  "notes": "the thoi",
+  "fullName": "Thai Van Sinh",
+  "phone": "0971494313",
+  "deliveryMethod": "Offline",
+  "orderStatus": "Processing",
+  "paymentStatus": "Unpaid",
+  "paymentMethod": "EWallet",
+  "userId": 2,
+  "branchId": 1,
+  "items": [
+    {
+      "id": 15,
+      "rentalDate": "2025-05-31T07:11:45.904828Z",
+      "rentedDate": "2025-06-30T07:11:45.904828Z",
+      "bookName": "Kính vạn hoa",
+      "rentalPrice": 4500,
+      "depositPrice": 28000,
+      "quantity": 1,
+      "totalRental": 135000,
+      "totalDeposit": 28000,
+      "createAt": "2025-05-31T07:11:46.030905Z",
+      "updateAt": null,
+      "createBy": "anonymousUser",
+      "updateBy": null
+    },
+    {
+      "id": 16,
+      "rentalDate": "2025-05-31T07:11:45.904828Z",
+      "rentedDate": "2025-06-14T07:11:45.904828Z",
+      "bookName": "Rừng Na Uy",
+      "rentalPrice": 4700,
+      "depositPrice": 40000,
+      "quantity": 1,
+      "totalRental": 65800,
+      "totalDeposit": 40000,
+      "createAt": "2025-05-31T07:11:46.041169Z",
+      "updateAt": null,
+      "createBy": "anonymousUser",
+      "updateBy": null
+    },
+    {
+      "id": 17,
+      "rentalDate": "2025-05-31T07:11:45.904828Z",
+      "rentedDate": "2025-07-17T07:11:45.904828Z",
+      "bookName": "Số đỏ",
+      "rentalPrice": 4800,
+      "depositPrice": 27000,
+      "quantity": 1,
+      "totalRental": 225600,
+      "totalDeposit": 27000,
+      "createAt": "2025-05-31T07:11:46.050831Z",
+      "updateAt": null,
+      "createBy": "anonymousUser",
+      "updateBy": null
+    },
+    {
+      "id": 18,
+      "rentalDate": "2025-05-31T07:11:45.904828Z",
+      "rentedDate": "2025-06-07T07:11:45.904828Z",
+      "bookName": "Harry Potter và Hòn đá Phù thủy",
+      "rentalPrice": 3200,
+      "depositPrice": 38000,
+      "quantity": 1,
+      "totalRental": 22400,
+      "totalDeposit": 38000,
+      "createAt": "2025-05-31T07:11:46.050831Z",
+      "updateAt": null,
+      "createBy": "anonymousUser",
+      "updateBy": null
+    }
+  ],
+  "createAt": "2025-05-31T07:11:45.966022Z",
+  "updateAt": null,
+  "createBy": "anonymousUser",
+  "updateBy": null
+})

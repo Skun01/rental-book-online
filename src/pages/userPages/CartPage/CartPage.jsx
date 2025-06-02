@@ -5,12 +5,14 @@ import styles from "./CartPage.module.css"
 import { useCart } from "../../../contexts/CartContext"
 
 const CartPage = () => {
-  const { cartItems, updateQuantity, removeFromCart, getTotalPrice, getTotalDeposit, updateRentDays } = useCart()
+  const { cartItems, restoreCartItems, updateQuantity, removeFromCart, getTotalPrice, getTotalDeposit, updateRentDays } = useCart()
   const navigate = useNavigate()
   const [showCommonDatePicker, setShowCommonDatePicker] = useState(false)
   const commonDateInputRef = useRef(null)
   const [commonDate, setCommonDate] = useState(-1)
-  
+  useEffect(()=>{
+    restoreCartItems()
+  }, [])
   const handleQuantityChange = (bookId, quantity) => {
     updateQuantity(bookId, quantity)
   }

@@ -15,7 +15,7 @@ const BookDetailsPage = () => {
   const [totalRentalPrice, setTotalRentalPrice] = useState(0)
   const {id} = useParams()
   const [book, setBook] = useState(null)
-  const {addToCart, clearCart, setCartItems} = useCart()
+  const {addToCart, changeCartItemsTemporarily} = useCart()
   const navigate = useNavigate()
   useEffect(()=>{
     async function getBookById(){
@@ -49,9 +49,8 @@ const BookDetailsPage = () => {
   }
 
   function handleRentNow(){
-    clearCart()
-    setCartItems([{...book, rentedDay: rentDate, quantity: rentNumber}])
-    navigate('/checkout')
+    changeCartItemsTemporarily([{book, rentedDay: rentDate, quantity: rentNumber}])
+    navigate('/checkout', {state: {areCartItems: false}})
   }
 
   // xu ly lay ngay khi chon ngay khac

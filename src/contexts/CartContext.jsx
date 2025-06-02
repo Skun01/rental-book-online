@@ -10,6 +10,7 @@ export function useCart() {
 
 export function CartProvider({ children }) {
   const [cartItems, setCartItems] = useState([])
+  const [backupCartItems, setBackupCartItems] = useState([])
   const [isInitialized, setIsInitialized] = useState(false)
   const { showToast } = useToast()
   const {currentUser} = useAuth()
@@ -115,22 +116,40 @@ export function CartProvider({ children }) {
     
   }
 
+  // change cartItem temporarily
+  const changeCartItemsTemporarily = (newCartItems) =>{
+    setBackupCartItems(cartItems)
+    setCartItems(newCartItems)
+  }
+
+  const restoreCartItems = () => {
+    if(backupCartItems.length !== 0){
+      setCartItems(backupCartItems)
+      setBackupCartItems([])
+    }
+  }
+
   const clearCart = () => {
     setCartItems([])
     localStorage.removeItem('cart')
   }
 
   const getTotalPrice = () => {
-    return cartItems.reduce((total, item) => total + item.book.rentalPrice * item.quantity, 0)
+    return cartItems.reduce((total, item) => total + item.book.rentalPrice * item.quantity * Math.floor(item.rentedDay/7), 0)
   }
 
   const getTotalDeposit = () => {
     return cartItems.reduce((total, item) => total + item.book.depositPrice * item.quantity, 0)
   }
 
-  const getCartItemCount = () => {
-    if(!cartItems) return 0;
-    return cartItems.reduce((count, item) => count + item.quantity, 0)
+  const getCartItemCount = (temporarily) => {
+    if(!cartItems) return 0
+    let items
+    if(temporarily) items = cartItems
+    else{
+      items = backupCartItems.length !== 0 ? backupCartItems : cartItems
+    }
+    return items.reduce((count, item) => count + item.quantity, 0)
   }
 
   const updateRentDays = (bookId, days) => {
@@ -147,6 +166,8 @@ export function CartProvider({ children }) {
     updateQuantity,
     removeFromCart,
     clearCart,
+    changeCartItemsTemporarily,
+    restoreCartItems,
     getTotalPrice,
     getTotalDeposit,
     getCartItemCount,

@@ -58,7 +58,7 @@ const userRoutes = [
         element: <CheckoutPage />,
       },
       {
-        path: 'checkout/success',
+        path: 'checkout/:orderId/success',
         element: <OrderSuccessPage />
       },
       {

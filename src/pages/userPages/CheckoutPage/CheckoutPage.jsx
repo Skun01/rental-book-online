@@ -1,19 +1,18 @@
 import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
 import { useCart } from "../../../contexts/CartContext"
 import styles from "./CheckoutPage.module.css"
+import { useNavigate, useLocation } from "react-router-dom"
 import { useAuth } from "../../../contexts/AuthContext"
 import { useToast } from "../../../contexts/ToastContext"
 import axios from "axios"
 
 const CheckoutPage = () => {
-  const navigate = useNavigate()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     fullName: "",
     phone: "",
-    deliveryMethod: "library-pickup",
-    pickupLocation: "main-library",
+    deliveryMethod: "offline", // [offline, online]
+    branchId: 1,
     pickupDate: "",
     address: "",
     city: "",
@@ -22,16 +21,23 @@ const CheckoutPage = () => {
     street: "",
     notes: "",
     paymentMethod: "EWallet",
+    paymentStatus:  "Unpaid", 
     shippingMethod: "Standard",
     accountNumber: "",
+    receiveDay: ""
   })
   const [errors, setErrors] = useState({})
   const [addresses, setAddresses] = useState([])
   const [selectedAddressId, setSelectedAddressId] = useState(null)
   const [showNewAddressForm, setShowNewAddressForm] = useState(false)
-  const { getTotalPrice, getTotalDeposit, getCartItemCount, cartItems } = useCart()
+  const { getTotalPrice, getTotalDeposit, getCartItemCount, cartItems, 
+    restoreCartItems, getPostCartItems, clearCart } = useCart()
   const { currentUser } = useAuth()
   const { showToast } = useToast()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const OtherSiteData = location.state;
+  
 
   // Tạo lịch chọn 3 ngày liên tục để đến nhận sách khi nhận tại thư viện
   const getAvailablePickupDates = () => {
@@ -110,6 +116,7 @@ const CheckoutPage = () => {
     }
   }, [])
 
+  // get all data input from form
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target
     setFormData({
@@ -136,85 +143,74 @@ const CheckoutPage = () => {
       newErrors.phone = "Số điện thoại không hợp lệ"
     }
 
-    if (formData.deliveryMethod === "library-pickup") {
+    if (formData.deliveryMethod === "Offline") {
       if (!formData.pickupDate) newErrors.pickupDate = "Vui lòng chọn ngày nhận sách"
-      if (!formData.pickupTime) newErrors.pickupTime = "Vui lòng chọn giờ nhận sách"
     }
 
-    if (formData.deliveryMethod === "home-delivery") {
+    if (formData.deliveryMethod === "Online") {
       if (!formData.address.trim()) newErrors.address = "Địa chỉ là bắt buộc"
       if (!formData.city.trim()) newErrors.city = "Thành phố là bắt buộc"
       if (!formData.district.trim()) newErrors.district = "Quận/Huyện là bắt buộc"
       if (!formData.ward.trim()) newErrors.ward = "Phường/Xã là bắt buộc"
       if (!formData.street.trim()) newErrors.street = "Đường/Phố là bắt buộc"
     }
-
-    if (formData.paymentMethod === "BankTransfer" && !formData.accountNumber.trim()) {
-      newErrors.accountNumber = "Số tài khoản là bắt buộc"
-    }
-
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
-  //check data
-  const prepareCheckoutData = () => {
-    const shippingFee =
-      formData.deliveryMethod === "home-delivery" ? (formData.shippingMethod === "Express" ? 10000 : 0) : 0
-    const totalPrice = getTotalPrice() + shippingFee
-    const depositPrice = getTotalDeposit()
-
-    const items = cartItems.map((item) => ({
-      bookId: item.book.id,
-      quantity: item.quantity,
-      rentedDay: item.rentedDay,
-    }))
-
-    const checkoutData = {
+  //get all data necessary to send to backend
+  const getCheckoutData = () => {
+    const shippingFee = formData.deliveryMethod === "Online" ? (formData.shippingMethod === "Express" ? 10000 : 0) : 0
+    const basicData = {
       userId: currentUser.id,
-      city: formData.city,
-      district: formData.district,
-      ward: formData.ward,
-      street: formData.street,
+      fullName: formData.fullName,
+      phone: formData.phone,
       notes: formData.notes,
-      totalPrice: totalPrice,
-      depositPrice: depositPrice,
+      totalPrice: getTotalPrice() + shippingFee,
+      depositPrice: getTotalDeposit(),
       paymentStatus: "Unpaid",
+      deliveryMethod: formData.deliveryMethod,
       paymentMethod: formData.paymentMethod,
-      shippingMethod: formData.shippingMethod,
-      items: items,
+      items: getPostCartItems(),
     }
-
-    // Add pickup scheduling if library pickup
-    if (formData.deliveryMethod === "library-pickup") {
-      // xu ly sau 
+    if(formData.deliveryMethod === "Offline"){
+      return {...basicData, 
+        branchId: +formData.branchId,
+        receiveDay:  new Date(formData.pickupDate).toISOString()
+      }
+    }else{
+      return {...basicData,
+        city: formData.city,
+        district: formData.district,
+        ward: formData.ward,
+        street: formData.street,
+        shippingMethod: formData.shippingMethod,
+      }
     }
-
-    return checkoutData
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    navigate("/checkout/success")
     if (validateForm()) {
       setIsSubmitting(true)
       try {
-        const checkoutData = prepareCheckoutData()
-        console.log("Checkout data to send:", checkoutData)
-
+        const checkoutData = getCheckoutData()
+        console.log("checkout data:", checkoutData)
         const bearer = localStorage.getItem("token")
-        const response = await axios.post("http://localhost:8080/api/v1/checkout", checkoutData, {
+        const response = await axios.post("http://localhost:8080/api/v1/order/rental", checkoutData, {
           headers: {
-            Authorization: `${bearer}`,
-            "Content-Type": "application/json",
+            Authorization: `${bearer}`
           },
         })
-
         console.log("Checkout response:", response.data)
-        showToast({ type: "success", message: "Đặt hàng thành công!" })
-        navigate("/checkout/success")
+        if(!OtherSiteData){
+          clearCart()
+        }else{
+          restoreCartItems()
+        }
+        navigate(`/checkout/${response.data.data.id}/success`)
       } catch (error) {
-        console.error("Lỗi khi xử lý đơn hàng:", error)
+        console.error("Lỗi khi đặt đơn hàng:", error)
         showToast({ type: "error", message: "Có lỗi khi xử lý đơn hàng" })
       } finally {
         setIsSubmitting(false)
@@ -259,49 +255,31 @@ const CheckoutPage = () => {
         <div className={styles.checkoutGrid}>
           <div className={styles.checkoutFormContainer}>
             <form onSubmit={handleSubmit} className={styles.checkoutForm}>
-              {/* Thông Tin Cá Nhân */}
+              {/* checkout information */}
               <div className={styles.formSection}>
                 <h2>Thông Tin Cá Nhân</h2>
                 <div className={styles.formGroup}>
                   <label htmlFor="fullName">Họ và Tên</label>
-                  <input
-                    type="text"
-                    id="fullName"
-                    name="fullName"
-                    value={formData.fullName}
-                    onChange={handleInputChange}
-                    className={errors.fullName ? styles.error : ""}
-                  />
+                  <input type="text" id="fullName" name="fullName" value={formData.fullName} 
+                    onChange={handleInputChange} className={errors.fullName ? styles.error : ""}/>
                   {errors.fullName && <span className={styles.errorMessage}>{errors.fullName}</span>}
                 </div>
 
                 <div className={styles.formGroup}>
                   <label htmlFor="phone">Số Điện Thoại</label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    className={errors.phone ? styles.error : ""}
-                  />
+                  <input type="tel" id="phone" name="phone" value={formData.phone} 
+                    onChange={handleInputChange} className={errors.phone ? styles.error : ""}/>
                   {errors.phone && <span className={styles.errorMessage}>{errors.phone}</span>}
                 </div>
               </div>
 
-              {/* Phương Thức Nhận Hàng */}
+              {/* delivery option */}
               <div className={styles.formSection}>
                 <h2>Phương Thức Nhận Sách</h2>
                 <div className={styles.deliveryOptions}>
                   <div className={styles.deliveryOption}>
-                    <input
-                      type="radio"
-                      id="library-pickup"
-                      name="deliveryMethod"
-                      value="library-pickup"
-                      checked={formData.deliveryMethod === "library-pickup"}
-                      onChange={handleInputChange}
-                    />
+                    <input type="radio" id="library-pickup" name="deliveryMethod" value="Offline" 
+                      checked={formData.deliveryMethod === "Offline"} onChange={handleInputChange} />
                     <label htmlFor="library-pickup">
                       <span className={styles.optionTitle}>Nhận tại thư viện sách</span>
                       <span className={styles.optionDescription}>Nhận sách tại một trong những địa điểm thư viện</span>
@@ -310,13 +288,8 @@ const CheckoutPage = () => {
 
                   <div className={styles.deliveryOption}>
                     <input
-                      type="radio"
-                      id="home-delivery"
-                      name="deliveryMethod"
-                      value="home-delivery"
-                      checked={formData.deliveryMethod === "home-delivery"}
-                      onChange={handleInputChange}
-                    />
+                      type="radio" id="home-delivery" name="deliveryMethod" value="Online" 
+                      checked={formData.deliveryMethod === "Online"} onChange={handleInputChange}/>
                     <label htmlFor="home-delivery">
                       <span className={styles.optionTitle}>Giao sách tận nơi</span>
                       <span className={styles.optionDescription}>Nhận sách ngay tại nhà của bạn</span>
@@ -325,20 +298,18 @@ const CheckoutPage = () => {
                 </div>
                 
                 {/* xu ly chon ngay den nhan sach khi chon den thu vien */}
-                {formData.deliveryMethod === "library-pickup" && (
+                {formData.deliveryMethod === "Offline" && (
                   <div className={styles.deliverySection}>
                     <div className={styles.formGroup}>
-                      <label htmlFor="pickupLocation">Địa điểm nhận sách</label>
-                      <select
-                        id="pickupLocation"
-                        name="pickupLocation"
-                        value={formData.pickupLocation}
-                        onChange={handleInputChange}
-                      >
-                        <option value="main-library">
+
+                      {/* get tensha of toshokan */}
+                      <label htmlFor="branchId">Địa điểm nhận sách</label>
+                      <select id="branchId" name="branchId" value={formData.branchId} 
+                        onChange={handleInputChange}>
+                        <option value= {1}>
                           Thư viện tòa A11 cơ sở 1 Đại Học Công Nghiệp Hà nội, Minh Khai, Bắc Từ Liêm Hà Nội
                         </option>
-                        <option value="branch-library">
+                        <option value={2}>
                           Thư viện tòa C3 cơ sở 3 Đại Học Công Nghiệp Hà nội, Phủ lý, Hà Nam
                         </option>
                       </select>
@@ -350,13 +321,8 @@ const CheckoutPage = () => {
                     <div className={styles.formRow}>
                       <div className={styles.formGroup}>
                         <label htmlFor="pickupDate">Ngày nhận</label>
-                        <select
-                          id="pickupDate"
-                          name="pickupDate"
-                          value={formData.pickupDate}
-                          onChange={handleInputChange}
-                          className={errors.pickupDate ? styles.error : ""}
-                        >
+                        <select id="pickupDate" name="pickupDate" value={formData.pickupDate} 
+                          onChange={handleInputChange} className={errors.pickupDate ? styles.error : ""}>
                           <option value="">Chọn ngày</option>
                           {getAvailablePickupDates().map((date) => (
                             <option key={date.value} value={date.value}>
@@ -370,16 +336,12 @@ const CheckoutPage = () => {
                   </div>
                 )}
 
-                {/* Shipping Method Selection */}
-                {formData.deliveryMethod === "home-delivery" && (
+                {/* giao hang */}
+                {formData.deliveryMethod === "Online" && (
                   <div className={styles.formGroup}>
                     <label htmlFor="shippingMethod">Phương thức vận chuyển</label>
-                    <select
-                      id="shippingMethod"
-                      name="shippingMethod"
-                      value={formData.shippingMethod}
-                      onChange={handleInputChange}
-                    >
+                    <select id="shippingMethod" name="shippingMethod" value={formData.shippingMethod} 
+                      onChange={handleInputChange}>
                       <option value="Standard">Tiêu chuẩn (3 ngày)</option>
                       <option value="Express">Nhanh (1 ngày)</option>
                     </select>
@@ -387,7 +349,7 @@ const CheckoutPage = () => {
                 )}
 
                 {/* giao sach tan noi chon dia chi */}
-                {formData.deliveryMethod === "home-delivery" && (
+                {formData.deliveryMethod === "Online" && (
                   <div className={styles.deliverySection}>
                     <h3>Thông tin giao hàng</h3>
                     {addresses.length > 0 && (
@@ -395,11 +357,9 @@ const CheckoutPage = () => {
                         <h4>Địa chỉ đã lưu</h4>
                         <div className={styles.addressList}>
                           {addresses.map((addr) => (
-                            <div
-                              key={addr.id}
+                            <div key={addr.id}
                               className={`${styles.addressCard} ${selectedAddressId === addr.id ? styles.selected : ""}`}
-                              onClick={() => handleAddressSelect(addr.id)}
-                            >
+                              onClick={() => handleAddressSelect(addr.id)}>
                               <div className={styles.addressInfo}>
                                 <p>{addr.address}</p>
                                 <p>
@@ -409,10 +369,8 @@ const CheckoutPage = () => {
                               </div>
                             </div>
                           ))}
-                          <div
-                            className={`${styles.addressCard} ${styles.newAddress} ${showNewAddressForm ? styles.selected : ""}`}
-                            onClick={() => handleAddressSelect("new")}
-                          >
+                          <div className={`${styles.addressCard} ${styles.newAddress} ${showNewAddressForm ? styles.selected : ""}`}
+                            onClick={() => handleAddressSelect("new")}>
                             <div className={styles.addressInfo}>
                               <p>+ Thêm địa chỉ mới</p>
                             </div>
@@ -426,41 +384,25 @@ const CheckoutPage = () => {
                         <h4>Địa chỉ mới</h4>
                         <div className={styles.formGroup}>
                           <label htmlFor="address">Địa chỉ chi tiết</label>
-                          <input
-                            type="text"
-                            id="address"
-                            name="address"
-                            value={formData.address}
-                            onChange={handleInputChange}
-                            className={errors.address ? styles.error : ""}
-                            placeholder="Số nhà, tên đường..."
-                          />
+                          <input type="text" id="address" name="address" value={formData.address} 
+                            onChange={handleInputChange} className={errors.address ? styles.error : ""} 
+                              placeholder="Số nhà, tên đường..."/>
                           {errors.address && <span className={styles.errorMessage}>{errors.address}</span>}
                         </div>
 
                         <div className={styles.formRow}>
                           <div className={styles.formGroup}>
                             <label htmlFor="city">Thành phố</label>
-                            <input
-                              type="text"
-                              id="city"
-                              name="city"
-                              value={formData.city}
-                              onChange={handleInputChange}
-                              className={errors.city ? styles.error : ""}
+                            <input type="text" id="city" name="city" value={formData.city} 
+                              onChange={handleInputChange} className={errors.city ? styles.error : ""}
                             />
                             {errors.city && <span className={styles.errorMessage}>{errors.city}</span>}
                           </div>
 
                           <div className={styles.formGroup}>
                             <label htmlFor="district">Quận/Huyện</label>
-                            <input
-                              type="text"
-                              id="district"
-                              name="district"
-                              value={formData.district}
-                              onChange={handleInputChange}
-                              className={errors.district ? styles.error : ""}
+                            <input type="text" id="district" name="district" value={formData.district} 
+                              onChange={handleInputChange} className={errors.district ? styles.error : ""} 
                             />
                             {errors.district && <span className={styles.errorMessage}>{errors.district}</span>}
                           </div>
@@ -469,26 +411,16 @@ const CheckoutPage = () => {
                         <div className={styles.formRow}>
                           <div className={styles.formGroup}>
                             <label htmlFor="ward">Phường/Xã</label>
-                            <input
-                              type="text"
-                              id="ward"
-                              name="ward"
-                              value={formData.ward}
-                              onChange={handleInputChange}
-                              className={errors.ward ? styles.error : ""}
+                            <input type="text" id="ward" name="ward" value={formData.ward} 
+                              onChange={handleInputChange} className={errors.ward ? styles.error : ""}
                             />
                             {errors.ward && <span className={styles.errorMessage}>{errors.ward}</span>}
                           </div>
 
                           <div className={styles.formGroup}>
                             <label htmlFor="street">Đường/Phố</label>
-                            <input
-                              type="text"
-                              id="street"
-                              name="street"
-                              value={formData.street}
-                              onChange={handleInputChange}
-                              className={errors.street ? styles.error : ""}
+                            <input type="text" id="street" name="street" value={formData.street} 
+                              onChange={handleInputChange} className={errors.street ? styles.error : ""}
                             />
                             {errors.street && <span className={styles.errorMessage}>{errors.street}</span>}
                           </div>
@@ -504,30 +436,19 @@ const CheckoutPage = () => {
                 <h2>Ghi chú</h2>
                 <div className={styles.formGroup}>
                   <label htmlFor="notes">Ghi chú đơn hàng (tùy chọn)</label>
-                  <textarea
-                    id="notes"
-                    name="notes"
-                    value={formData.notes}
-                    onChange={handleInputChange}
-                    rows={3}
-                    placeholder="Thêm ghi chú cho đơn hàng..."
-                    className={styles.orderNote}
+                  <textarea id="notes" name="notes" value={formData.notes} onChange={handleInputChange} 
+                    rows={3} placeholder="Thêm ghi chú cho đơn hàng..." className={styles.orderNote}
                   />
                 </div>
               </div>
 
-              {/* Phương Thức Thanh Toán */}
+              {/* payment */}
               <div className={styles.formSection}>
                 <h2>Phương Thức Thanh Toán</h2>
                 <div className={styles.paymentOptions}>
                   <div className={styles.paymentOption}>
-                    <input
-                      type="radio"
-                      id="e-wallet"
-                      name="paymentMethod"
-                      value="EWallet"
-                      checked={formData.paymentMethod === "EWallet"}
-                      onChange={handleInputChange}
+                    <input type="radio" id="e-wallet" name="paymentMethod" value="EWallet" 
+                      checked={formData.paymentMethod === "EWallet"} onChange={handleInputChange}
                     />
                     <label htmlFor="e-wallet">
                       <span className={styles.optionTitle}>Ví điện tử</span>
@@ -535,13 +456,8 @@ const CheckoutPage = () => {
                     </label>
                   </div>
                   <div className={styles.paymentOption}>
-                    <input
-                      type="radio"
-                      id="cash"
-                      name="paymentMethod"
-                      value="Cash"
-                      checked={formData.paymentMethod === "Cash"}
-                      onChange={handleInputChange}
+                    <input type="radio" id="cash" name="paymentMethod" value="Cash" 
+                      checked={formData.paymentMethod === "Cash"} onChange={handleInputChange}
                     />
                     <label htmlFor="cash">
                       <span className={styles.optionTitle}>Thanh toán khi nhận hàng</span>
@@ -549,13 +465,8 @@ const CheckoutPage = () => {
                     </label>
                   </div>
                   <div className={styles.paymentOption}>
-                    <input
-                      type="radio"
-                      id="bank-transfer"
-                      name="paymentMethod"
-                      value="BankTransfer"
-                      checked={formData.paymentMethod === "BankTransfer"}
-                      onChange={handleInputChange}
+                    <input type="radio" id="bank-transfer" name="paymentMethod" value="BankTransfer" 
+                      checked={formData.paymentMethod === "BankTransfer"} onChange={handleInputChange}
                     />
                     <label htmlFor="bank-transfer">
                       <span className={styles.optionTitle}>Chuyển khoản ngân hàng</span>
@@ -573,7 +484,6 @@ const CheckoutPage = () => {
           </div>
 
           <div className={styles.orderSummaryContainer}>
-
             {/* Hiển thị các item trong đơn hàng*/}
             <div className={styles.orderSummary}>
               <h2 className={styles.summaryTitle}>Tóm tắt đơn hàng</h2>
@@ -606,7 +516,7 @@ const CheckoutPage = () => {
               <div className={styles.summaryDetails}>
                 <div className={styles.summaryRow}>
                   <span>Tổng số lượng:</span>
-                  <span>{getCartItemCount()}</span>
+                  <span>{getCartItemCount(true)}</span>
                 </div>
                 <div className={styles.summaryRow}>
                   <span>Tổng tiền cọc:</span>
@@ -616,16 +526,16 @@ const CheckoutPage = () => {
                   <span>Tổng phí thuê:</span>
                   <span>{getTotalPrice().toLocaleString("vi-VN")}đ</span>
                 </div>
-                {formData.deliveryMethod === "home-delivery" && (
+                {formData.deliveryMethod === "Online" && (
                   <div className={styles.summaryRow}>
                     <span>Phí vận chuyển ({formData.shippingMethod === "Express" ? "Nhanh" : "Tiêu chuẩn"}):</span>
                     <span>{formData.shippingMethod === "Express" ? "10.000đ" : "Miễn phí"}</span>
                   </div>
                 )}
 
-                {/* Expected Date Display */}
+                {/* date nhan du kien */}
                 <div className={styles.summaryRow}>
-                  <span>{formData.deliveryMethod === "library-pickup" ? "Thời gian nhận:" : "Ngày nhận hàng:"}</span>
+                  <span>{formData.deliveryMethod === "Online" ? "Ngày nhận dự kiến:" : "Ngày lấy sách:"}</span>
                   <span className={styles.expectedDate}>{getExpectedDate()}</span>
                 </div>
 
@@ -634,7 +544,7 @@ const CheckoutPage = () => {
                   <span>
                     {(
                       getTotalPrice() + (getTotalDeposit()) + 
-                      (formData.deliveryMethod === "home-delivery"
+                      (formData.deliveryMethod === "Online"
                         ? formData.shippingMethod === "Express"
                           ? 10000
                           : 0
