@@ -114,7 +114,7 @@ const CheckoutPage = () => {
     } catch (error) {
       console.error("Error fetching addresses:", error)
     }
-  }, [])
+  }, [currentUser.id])
 
   // get all data input from form
   const handleInputChange = (e) => {
@@ -148,7 +148,6 @@ const CheckoutPage = () => {
     }
 
     if (formData.deliveryMethod === "Online") {
-      if (!formData.address.trim()) newErrors.address = "Địa chỉ là bắt buộc"
       if (!formData.city.trim()) newErrors.city = "Thành phố là bắt buộc"
       if (!formData.district.trim()) newErrors.district = "Quận/Huyện là bắt buộc"
       if (!formData.ward.trim()) newErrors.ward = "Phường/Xã là bắt buộc"

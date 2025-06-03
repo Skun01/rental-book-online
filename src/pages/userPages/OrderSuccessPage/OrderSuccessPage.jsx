@@ -17,15 +17,14 @@ const OrderSuccessPage = () => {
   useEffect(() => {
     const fetchOrderDetails = async () => {
       try {
-        // const bearer = localStorage.getItem("token")
-        // const response = await axios.get(`http://localhost:8080/api/v1/order/rental/${orderId}`, {
-        //   headers: {
-        //     Authorization: `${bearer}`,
-        //   },
-        // })
-        // console.log(response.data.data)
-        // setOrderData(response.data.data)
-        setOrderData(getSampleOrderData2())
+        const bearer = localStorage.getItem("token")
+        const response = await axios.get(`http://localhost:8080/api/v1/order/rental/${orderId}`, {
+          headers: {
+            Authorization: `${bearer}`,
+          },
+        })
+        console.log(response.data.data)
+        setOrderData(response.data.data)
       } catch (error) {
         console.error("Error fetching order details:", error)
         showToast({ type: "error", message: "Không thể tải thông tin đơn hàng, hiển thị dữ liệu mẫu" })
@@ -37,27 +36,19 @@ const OrderSuccessPage = () => {
     fetchOrderDetails()
   }, [orderId])
 
-  // Get status info with correct statuses
   const getStatusInfo = (status) => {
     const statusMap = {
-      PROCESSING: { class: "processing", text: "Đang xử lý", icon: <Clock size={16} />, canCancel: true },
       Processing: { class: "processing", text: "Đang xử lý", icon: <Clock size={16} />, canCancel: true },
-      CONFIRMED: { class: "confirmed", text: "Đã xác nhận", icon: <Check size={16} />, canCancel: false },
       Confirmed: { class: "confirmed", text: "Đã xác nhận", icon: <Check size={16} />, canCancel: false },
-      DELIVERING: { class: "delivering", text: "Đang giao hàng", icon: <Truck size={16} />, canCancel: false },
       Delivering: { class: "delivering", text: "Đang giao hàng", icon: <Truck size={16} />, canCancel: false },
-      CANCELLED: { class: "cancelled", text: "Đã hủy", icon: <XCircle size={16} />, canCancel: false },
       Cancelled: { class: "cancelled", text: "Đã hủy", icon: <XCircle size={16} />, canCancel: false },
     }
     return statusMap[status] || { class: "unknown", text: status, icon: <HelpCircle size={16} />, canCancel: false }
   }
 
-  // Get payment status info
   const getPaymentStatusInfo = (status) => {
     const statusMap = {
-      UNPAID: { class: "unpaid", text: "Chưa thanh toán", icon: <CreditCard size={16} /> },
       Unpaid: { class: "unpaid", text: "Chưa thanh toán", icon: <CreditCard size={16} /> },
-      PAID: { class: "paid", text: "Đã thanh toán", icon: <Check size={16} /> },
       Paid: { class: "paid", text: "Đã thanh toán", icon: <Check size={16} /> },
     }
     return statusMap[status] || { class: "unknown", text: status, icon: <HelpCircle size={16} /> }
@@ -69,18 +60,13 @@ const OrderSuccessPage = () => {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
     }).format(date)
   }
 
   const getPaymentMethodText = (method) => {
     const methodMap = {
-      CASH: "Tiền mặt",
       Cash: "Tiền mặt",
-      BANK_TRANSFER: "Chuyển khoản ngân hàng",
       BankTransfer: "Chuyển khoản ngân hàng",
-      E_WALLET: "Ví điện tử",
       EWallet: "Ví điện tử",
     }
     return methodMap[method] || method
@@ -91,19 +77,6 @@ const OrderSuccessPage = () => {
       return "Nhận tại thư viện"
     }
     return "Giao hàng tận nơi"
-  }
-
-  const getEstimatedDeliveryDate = (order) => {
-    const orderDate = new Date(order.createAt)
-    const isLibraryPickup = order.deliveryMethod === 'Offline'
-
-    if (isLibraryPickup) {
-      orderDate.setDate(orderDate.getDate() + 2) // 2 days for library pickup
-    } else {
-      orderDate.setDate(orderDate.getDate() + 3) // 3 days for home delivery
-    }
-
-    return orderDate.toISOString()
   }
 
   // Calculate rental days for each item
@@ -130,7 +103,7 @@ const OrderSuccessPage = () => {
       )
       setOrderData((prev) => ({
         ...prev,
-        orderStatus: "CANCELLED",
+        orderStatus: "Cancelled",
       }))
       showToast({ type: "success", message: "Đơn hàng đã được hủy thành công" })
       setShowCancelModal(false)
@@ -189,15 +162,15 @@ const OrderSuccessPage = () => {
         <div className={styles.successCard}>
           <div className={styles.successHeader}>
             <div className={styles.successIcon}>
-              {orderData.orderStatus === "Cancelled" || orderData.orderStatus === "CANCELLED" ? 
+              {orderData.orderStatus === "Cancelled"? 
                 <X size={64} color="#ef4444" /> : <CheckCircle size={64} />}
             </div>
             <h1 className={styles.successTitle}>
-              {orderData.orderStatus === "Cancelled" || orderData.orderStatus === "CANCELLED" ? 
+              {orderData.orderStatus === "Cancelled"? 
                 "Đơn hàng đã bị hủy" : "Đặt hàng thành công!"}
             </h1>
             <p className={styles.successMessage}>
-              {orderData.orderStatus === "Cancelled" || orderData.orderStatus === "CANCELLED"
+              {orderData.orderStatus === "Cancelled"
                 ? "Đơn hàng của bạn đã được hủy. Nếu bạn đã thanh toán, chúng tôi sẽ hoàn tiền trong 3-5 ngày làm việc."
                 : "Cảm ơn bạn đã đặt hàng. Đơn hàng của bạn đã được xác nhận và đang được xử lý."}
             </p>
@@ -206,7 +179,7 @@ const OrderSuccessPage = () => {
           <div className={styles.orderInfoSection}>
             <div className={styles.orderHeaderWithActions}>
               <h2 className={styles.sectionTitle}>Thông tin đơn hàng</h2>
-              {statusInfo.canCancel && orderData.orderStatus !== "CANCELLED" && orderData.orderStatus !== "Cancelled" && (
+              {statusInfo.canCancel && orderData.orderStatus !== "Cancelled" && (
                 <button className={styles.cancelButton} onClick={() => setShowCancelModal(true)} disabled={cancelling}>
                   {cancelling ? "Đang hủy..." : "Hủy đơn hàng"}
                 </button>
@@ -287,7 +260,7 @@ const OrderSuccessPage = () => {
                       <div className={styles.itemRentDetails}>
                         <span className={styles.itemRentDays}>Thời gian thuê: {rentalDays} ngày</span>
                         <span className={styles.itemRentPeriod}>
-                          ({formatDate(item.rentalDate)} - {formatDate(item.rentedDate)})
+                          ({formatDate(item.receiveDay || item.createAt)} - {formatDate(item.rentedDate)})
                         </span>
                       </div>
                       <div className={styles.itemPrice}>
@@ -342,6 +315,14 @@ const OrderSuccessPage = () => {
               {isLibraryPickup ? (
                 <>
                   <div className={styles.deliveryDetail}>
+                    <span className={styles.deliveryLabel}>Người đến lấy sách:</span>
+                    <span className={styles.deliveryValue}>{orderData.fullName}</span>
+                  </div>
+                  <div className={styles.deliveryDetail}>
+                    <span className={styles.deliveryLabel}>Số điện thoại:</span>
+                    <span className={styles.deliveryValue}>{orderData.phone}</span>
+                  </div>
+                  <div className={styles.deliveryDetail}>
                     <span className={styles.deliveryLabel}>Địa điểm nhận:</span>
                     <span className={styles.deliveryValue}>Thư viện Đại học Công nghiệp Hà Nội</span>
                   </div>
@@ -354,8 +335,8 @@ const OrderSuccessPage = () => {
                     <span className={styles.deliveryValue}>Thứ 2 - Thứ 6: 8:00 - 17:30</span>
                   </div>
                   <div className={styles.deliveryDetail}>
-                    <span className={styles.deliveryLabel}>Ngày có thể nhận:</span>
-                    <span className={styles.deliveryValue}>{formatDate(getEstimatedDeliveryDate(orderData))}</span>
+                    <span className={styles.deliveryLabel}>Ngày đến nhận:</span>
+                    <span className={styles.deliveryValue}>{formatDate(orderData.receiveDay)}</span>
                   </div>
                 </>
               ) : (
@@ -375,8 +356,8 @@ const OrderSuccessPage = () => {
                     </span>
                   </div>
                   <div className={styles.deliveryDetail}>
-                    <span className={styles.deliveryLabel}>Ngày dự kiến giao hàng:</span>
-                    <span className={styles.deliveryValue}>{formatDate(getEstimatedDeliveryDate(orderData))}</span>
+                    <span className={styles.deliveryLabel}>Ngày dự kiến nhận hàng:</span>
+                    <span className={styles.deliveryValue}>{formatDate(orderData.createAt)}</span>
                   </div>
                 </>
               )}
@@ -393,11 +374,11 @@ const OrderSuccessPage = () => {
           <div className={styles.actionButtons}>
             <Link to="/orders" className={styles.viewOrderButton}>
               <ShoppingBag size={18} />
-              <span>Xem đơn hàng của tôi</span>
+              <span>Xem các đơn hàng</span>
             </Link>
 
             <Link to="/" className={styles.continueShoppingButton}>
-              <span>Tiếp tục tìm sách</span>
+              <span>Tiếp tục xem sách</span>
               <ArrowRight size={18} />
             </Link>
           </div>
@@ -417,7 +398,7 @@ const OrderSuccessPage = () => {
             <div className={styles.modalBody}>
               <p>Bạn có chắc chắn muốn hủy đơn hàng #{orderData.id}?</p>
               <p className={styles.cancelWarning}>
-                Hành động này không thể hoàn tác. Nếu bạn đã thanh toán, chúng tôi sẽ hoàn tiền trong 3-5 ngày làm việc.
+                Bạn sẽ được hủy đơn hàng và được hoàn tiền
               </p>
             </div>
             <div className={styles.modalActions}>
@@ -440,173 +421,3 @@ const OrderSuccessPage = () => {
 }
 
 export default OrderSuccessPage
-
-const getSampleOrderData1 = () => ({
-  "id": 1,
-  "totalPrice": 60700,
-  "depositPrice": 343000,
-  "city": "Ha noi",
-  "district": "Bắc Từ Liêm",
-  "ward": "Minh Khai",
-  "street": "Văn trì",
-  "notes": "Yeu em",
-  "fullName": 'thai van Truong',
-  "phone": '0374963082',
-  "deliveryMethod": "Online",
-  "orderStatus": "Processing",
-  "paymentStatus": "Unpaid",
-  "paymentMethod": "Cash",
-  "userId": 2,
-  "branchId": null,
-  "items": [
-    {
-      "id": 1,
-      "rentalDate": "2025-05-31T05:49:54.016607Z",
-      "rentedDate": "2025-06-20T05:49:54.016607Z",
-      "bookName": "Cho tôi xin một vé đi tuổi thơ",
-      "rentalPrice": 4000,
-      "depositPrice": 25000,
-      "quantity": 4,
-      "totalRental": 304000,
-      "totalDeposit": 100000,
-      "createAt": "2025-05-31T05:49:54.461077Z",
-      "updateAt": null,
-      "createBy": "anonymousUser",
-      "updateBy": null
-    },
-    {
-      "id": 2,
-      "rentalDate": "2025-05-31T05:49:54.016607Z",
-      "rentedDate": "2025-06-20T05:49:54.016607Z",
-      "bookName": "Mắt biếc",
-      "rentalPrice": 3500,
-      "depositPrice": 22000,
-      "quantity": 5,
-      "totalRental": 332500,
-      "totalDeposit": 110000,
-      "createAt": "2025-05-31T05:49:54.564416Z",
-      "updateAt": null,
-      "createBy": "anonymousUser",
-      "updateBy": null
-    },
-    {
-      "id": 3,
-      "rentalDate": "2025-05-31T05:49:54.016607Z",
-      "rentedDate": "2025-06-30T05:49:54.016607Z",
-      "bookName": "Kính vạn hoa",
-      "rentalPrice": 4500,
-      "depositPrice": 28000,
-      "quantity": 1,
-      "totalRental": 130500,
-      "totalDeposit": 28000,
-      "createAt": "2025-05-31T05:49:54.574501Z",
-      "updateAt": null,
-      "createBy": "anonymousUser",
-      "updateBy": null
-    },
-    {
-      "id": 4,
-      "rentalDate": "2025-05-31T05:49:54.016607Z",
-      "rentedDate": "2025-06-14T05:49:54.016607Z",
-      "bookName": "Rừng Na Uy",
-      "rentalPrice": 4700,
-      "depositPrice": 40000,
-      "quantity": 1,
-      "totalRental": 61100,
-      "totalDeposit": 40000,
-      "createAt": "2025-05-31T05:49:54.584081Z",
-      "updateAt": null,
-      "createBy": "anonymousUser",
-      "updateBy": null
-    },
-  ],
-  "createAt": "2025-05-31T05:49:54.145001Z",
-  "updateAt": null,
-  "createBy": "anonymousUser",
-  "updateBy": null
-})
-
-const getSampleOrderData2 = () => ({
-  "id": 3,
-  "totalPrice": 50700,
-  "depositPrice": 343000,
-  "city": null,
-  "district": null,
-  "ward": null,
-  "street": null,
-  "notes": "the thoi",
-  "fullName": "Thai Van Sinh",
-  "phone": "0971494313",
-  "deliveryMethod": "Offline",
-  "orderStatus": "Processing",
-  "paymentStatus": "Unpaid",
-  "paymentMethod": "EWallet",
-  "userId": 2,
-  "branchId": 1,
-  "items": [
-    {
-      "id": 15,
-      "rentalDate": "2025-05-31T07:11:45.904828Z",
-      "rentedDate": "2025-06-30T07:11:45.904828Z",
-      "bookName": "Kính vạn hoa",
-      "rentalPrice": 4500,
-      "depositPrice": 28000,
-      "quantity": 1,
-      "totalRental": 135000,
-      "totalDeposit": 28000,
-      "createAt": "2025-05-31T07:11:46.030905Z",
-      "updateAt": null,
-      "createBy": "anonymousUser",
-      "updateBy": null
-    },
-    {
-      "id": 16,
-      "rentalDate": "2025-05-31T07:11:45.904828Z",
-      "rentedDate": "2025-06-14T07:11:45.904828Z",
-      "bookName": "Rừng Na Uy",
-      "rentalPrice": 4700,
-      "depositPrice": 40000,
-      "quantity": 1,
-      "totalRental": 65800,
-      "totalDeposit": 40000,
-      "createAt": "2025-05-31T07:11:46.041169Z",
-      "updateAt": null,
-      "createBy": "anonymousUser",
-      "updateBy": null
-    },
-    {
-      "id": 17,
-      "rentalDate": "2025-05-31T07:11:45.904828Z",
-      "rentedDate": "2025-07-17T07:11:45.904828Z",
-      "bookName": "Số đỏ",
-      "rentalPrice": 4800,
-      "depositPrice": 27000,
-      "quantity": 1,
-      "totalRental": 225600,
-      "totalDeposit": 27000,
-      "createAt": "2025-05-31T07:11:46.050831Z",
-      "updateAt": null,
-      "createBy": "anonymousUser",
-      "updateBy": null
-    },
-    {
-      "id": 18,
-      "rentalDate": "2025-05-31T07:11:45.904828Z",
-      "rentedDate": "2025-06-07T07:11:45.904828Z",
-      "bookName": "Harry Potter và Hòn đá Phù thủy",
-      "rentalPrice": 3200,
-      "depositPrice": 38000,
-      "quantity": 1,
-      "totalRental": 22400,
-      "totalDeposit": 38000,
-      "createAt": "2025-05-31T07:11:46.050831Z",
-      "updateAt": null,
-      "createBy": "anonymousUser",
-      "updateBy": null
-    }
-  ],
-  "createAt": "2025-05-31T07:11:45.966022Z",
-  "updateAt": null,
-  "createBy": "anonymousUser",
-  "updateBy": null
-})
