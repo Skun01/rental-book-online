@@ -70,8 +70,8 @@ const userRoutes = [
         element: <OrdersPage />,
       },
       {
-        path: "/orders/:id",
-        element: <OrderDetailsPage />,
+        path: "/orders/:orderId",
+        element: <OrderSuccessPage />,
       },
       {
         path: '/rented-books',

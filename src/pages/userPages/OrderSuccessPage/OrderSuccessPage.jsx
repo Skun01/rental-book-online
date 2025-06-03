@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
-import { Link, useParams } from "react-router-dom"
+import { Link, useParams, useLocation } from "react-router-dom"
 import { CheckCircle, ArrowRight, ShoppingBag, Calendar, MapPin, CreditCard, AlertTriangle, X,
-  Truck, XCircle, HelpCircle, Check, Clock} from "lucide-react"
+  Truck, XCircle, HelpCircle, Check, Clock, ArrowLeft} from "lucide-react"
 import { useToast } from "../../../contexts/ToastContext"
 import axios from "axios"
 import styles from "./OrderSuccessPage.module.css"
@@ -12,10 +12,19 @@ const OrderSuccessPage = () => {
   const [loading, setLoading] = useState(true)
   const [cancelling, setCancelling] = useState(false)
   const [showCancelModal, setShowCancelModal] = useState(false)
-
+  const location = useLocation()
   const {orderId} = useParams()
+  const {order} = location.state || {}
+  useEffect(()=>{
+    window.scrollTo({top: 0, behavior: 'instant'})
+  }, [])
   useEffect(() => {
     const fetchOrderDetails = async () => {
+      if(order){
+        setOrderData(order)
+        setLoading(false)
+        return
+      }
       try {
         const bearer = localStorage.getItem("token")
         const response = await axios.get(`http://localhost:8080/api/v1/order/rental/${orderId}`, {
@@ -23,7 +32,6 @@ const OrderSuccessPage = () => {
             Authorization: `${bearer}`,
           },
         })
-        console.log(response.data.data)
         setOrderData(response.data.data)
       } catch (error) {
         console.error("Error fetching order details:", error)
@@ -372,15 +380,25 @@ const OrderSuccessPage = () => {
           </div>
 
           <div className={styles.actionButtons}>
-            <Link to="/orders" className={styles.viewOrderButton}>
-              <ShoppingBag size={18} />
-              <span>Xem các đơn hàng</span>
-            </Link>
+            {order ? (
+              <Link to="/orders" className={styles.viewOrderButton}>
+                <ArrowLeft size={18} />
+                <span>Quay lại</span>
+              </Link>
+            ) : (
+              <>
+              <Link to="/orders" className={styles.viewOrderButton}>
+                <ShoppingBag size={18} />
+                <span>Xem các đơn hàng</span>
+              </Link>
 
-            <Link to="/" className={styles.continueShoppingButton}>
-              <span>Tiếp tục xem sách</span>
-              <ArrowRight size={18} />
-            </Link>
+              <Link to="/" className={styles.continueShoppingButton}>
+                <span>Tiếp tục xem sách</span>
+                <ArrowRight size={18} />
+              </Link>
+              </>
+            )}
+            
           </div>
         </div>
       </div>

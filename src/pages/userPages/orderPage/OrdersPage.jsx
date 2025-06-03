@@ -1,194 +1,33 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Calendar, Package, CheckCircle, XCircle, Clock, Truck, Search, ArrowRight, RefreshCw } from "lucide-react"
+import { Calendar, Package, CheckCircle2, XCircle, Clock, Truck, Search, ArrowRight, RefreshCw } from "lucide-react"
 import styles from "./OrdersPage.module.css"
-
-// Dữ liệu mẫu cho đơn hàng thuê sách
-const mockRentalOrders = [
-  {
-    id: "ORD-5823",
-    date: "2023-05-15T10:30:00",
-    status: "pending", // pending, processing, completed, cancelled
-    totalItems: 3,
-    totalAmount: 250000,
-    depositAmount: 500000,
-    books: [
-      {
-        id: 1,
-        title: "Đắc Nhân Tâm",
-        author: "Dale Carnegie",
-        cover_image: "/Book.jpg",
-      },
-      {
-        id: 2,
-        title: "Nhà Giả Kim",
-        author: "Paulo Coelho",
-        cover_image: "/Book.jpg",
-      },
-      {
-        id: 3,
-        title: "Tư Duy Phản Biện",
-        author: "Albert Rutherford",
-        cover_image: "/Book.jpg",
-      },
-    ],
-    deliveryMethod: "home-delivery",
-    paymentMethod: "MOMO",
-  },
-  {
-    id: "ORD-6104",
-    date: "2023-04-02T14:45:00",
-    status: "processing",
-    totalItems: 2,
-    totalAmount: 180000,
-    depositAmount: 360000,
-    books: [
-      {
-        id: 4,
-        title: "Atomic Habits",
-        author: "James Clear",
-        cover_image: "/Book.jpg",
-      },
-      {
-        id: 5,
-        title: "Sapiens: Lược Sử Loài Người",
-        author: "Yuval Noah Harari",
-        cover_image: "/Book.jpg",
-      },
-    ],
-    deliveryMethod: "library-pickup",
-    paymentMethod: "CASH",
-  },
-  {
-    id: "ORD-7291",
-    date: "2023-03-18T09:15:00",
-    status: "completed",
-    totalItems: 1,
-    totalAmount: 95000,
-    depositAmount: 200000,
-    books: [
-      {
-        id: 6,
-        title: "Người Giàu Có Nhất Thành Babylon",
-        author: "George S. Clason",
-        cover_image: "/Book.jpg",
-      },
-    ],
-    deliveryMethod: "home-delivery",
-    paymentMethod: "CARD",
-  },
-  {
-    id: "ORD-8456",
-    date: "2023-02-25T16:20:00",
-    status: "cancelled",
-    totalItems: 2,
-    totalAmount: 150000,
-    depositAmount: 300000,
-    books: [
-      {
-        id: 7,
-        title: "Điều Kỳ Diệu Của Tiệm Tạp Hóa Namiya",
-        author: "Keigo Higashino",
-        cover_image: "/Book.jpg",
-      },
-      {
-        id: 8,
-        title: "Rừng Na Uy",
-        author: "Haruki Murakami",
-        cover_image: "/Book.jpg",
-      },
-    ],
-    deliveryMethod: "home-delivery",
-    paymentMethod: "MOMO",
-    cancelReason: "Người dùng hủy",
-  },
-]
-
-// Dữ liệu mẫu cho đơn hàng trả sách
-const mockReturnOrders = [
-  {
-    id: "RET-1234",
-    date: "2023-05-20T11:45:00",
-    status: "pending", // pending, processing, completed
-    totalItems: 2,
-    totalRefund: 320000,
-    books: [
-      {
-        id: 1,
-        title: "Đắc Nhân Tâm",
-        author: "Dale Carnegie",
-        cover_image: "/Book.jpg",
-      },
-      {
-        id: 2,
-        title: "Nhà Giả Kim",
-        author: "Paulo Coelho",
-        cover_image: "/Book.jpg",
-      },
-    ],
-    returnMethod: "online",
-  },
-  {
-    id: "RET-2345",
-    date: "2023-04-15T13:30:00",
-    status: "processing",
-    totalItems: 1,
-    totalRefund: 150000,
-    books: [
-      {
-        id: 6,
-        title: "Người Giàu Có Nhất Thành Babylon",
-        author: "George S. Clason",
-        cover_image: "/Book.jpg",
-      },
-    ],
-    returnMethod: "library",
-  },
-  {
-    id: "RET-3456",
-    date: "2023-03-10T09:00:00",
-    status: "completed",
-    totalItems: 3,
-    totalRefund: 450000,
-    books: [
-      {
-        id: 3,
-        title: "Tư Duy Phản Biện",
-        author: "Albert Rutherford",
-        cover_image: "/Book.jpg",
-      },
-      {
-        id: 4,
-        title: "Atomic Habits",
-        author: "James Clear",
-        cover_image: "/Book.jpg",
-      },
-      {
-        id: 5,
-        title: "Sapiens: Lược Sử Loài Người",
-        author: "Yuval Noah Harari",
-        cover_image: "/Book.jpg",
-      },
-    ],
-    returnMethod: "online",
-  },
-]
+import { useAuth } from "../../../contexts/AuthContext"
+import axios from "axios"
 
 const OrdersPage = () => {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState("rental")
   const [activeFilter, setActiveFilter] = useState("all")
-  const [searchQuery, setSearchQuery] = useState("")
   const [filteredOrders, setFilteredOrders] = useState([])
   const [isLoading, setIsLoading] = useState(true)
+  const {currentUser} = useAuth()
 
-  // Giả lập việc lấy dữ liệu từ API
+  // get orders data by user
   useEffect(() => {
-    const fetchOrders = async () => {
+    const getOrdersData = async () => {
       setIsLoading(true)
+      
       try {
-        // Giả lập API call
-        await new Promise((resolve) => setTimeout(resolve, 800))
+        const response = await axios.get(
+          `http://localhost:8080/api/v1/order/rental?page=0&size=100&sortDir=asc&userId=${currentUser.id}&orderStatus=${activeFilter === 'all' ? '' : activeFilter}`,
+          {
+            headers: {
+              Authorization: `${localStorage.getItem('token')}`
+            }
+          }
+        )
+        setFilteredOrders(response.data.data.content)
         setIsLoading(false)
       } catch (error) {
         console.error("Error fetching orders:", error)
@@ -196,102 +35,74 @@ const OrdersPage = () => {
       }
     }
 
-    fetchOrders()
-  }, [])
+    getOrdersData()
+  }, [activeFilter, currentUser.id])
 
-  // Lọc đơn hàng dựa trên tab, bộ lọc và tìm kiếm
   useEffect(() => {
-    const orders = activeTab === "rental" ? mockRentalOrders : mockReturnOrders
 
-    let filtered = [...orders]
+  }, [activeTab, activeFilter])
 
-    // Lọc theo trạng thái
-    if (activeFilter !== "all") {
-      filtered = filtered.filter((order) => order.status === activeFilter)
-    }
-
-    // Lọc theo tìm kiếm
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase()
-      filtered = filtered.filter((order) => {
-        // Tìm kiếm theo mã đơn hàng
-        if (order.id.toLowerCase().includes(query)) return true
-
-        // Tìm kiếm theo tên sách
-        return order.books.some(
-          (book) => book.title.toLowerCase().includes(query) || book.author.toLowerCase().includes(query),
-        )
-      })
-    }
-
-    setFilteredOrders(filtered)
-  }, [activeTab, activeFilter, searchQuery])
-
-  // Xử lý chuyển đổi tab
   const handleTabChange = (tab) => {
     setActiveTab(tab)
     setActiveFilter("all")
     setSearchQuery("")
   }
 
-  // Xử lý thay đổi bộ lọc
   const handleFilterChange = (filter) => {
     setActiveFilter(filter)
   }
 
-  // Xử lý thay đổi tìm kiếm
-  const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value)
-  }
-
-  // Xử lý xem chi tiết đơn hàng
   const handleViewOrderDetails = (order) => {
     if (activeTab === "rental") {
-      navigate("/orders/success", { state: order })
+      navigate(`/orders/${order.id}`, {state: {order}})
     } else {
-      navigate("/return-success", { state: order })
+      navigate("/return-success")
     }
   }
 
-  // Format ngày tháng
   const formatDate = (dateString) => {
-    const options = { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }
+    const options = { day: "2-digit", month: "2-digit", year: "numeric", hour: '2-digit', minute: '2-digit'}
     return new Date(dateString).toLocaleDateString("vi-VN", options)
   }
 
-  // Lấy thông tin trạng thái đơn hàng
   const getStatusInfo = (status) => {
     switch (status) {
-      case "pending":
+      case "Processing":
         return {
           text: "Chờ xác nhận",
           icon: <Clock size={18} />,
           className: styles.statusPending,
-        }
-      case "processing":
+        };
+      case "Confirmed":
         return {
-          text: "Đang xử lý",
-          icon: <Truck size={18} />,
+          text: "Đã xác nhận",
+          icon: <CheckCircle2 size={18} />,
           className: styles.statusProcessing,
-        }
-      case "completed":
+        };
+      case "Delivering":
+        return {
+          text: "Đang giao",
+          icon: <Truck size={18} />,
+          className: styles.statusDelivering,
+        };
+      case "Completed":
         return {
           text: "Hoàn thành",
-          icon: <CheckCircle size={18} />,
+          icon: <Package size={18} />,
           className: styles.statusCompleted,
-        }
-      case "cancelled":
+        };
+      case "Cancelled":
         return {
           text: "Đã hủy",
           icon: <XCircle size={18} />,
           className: styles.statusCancelled,
-        }
+        };
       default:
         return {
           text: status,
           icon: null,
           className: "",
-        }
+        };
     }
   }
 
@@ -319,8 +130,9 @@ const OrdersPage = () => {
           </div>
         </div>
 
+        {/* filter section */}
         <div className={styles.controlsSection}>
-          <div className={styles.searchBar}>
+          {/* <div className={styles.searchBar}>
             <Search size={20} className={styles.searchIcon} />
             <input
               type="text"
@@ -329,7 +141,7 @@ const OrdersPage = () => {
               onChange={handleSearchChange}
               className={styles.searchInput}
             />
-          </div>
+          </div> */}
 
           <div className={styles.filterButtons}>
             <button
@@ -339,27 +151,27 @@ const OrdersPage = () => {
               Tất cả
             </button>
             <button
-              className={`${styles.filterButton} ${activeFilter === "pending" ? styles.activeFilter : ""}`}
-              onClick={() => handleFilterChange("pending")}
+              className={`${styles.filterButton} ${activeFilter === "Processing" ? styles.activeFilter : ""}`}
+              onClick={() => handleFilterChange("Processing")}
             >
               Chờ xác nhận
             </button>
             <button
-              className={`${styles.filterButton} ${activeFilter === "processing" ? styles.activeFilter : ""}`}
-              onClick={() => handleFilterChange("processing")}
+              className={`${styles.filterButton} ${activeFilter === "Confirmed" ? styles.activeFilter : ""}`}
+              onClick={() => handleFilterChange("Confirmed")}
             >
-              {activeTab === "rental" ? "Đang giao" : "Đang xử lý"}
+              Đã xác nhận
             </button>
             <button
-              className={`${styles.filterButton} ${activeFilter === "completed" ? styles.activeFilter : ""}`}
-              onClick={() => handleFilterChange("completed")}
+              className={`${styles.filterButton} ${activeFilter === "Delivering" ? styles.activeFilter : ""}`}
+              onClick={() => handleFilterChange("Delivering")}
             >
-              Hoàn thành
+              Đang giao
             </button>
             {activeTab === "rental" && (
               <button
-                className={`${styles.filterButton} ${activeFilter === "cancelled" ? styles.activeFilter : ""}`}
-                onClick={() => handleFilterChange("cancelled")}
+                className={`${styles.filterButton} ${activeFilter === "Cancelled" ? styles.activeFilter : ""}`}
+                onClick={() => handleFilterChange("Cancelled")}
               >
                 Đã hủy
               </button>
@@ -367,6 +179,7 @@ const OrdersPage = () => {
           </div>
         </div>
 
+        {/* data section */}
         {isLoading ? (
           <div className={styles.loadingContainer}>
             <div className={styles.loading}></div>
@@ -375,15 +188,15 @@ const OrdersPage = () => {
         ) : filteredOrders.length > 0 ? (
           <div className={styles.ordersList}>
             {filteredOrders.map((order) => {
-              const statusInfo = getStatusInfo(order.status)
+              const statusInfo = getStatusInfo(order.orderStatus)
               return (
                 <div key={order.id} className={styles.orderCard}>
                   <div className={styles.orderHeader}>
                     <div className={styles.orderInfo}>
-                      <h3 className={styles.orderId}>{order.id}</h3>
+                      <h3 className={styles.orderId}>#{order.id}</h3>
                       <div className={styles.orderDate}>
                         <Calendar size={16} />
-                        <span>{formatDate(order.date)}</span>
+                        <span>{formatDate(order.createAt)}</span>
                       </div>
                     </div>
                     <div className={`${styles.orderStatus} ${statusInfo.className}`}>
@@ -393,43 +206,44 @@ const OrdersPage = () => {
                   </div>
 
                   <div className={styles.orderBooks}>
-                    {order.books.slice(0, 3).map((book) => (
+                    {order.items.slice(0, 3).map((book) => (
                       <div key={book.id} className={styles.bookThumbnail}>
-                        <img src={book.cover_image || "/placeholder.svg"} alt={book.title} />
+                        <img src={book.cover_image || "/auth.jpg"} alt={book.title} />
                       </div>
                     ))}
-                    {order.books.length > 3 && (
-                      <div className={styles.moreBooksIndicator}>+{order.books.length - 3}</div>
+                    {order.items.length > 3 && (
+                      <div className={styles.moreBooksIndicator}>+{order.items.length - 3}</div>
                     )}
                   </div>
 
                   <div className={styles.orderDetails}>
                     <div className={styles.orderDetail}>
-                      <span className={styles.detailLabel}>Số lượng:</span>
-                      <span className={styles.detailValue}>{order.totalItems} sách</span>
+                      <span className={styles.detailLabel}>Tổng số lượng:</span>
+                      <span className={styles.detailValue}>
+                        {order.items.reduce((totalQuantity, book)=>(totalQuantity + book.quantity), 0)} sách</span>
                     </div>
                     <div className={styles.orderDetail}>
                       <span className={styles.detailLabel}>
                         {activeTab === "rental" ? "Tổng tiền thuê:" : "Tổng hoàn trả:"}
                       </span>
                       <span className={styles.detailValue}>
-                        {(activeTab === "rental" ? order.totalAmount : order.totalRefund)}đ
+                        {(activeTab === "rental" ? order.totalPrice.toLocaleString('vi-VN') : order.totalRefund)}đ
                       </span>
                     </div>
                     {activeTab === "rental" && (
                       <div className={styles.orderDetail}>
                         <span className={styles.detailLabel}>Tiền đặt cọc:</span>
-                        <span className={styles.detailValue}>{order.depositAmount}đ</span>
+                        <span className={styles.detailValue}>{order.depositPrice.toLocaleString('vi-VN')}đ</span>
                       </div>
                     )}
                     <div className={styles.orderDetail}>
                       <span className={styles.detailLabel}>Phương thức:</span>
                       <span className={styles.detailValue}>
                         {activeTab === "rental"
-                          ? order.deliveryMethod === "home-delivery"
+                          ? order.deliveryMethod === "Online"
                             ? "Giao hàng tận nơi"
                             : "Nhận tại thư viện"
-                          : order.returnMethod === "online"
+                          : order.returnMethod === "Online"
                             ? "Trả online"
                             : "Trả tại thư viện"}
                       </span>
@@ -438,9 +252,9 @@ const OrdersPage = () => {
                       <div className={styles.orderDetail}>
                         <span className={styles.detailLabel}>Thanh toán:</span>
                         <span className={styles.detailValue}>
-                          {order.paymentMethod === "CASH"
+                          {order.paymentMethod === "Cash"
                             ? "Tiền mặt"
-                            : order.paymentMethod === "CARD"
+                            : order.paymentMethod === "BankTransfer"
                               ? "Thẻ ngân hàng"
                               : "Ví điện tử"}
                         </span>
@@ -461,7 +275,7 @@ const OrdersPage = () => {
         ) : (
           <div className={styles.noOrders}>
             <Package size={48} />
-            <p>Không tìm thấy đơn hàng nào phù hợp với bộ lọc hiện tại.</p>
+            <p>Không tìm thấy đơn hàng nào phù hợp.</p>
             <button
               className={styles.resetFilterButton}
               onClick={() => {
