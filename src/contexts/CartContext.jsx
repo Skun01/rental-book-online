@@ -22,7 +22,7 @@ export function CartProvider({ children }) {
         if (cart) {
           setCartItems(JSON.parse(cart))
         } else if(currentUser){
-          const response = await axios.get(`http://localhost:8080/api/v1/cart/${currentUser.id}?page=0&size=10`,{
+          const response = await axios.get(`http://localhost:8080/api/v1/cart/by/user/${currentUser.id}?page=0&size=10`,{
             headers: {
               Authorization: `${localStorage.getItem('token')}`,
             }
@@ -102,7 +102,7 @@ export function CartProvider({ children }) {
   // xu ly add cart vao database
   const handlePostCart = async() => {
     try{
-      await axios.post(`http://localhost:8080/api/v1/cart`, {
+      await axios.post(`http://localhost:8080/api/v1/cart/update`, {
         userId: currentUser.id,
         books: getPostCartItems()
       }, {

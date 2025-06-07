@@ -89,7 +89,7 @@ const CheckoutPage = () => {
       const bearer = localStorage.getItem("token")
       async function getUserAddress() {
         await axios
-          .get(`http://localhost:8080/api/v1/address/user/${currentUser.id}?page=0&size=10`, {
+          .get(`http://localhost:8080/api/v1/address/by/user/${currentUser.id}?page=0&size=10`, {
             headers: {
               Authorization: `${bearer}`,
             },
@@ -194,14 +194,12 @@ const CheckoutPage = () => {
       setIsSubmitting(true)
       try {
         const checkoutData = getCheckoutData()
-        console.log("checkout data:", checkoutData)
         const bearer = localStorage.getItem("token")
-        const response = await axios.post("http://localhost:8080/api/v1/order/rental", checkoutData, {
+        const response = await axios.post("http://localhost:8080/api/v1/order/rental/create", checkoutData, {
           headers: {
             Authorization: `${bearer}`
           },
         })
-        console.log("Checkout response:", response.data)
         if(!OtherSiteData){
           clearCart()
         }else{
@@ -491,7 +489,7 @@ const CheckoutPage = () => {
                 {cartItems.map((item) => (
                   <div key={item.book.id} className={styles.cartItem}>
                     <div className={styles.itemImage}>
-                      <img src={item.book.imageList ? item.book.imageList[0].url : '/auth.jpg'} alt={item.title} className={styles.itemThumbnail} />
+                      <img src={item.book.imageList ? item.book?.imageList[0]?.url : '/auth.jpg'} alt={item.title} className={styles.itemThumbnail} />
                       {item.quantity > 1 && <span className={styles.itemQuantity}>{item.quantity}</span>}
                     </div>
                     <div className={styles.itemInfo}>

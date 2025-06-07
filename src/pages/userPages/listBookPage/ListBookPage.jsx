@@ -24,20 +24,20 @@ const ListBookPage = ({pageTitle}) => {
         const search = queryParams.get("q") || ""
         let api = ""
         if(filterList){
-          api = search ? `http://localhost:8080/api/v1/book/search?page=0&size=5&keyword=${search}` :  `http://localhost:8080/api/v1/book/search?page=0&size=5`
+          api = search ? `http://localhost:8080/api/v1/book/all?page=0&size=5&keyword=${search}` :  `http://localhost:8080/api/v1/book/all?page=0&size=5`
           if (filterList.categoryId) api += `&categoryId=${filterList.categoryId}`
           if (filterList.authorId) api += `&authorId=${filterList.authorId}`
           if (filterList.minPrice) api += `&minPrice=${filterList.minPrice}`
           if (filterList.maxPrice) api += `&maxPrice=${filterList.maxPrice}`
           if(filterList.sort) api += `&${filterList.sort}`
         }else if(search){
-          api = `http://localhost:8080/api/v1/book/search?page=${page}&size=5&keyword=${search}`
+          api = `http://localhost:8080/api/v1/book/all?page=${page}&size=5&keyword=${search}`
         }else {
-          api = `http://localhost:8080/api/v1/book?page=${page}&size=5`
+          api = `http://localhost:8080/api/v1/book/all?page=${page}&size=5`
         }
         const response = await axios.get(api);
         if(!filterList && !search){
-          setBooks(response.data.data.content)
+          setBooks(response.data.data.result.content)
           setTotalPage(response.data.data.totalPages)
         }else{
           setBooks(response.data.data.result.content)
@@ -55,7 +55,7 @@ const ListBookPage = ({pageTitle}) => {
             .then(response=>{
               setTitle(response.data.data.name)
             })
-          await axios.get(`http://localhost:8080/api/v1/book/search?page=${page}&size=5&categoryId=${id}`)
+          await axios.get(`http://localhost:8080/api/v1/book/all?page=${page}&size=5&categoryId=${id}`)
             .then(response=>{
               setBooks(response.data.data.result.content)
               setTotalPage(response.data.data.result.totalPages)
@@ -65,7 +65,7 @@ const ListBookPage = ({pageTitle}) => {
             .then(response=>{
               setTitle(response.data.data.name)
             })
-          await axios.get(`http://localhost:8080/api/v1/book/search?page=${page}&size=5&authorId=${id}`)
+          await axios.get(`http://localhost:8080/api/v1/book/all?page=${page}&size=5&authorId=${id}`)
             .then(response=>{
               setBooks(response.data.data.result.content)
               setTotalPage(response.data.data.result.totalPages)

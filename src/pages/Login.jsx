@@ -1,6 +1,7 @@
 import { useState } from "react" 
 import { BookOpen, EyeOff, Eye, Loader, LogIn, Home } from "lucide-react"
 import { useAuth } from "../contexts/AuthContext"
+import { useNavigate } from "react-router-dom"
 import axios from "axios"
 
 function Login({ onClose, switchToRegister }) {
@@ -14,6 +15,7 @@ function Login({ onClose, switchToRegister }) {
     password: "",
     general: "",
   });
+  const navigate = useNavigate()
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -64,14 +66,17 @@ function Login({ onClose, switchToRegister }) {
     setIsLoading(true);
 
     try {
-      console.log(trimmedEmail, password);
       await axios.post("http://localhost:8080/api/v1/auth/login", {
         email: trimmedEmail,
         password: password,
       })
       .then(res => {
         const { accessToken, user } = res.data.data;
+        console.log(res)
         login(user, accessToken);
+        if(user.role.name === "SUPER_ADMIN"){
+          navigate('/admin/')
+        }
         onClose();
       });
       

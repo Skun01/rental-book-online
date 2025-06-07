@@ -9,14 +9,14 @@ const FilterSection = ({setFilterList}) => {
   const [authors, setAuthors] = useState([])
   useEffect(()=>{
     async function getCategories(){
-      await axios.get('http://localhost:8080/api/v1/category?page=0&size=100')
+      await axios.get('http://localhost:8080/api/v1/category/all?page=0&size=100')
         .then(response=>{
           setCategories(response.data.data.content)
         })
     }
 
     async function getAuthors(){
-      await axios.get('http://localhost:8080/api/v1/author?page=0&size=100')
+      await axios.get('http://localhost:8080/api/v1/author/all?page=0&size=100')
         .then(response=>{
           setAuthors(response.data.data.content)
         })

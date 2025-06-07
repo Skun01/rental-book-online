@@ -20,7 +20,7 @@ const OrdersPage = () => {
       
       try {
         const response = await axios.get(
-          `http://localhost:8080/api/v1/order/rental?page=0&size=100&sortDir=asc&userId=${currentUser.id}&orderStatus=${activeFilter === 'all' ? '' : activeFilter}`,
+          `http://localhost:8080/api/v1/order/rental/all?page=0&size=100&sortDir=asc&userId=${currentUser.id}&orderStatus=${activeFilter === 'all' ? '' : activeFilter}`,
           {
             headers: {
               Authorization: `${localStorage.getItem('token')}`
@@ -45,7 +45,6 @@ const OrdersPage = () => {
   const handleTabChange = (tab) => {
     setActiveTab(tab)
     setActiveFilter("all")
-    setSearchQuery("")
   }
 
   const handleFilterChange = (filter) => {
@@ -280,7 +279,6 @@ const OrdersPage = () => {
               className={styles.resetFilterButton}
               onClick={() => {
                 setActiveFilter("all")
-                setSearchQuery("")
               }}
             >
               Xóa bộ lọc

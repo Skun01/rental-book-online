@@ -192,7 +192,7 @@ const CartItem = ({ item, onQuantityChange, onRemoveItem, updateRentDays, common
         <div className={styles.productCol}>
           <div className={styles.productInfo}>
             <Link to={`/books/${item.book.id}`} className={styles.productImageLink}>
-              <img src={item.book.imageList[0].url || "/placeholder.svg"} alt={item.book.name} className={styles.productImage} />
+              <img src={item.book?.imageList[0]?.url || "/placeholder.svg"} alt={item.book.name} className={styles.productImage} />
             </Link>
             <div className={styles.productDetails}>
               <Link to={`/books/${item.book.id}`} className={styles.productTitle}>

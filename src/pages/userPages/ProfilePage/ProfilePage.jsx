@@ -26,7 +26,7 @@ const ProfilePage = () => {
 
     // full user infor
     async function getFullUserInfor(){
-      await axios.get(`http://localhost:8080/api/v1/user/${currentUser.id}`, {
+      await axios.get(`http://localhost:8080/api/v1/user/by/${currentUser.id}`, {
         headers: {
           Authorization: `${bearer}`
         }
@@ -50,7 +50,7 @@ const ProfilePage = () => {
     }
   // update userInfor 
   async function updateUser(){
-    await axios.put(`http://localhost:8080/api/v1/user/${currentUser.id}`, 
+    await axios.put(`http://localhost:8080/api/v1/user/by/${currentUser.id}`, 
     {
       fullName: formData.full_name,
       gender: formData.gender === 'MALE' ? 'Male' : formData.gender === 'FEMALE' ? 'Female' : 'Other',
@@ -331,7 +331,7 @@ const AddressTab = ({ userId, editMode, setEditMode }) => {
   useEffect(()=>{
     const bearer = localStorage.getItem('token')
     async function getUserAddress(){
-      await axios.get(`http://localhost:8080/api/v1/address/user/${userId}?page=0&size=10`, {
+      await axios.get(`http://localhost:8080/api/v1/address/by/user/${userId}?page=0&size=10`, {
         headers: {
           Authorization: `${bearer}`
         }
@@ -358,7 +358,7 @@ const AddressTab = ({ userId, editMode, setEditMode }) => {
 
     // query create address
     try {
-      await axios.post('http://localhost:8080/api/v1/address',
+      await axios.post('http://localhost:8080/api/v1/address/create',
         {
           userId: userId,
           ...newAddress,
@@ -388,7 +388,7 @@ const AddressTab = ({ userId, editMode, setEditMode }) => {
 
   const handleDeleteAddress = async (addressId) => {
     try {
-      await axios.delete(`http://localhost:8080/api/v1/address/${addressId}`,
+      await axios.delete(`http://localhost:8080/api/v1/address/delete/${addressId}`,
         {
           headers: {
             Authorization: `${localStorage.getItem('token')}`
@@ -405,7 +405,7 @@ const AddressTab = ({ userId, editMode, setEditMode }) => {
 
   const handleSetDefaultAddress = async (addressId) => {
     try {
-      await axios.put(`http://localhost:8080/api/v1/address`,
+      await axios.put(`http://localhost:8080/api/v1/address/update/default`,
         {
           userId: userId,
           addressId: addressId,
@@ -495,7 +495,7 @@ const AddressTab = ({ userId, editMode, setEditMode }) => {
                     Địa chỉ {address.isDefault === "true" ? "mặc định" : ""}
                   </h3>
                   <div className={styles.addressActions}>
-                    {address.isDefault === 'false' && (
+                    {!address.isDefault && (
                       <button 
                         className={styles.setDefaultButton}
                         onClick={() => handleSetDefaultAddress(address.id)}
@@ -562,7 +562,7 @@ const PasswordTab = ({ userId, setMessage }) => {
     }
 
     try {
-      await axios.put('http://localhost:8080/api/v1/user/password',
+      await axios.put('http://localhost:8080/api/v1/user/update/password',
         {
           userId: userId,
           currentPassword : passwordData.currentPassword,

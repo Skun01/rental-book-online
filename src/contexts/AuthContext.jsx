@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react"
-
+import { useNavigate } from "react-router-dom"
 const AuthContext = createContext()
 
 export function useAuth() {
@@ -9,7 +9,7 @@ export function useAuth() {
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null)
   const [loading, setLoading] = useState(true)
-
+  const navigate = useNavigate()
   useEffect(() => {
     const storedUser = localStorage.getItem("user")
     if (storedUser) {
@@ -35,6 +35,7 @@ export function AuthProvider({ children }) {
   }
 
   const logout = () => {
+    navigate('/')
     setCurrentUser(null)
 
     try {

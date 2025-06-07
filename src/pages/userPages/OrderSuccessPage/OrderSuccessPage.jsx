@@ -27,7 +27,7 @@ const OrderSuccessPage = () => {
       }
       try {
         const bearer = localStorage.getItem("token")
-        const response = await axios.get(`http://localhost:8080/api/v1/order/rental/${orderId}`, {
+        const response = await axios.get(`http://localhost:8080/api/v1/order/rental/by/${orderId}`, {
           headers: {
             Authorization: `${bearer}`,
           },
@@ -101,7 +101,7 @@ const OrderSuccessPage = () => {
     try {
       const bearer = localStorage.getItem("token")
       await axios.put(
-        `http://localhost:8080/api/v1/order/rental/cancel/${orderData.id}`,
+        `http://localhost:8080/api/v1/order/rental/update/cancel/${orderData.id}`,
         {},
         {
           headers: {

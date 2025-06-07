@@ -30,7 +30,7 @@ function NavBar(){
     };
     window.addEventListener("scroll", handleScroll);
     async function getCategories(){
-      await axios.get('http://localhost:8080/api/v1/category?page=0&size=100')
+      await axios.get('http://localhost:8080/api/v1/category/all?page=0&size=100&sortDir=asc&status=Active')
         .then(response=>{
           setCategories(response.data.data.content)
         })

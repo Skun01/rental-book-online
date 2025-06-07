@@ -20,17 +20,16 @@ const ListPage = ({ pageData }) => {
       try {
         let response
         if (pageData === "authors") {
-          response = await axios.get(`http://localhost:8080/api/v1/author?page=${currentPage - 1}&size=10&sortDir=asc`)
+          response = await axios.get(`http://localhost:8080/api/v1/author/all?page=${currentPage - 1}&size=10&sortDir=asc`)
         } else if (pageData === "categories") {
           response = await axios.get(
-            `http://localhost:8080/api/v1/category?page=${currentPage - 1}&size=10&sortDir=asc`,
+            `http://localhost:8080/api/v1/category/all?page=${currentPage - 1}&size=100&sortDir=asc`,
           )
         }
 
         if (response) {
           setDataList(response.data.data.content)
           setTotalPage(response.data.data.totalPages)
-          console.log(response.data)
         }
       } catch (error) {
         console.error(`Error fetching ${pageData}:`, error)

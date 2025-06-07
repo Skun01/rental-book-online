@@ -23,21 +23,8 @@ const HomePage = () => {
     const fetchData = async () => {
       try {
         // Lấy sách mặc định
-        const booksResponse = await axios.get("http://localhost:8080/api/v1/book?page=0&size=12")
-        setBooks(booksResponse.data.data.content)
-
-        // const newBooksResponse = await axios.get("http://localhost:8080/api/v1/book/search?page=0&size=4&sort=publishDate,desc")
-        // setNewReleaseBooks(newBooksResponse.data.data.result.content)
-
-        // const topRentedResponse = await axios.get("http://localhost:8080/api/v1/book/search?page=0&size=5&sort=rentCount,desc")
-        // setTopRentedBooks(topRentedResponse.data.data.result.content)
-
-        // const teenBooksResponse = await axios.get("http://localhost:8080/api/v1/book/search?page=0&size=4&categoryId=TEEN_CATEGORY_ID")
-        // setTeenBooks(teenBooksResponse.data.data.result.content)
-
-        // const recommendedResponse = await axios.get("http://localhost:8080/api/v1/book/search?page=0&size=4&sort=rating,desc")
-        // setRecommendedBooks(recommendedResponse.data.data.result.content)
-
+        const booksResponse = await axios.get("http://localhost:8080/api/v1/book/all?page=0&size=12")
+        setBooks(booksResponse.data.data.result.content)
       } catch (error) {
         console.error("Error fetching books data:", error)
       } finally {
@@ -51,7 +38,7 @@ const HomePage = () => {
   useEffect(()=>{
     const fetchData = async () => {
       try {
-       await axios.get("http://localhost:8080/api/v1/category?page=0&size=10")
+       await axios.get("http://localhost:8080/api/v1/category/all?page=0&size=12&sortDir=asc&status=Active")
         .then(response=>{
           setCategories(response.data.data.content)
         })

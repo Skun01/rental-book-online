@@ -19,7 +19,7 @@ const BookDetailsPage = () => {
   const navigate = useNavigate()
   useEffect(()=>{
     async function getBookById(){
-      await axios.get(`http://localhost:8080/api/v1/book/${id}`)
+      await axios.get(`http://localhost:8080/api/v1/book/by/${id}`)
         .then(response=>{
           setBook(response.data.data)
         })

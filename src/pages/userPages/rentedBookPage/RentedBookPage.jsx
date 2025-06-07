@@ -2,15 +2,12 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Calendar, Clock, AlertTriangle, Eye, Package, BookOpen, AlertCircle, DollarSign } from "lucide-react"
 import { useAuth } from "../../../contexts/AuthContext"
-import { useToast } from "../../../contexts/ToastContext"
 import axios from "axios"
 import styles from "./RentedBookPage.module.css"
 
 const RentedBookPage = () => {
   const navigate = useNavigate()
   const { currentUser } = useAuth()
-  const { showToast } = useToast()
-
   const [rentedBooks, setRentedBooks] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedBooks, setSelectedBooks] = useState([])
@@ -18,13 +15,26 @@ const RentedBookPage = () => {
   const [returning, setReturning] = useState(false)
 
   useEffect(() => {
-    setTimeout(()=>{
-      setLoading(false)
-      setRentedBooks(getSampleData())
-    }, 1000)
     window.scrollTo({top: 0, behavior: 'smooth'})
-  }, [])
-
+    async function getBookRented(){
+      try{
+        const response = await axios.get(`http://localhost:8080/api/v1/order/rental/all?page=0&size=100&sortDir=asc&userId=${currentUser.id}`,
+          {
+            headers: {
+              Authorization: localStorage.getItem('token')
+            }
+          })
+        
+        setRentedBooks(transformOrdersToRentedBooks(response))
+      }catch(err){
+        console.log('loi khi lay data base:', err)
+      }finally{
+        setLoading(false)
+      }
+      
+    }
+    getBookRented()
+  }, [currentUser.id])
 
   const formatDate = (dateString) => {
     const date = new Date(dateString)
@@ -94,11 +104,12 @@ const RentedBookPage = () => {
   }
 
   const handleReturnBooks = async () => {
-    console.log('will return')
+    console.log(selectedBooks)
+    navigate(`/return-books`, {state: {booksToReturn: selectedBooks}})
   }
 
   const handleViewOrderDetail = (orderId) => {
-    navigate(`/order-success?orderId=${orderId}`)
+    navigate(`/orders/${orderId}`)
   }
 
 
@@ -329,108 +340,72 @@ const RentedBookPage = () => {
 
 export default RentedBookPage
 
-
-// Sample data with proper dates
-  const getSampleData = () => {
-    const today = new Date()
-    return [
-      {
-        id: 1,
-        bookId: 101,
-        bookTitle: "Đắc Nhân Tâm - Nghệ Thuật Thu Phục Lòng Người",
-        bookAuthor: "Dale Carnegie",
-        bookImage: "/auth.jpg",
-        quantity: 2,
-        startDate: "2024-01-15T08:00:00Z",
-        rentedDays: 14,
-        expectedReturnDate: new Date(today.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days from now
-        depositPrice: 100000,
-        orderId: "ORD-12345",
-        status: "ACTIVE",
-      },
-      {
-        id: 2,
-        bookId: 102,
-        bookTitle: "Nhà Giả Kim",
-        bookAuthor: "Paulo Coelho",
-        bookImage: "/auth.jpg",
-        quantity: 1,
-        startDate: "2024-01-05T08:00:00Z",
-        rentedDays: 21,
-        expectedReturnDate: new Date(today.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago (overdue)
-        depositPrice: 120000,
-        orderId: "ORD-12346",
-        status: "OVERDUE",
-      },
-      {
-        id: 3,
-        bookId: 103,
-        bookTitle: "Tôi Tài Giỏi, Bạn Cũng Thế",
-        bookAuthor: "Adam Khoo",
-        bookImage: "/auth.jpg",
-        quantity: 1,
-        startDate: "2024-01-20T08:00:00Z",
-        rentedDays: 7,
-        expectedReturnDate: new Date(today.getTime() + 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days from now
-        depositPrice: 80000,
-        orderId: "ORD-12347",
-        status: "ACTIVE",
-      },
-      {
-        id: 4,
-        bookId: 104,
-        bookTitle: "Sapiens: Lược Sử Loài Người",
-        bookAuthor: "Yuval Noah Harari",
-        bookImage: "/auth.jpg",
-        quantity: 3,
-        startDate: "2024-01-12T08:00:00Z",
-        rentedDays: 28,
-        expectedReturnDate: new Date(today.getTime() + 15 * 24 * 60 * 60 * 1000).toISOString(), // 15 days from now
-        depositPrice: 150000,
-        orderId: "ORD-12348",
-        status: "ACTIVE",
-      },
-      {
-        id: 5,
-        bookId: 105,
-        bookTitle: "Atomic Habits - Thay Đổi Tí Hon Hiệu Quả Bất Ngờ",
-        bookAuthor: "James Clear",
-        bookImage: "/auth.jpg",
-        quantity: 1,
-        startDate: "2024-01-01T08:00:00Z",
-        rentedDays: 14,
-        expectedReturnDate: new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days ago (overdue)
-        depositPrice: 90000,
-        orderId: "ORD-12349",
-        status: "OVERDUE",
-      },
-      {
-        id: 6,
-        bookId: 106,
-        bookTitle: "Thinking, Fast and Slow",
-        bookAuthor: "Daniel Kahneman",
-        bookImage: "/auth.jpg",
-        quantity: 2,
-        startDate: "2024-01-25T08:00:00Z",
-        rentedDays: 21,
-        expectedReturnDate: new Date(today.getTime() + 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days from now
-        depositPrice: 110000,
-        orderId: "ORD-12350",
-        status: "ACTIVE",
-      },
-      {
-        id: 7,
-        bookId: 107,
-        bookTitle: "The 7 Habits of Highly Effective People",
-        bookAuthor: "Stephen R. Covey",
-        bookImage: "/auth.jpg",
-        quantity: 1,
-        startDate: "2024-12-20T08:00:00Z",
-        rentedDays: 30,
-        expectedReturnDate: new Date(today.getTime() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago (overdue)
-        depositPrice: 95000,
-        orderId: "ORD-12351",
-        status: "OVERDUE",
-      },
-    ]
+// cac ham ho tro loc sach
+const transformOrdersToRentedBooks = (apiResponse) => {
+  if (!apiResponse?.data?.data?.content) {
+    return [];
   }
+  const rentedBooks = [];
+  apiResponse.data.data.content.forEach(order => {
+    if (order.orderStatus === "Processing") {
+      order.items.forEach(item => {
+        if (item.itemStatus === "Pending" || item.itemStatus === "Active") {
+          const rentedBook = {
+            id: item.id,
+            orderId: order.id,
+            bookTitle: item.bookName,
+            bookAuthor: "Chưa có thông tin",
+            bookImage: item.imageUrl,
+            quantity: item.quantity,
+            startDate: item.rentalDate,
+            expectedReturnDate: item.rentedDate,
+            rentedDays: calculateRentedDays(item.rentalDate, item.rentedDate),
+            depositPrice: item.depositPrice, 
+            rentalPrice: item.rentalPrice, 
+            totalDeposit: item.totalDeposit, 
+            totalRental: item.totalRental, 
+            status: determineBookStatus(item.rentedDate, item.itemStatus), 
+            customerInfo: {
+              fullName: order.fullName,
+              phone: order.phone,
+              address: `${order.street}, ${order.ward}, ${order.district}, ${order.city}`,
+              notes: order.notes
+            },
+            paymentInfo: {
+              paymentMethod: order.paymentMethod,
+              paymentStatus: order.paymentStatus,
+              deliveryMethod: order.deliveryMethod
+            }
+          };
+          
+          rentedBooks.push(rentedBook);
+        }
+      });
+    }
+  });
+
+  return rentedBooks;
+};
+
+const calculateRentedDays = (startDate, endDate) => {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const diffTime = Math.abs(end - start);
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays;
+};
+
+const determineBookStatus = (expectedReturnDate, itemStatus) => {
+  const now = new Date();
+  const returnDate = new Date(expectedReturnDate);
+  
+  if (now > returnDate) {
+    return "OVERDUE"; // Quá hạn
+  }
+  
+  if (itemStatus === "Pending") {
+    return "ACTIVE"; // Đang thuê
+  }
+  
+  return itemStatus;
+};
