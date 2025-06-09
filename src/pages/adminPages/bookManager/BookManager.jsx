@@ -1,47 +1,143 @@
 import styles from "./BookManager.module.css"
 import { Search, FilterIcon as Funnel, ChevronDown, Plus, Trash2, Edit } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Notification from "../../../components/adminComponents/notification/Notification"
 import BookForm from "../../../components/adminComponents/bookForm/BookForm"
+import {allBookGet, bookDelete, updateBookPut, createBookPost} from "../../../api/bookApi"
+import {allCategoryGet} from "../../../api/categoryApi"
+import {allAuthorGet} from "../../../api/authorApi"
+import { useToast } from "../../../contexts/ToastContext"
+
 
 export default function BookManager() {
+  const [books, setBooks] = useState([])
+  const [categories, setCategories] = useState([])
+  const [authors, setAuthors] = useState([])
+  const [loading, setLoading] = useState(false)
   const [addNewBook, setAddNewBook] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [filters, setFilters] = useState({
     categoryId: "",
     authorId: "",
-    sort: "publish_date_desc",
+    language: "",
+    minPrice: "",
+    maxPrice: "",
+    status: "",
+    sortDir: "desc",
+    page: 0,
+    size: 100
   })
+  const {showToast} = useToast()
 
-  // handle save and cancel book form
+  useEffect(() => {
+    fetchBooks()
+  }, [filters])
+
+  useEffect(() => {
+    fetchCategories()
+    fetchAuthors()
+  }, [])
+
+  const fetchBooks = async () => {
+    setLoading(true)
+    try {
+      const params = new URLSearchParams()
+      params.append('page', filters.page)
+      params.append('size', filters.size)
+      params.append('sortDir', filters.sortDir)
+      
+      if (searchTerm.trim()) params.append('keyword', searchTerm)
+      if (filters.categoryId) params.append('categoryId', filters.categoryId)
+      if (filters.authorId) params.append('authorId', filters.authorId)
+      if (filters.language) params.append('language', filters.language)
+      if (filters.minPrice) params.append('minPrice', filters.minPrice)
+      if (filters.maxPrice) params.append('maxPrice', filters.maxPrice)
+
+      const bookData = await allBookGet(`/book/all?${params}`)
+      setBooks(bookData)
+    } catch (error) {
+      console.error('Error fetching books:', error)
+      setBooks([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchCategories = async () => {
+    try {
+      const categoryData = await allCategoryGet()
+      setCategories(categoryData)
+    } catch (error) {
+      console.error('Error fetching categories:', error)
+    }
+  }
+
+  const fetchAuthors = async () => {
+    try {
+      const authorData = await allAuthorGet()
+      setAuthors(authorData)
+    } catch (error) {
+      console.error('Error fetching authors:', error)
+    }
+  }
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchBooks()
+    }, 500)
+    return () => clearTimeout(timeoutId)
+  }, [searchTerm])
+
   function handleCancelAddNewBook() {
     setAddNewBook(false)
   }
 
-  function handleSaveBook(bookData) {
-    console.log("Saving book:", bookData)
-    setAddNewBook(false)
+  async function handleSaveBook(bookData) {
+    try {
+      const formData = new FormData()
+      const bookInfo = {
+        name: bookData.name,
+        description: bookData.description,
+        publisher: bookData.publisher,
+        publishDate: bookData.publish_date,
+        pages: bookData.pages,
+        language: bookData.language,
+        totalQuantity: bookData.totalQuantity,
+        stock: bookData.stock,
+        rentalPrice: bookData.rentalPrice,
+        depositPrice: bookData.depositPrice,
+        status: bookData.status,
+        categoryId: bookData.categoryId,
+        authorId: bookData.authorsId
+      }
+      
+      formData.append('book', JSON.stringify(bookInfo))
+      
+      if (bookData.imageList) {
+        bookData.imageList.forEach((image, index) => {
+          if (image.file) {
+            formData.append('images', image.file)
+            formData.append(`isDefault${index}`, image.isDefault)
+          }
+        })
+      }
+
+      console.log(bookData)
+      await createBookPost(bookData)
+      setAddNewBook(false)
+      fetchBooks()
+      showToast({type: 'success', message: `Thêm sách thành công!`})
+    } catch (error) {
+      console.error('Error saving book:', error)
+      showToast({type: 'error', message: `Có lỗi khi thêm sửa sách`})
+    }
   }
-
-  // filters books
-  const filteredBooks = books.filter((book) => {
-    const matchesSearch =
-      book.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      book.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      book.publisher.toLowerCase().includes(searchTerm.toLowerCase())
-
-    const matchesCategory = !filters.categoryId || book.categoryId.toString() === filters.categoryId
-    const matchesAuthor = !filters.authorId || book.authorsId.toString() === filters.authorId
-
-    return matchesSearch && matchesCategory && matchesAuthor
-  })
 
   return (
     <div className="adminTabPage">
       <div className="adminPageTitle">Quản lý sách</div>
 
       <div className={styles.manageTool}>
-
         <div className={styles.searchContainer}>
           <input
             type="text"
@@ -56,7 +152,7 @@ export default function BookManager() {
         </div>
 
         <div className={styles.toolActions}>
-          <Filter filters={filters} setFilters={setFilters} />
+          <Filter filters={filters} setFilters={setFilters} categories={categories} authors={authors} />
           <button className={styles.addButton} onClick={() => setAddNewBook(true)}>
             <Plus size={20} />
             <span>Thêm sách mới</span>
@@ -65,7 +161,11 @@ export default function BookManager() {
       </div>
 
       <div className={styles.tableSection}>
-        <BookTable books={filteredBooks} />
+        {loading ? (
+          <div className={styles.loading}>Đang tải...</div>
+        ) : (
+          <BookTable books={books} onRefresh={fetchBooks} categories={categories} authors={authors} />
+        )}
       </div>
 
       {addNewBook && (
@@ -84,11 +184,11 @@ export default function BookManager() {
   )
 }
 
-const Filter = ({ filters, setFilters }) => {
+const Filter = ({ filters, setFilters, categories, authors }) => {
   const [isOpen, setIsOpen] = useState(false)
 
   const handleFilterChange = (key, value) => {
-    setFilters((prev) => ({ ...prev, [key]: value }))
+    setFilters((prev) => ({ ...prev, [key]: value, page: 0 }))
   }
 
   const handleApplyFilter = () => {
@@ -99,7 +199,12 @@ const Filter = ({ filters, setFilters }) => {
     setFilters({
       categoryId: "",
       authorId: "",
-      sort: "publish_date_desc",
+      language: "",
+      minPrice: "",
+      maxPrice: "",
+      sortDir: "desc",
+      page: 0,
+      size: 100
     })
     setIsOpen(false)
   }
@@ -147,18 +252,48 @@ const Filter = ({ filters, setFilters }) => {
           </div>
 
           <div className={styles.filterGroup}>
+            <label className={styles.filterLabel}>Ngôn ngữ</label>
+            <select
+              className={styles.filterSelect}
+              value={filters.language}
+              onChange={(e) => handleFilterChange("language", e.target.value)}
+            >
+              <option value="">Tất cả ngôn ngữ</option>
+              <option value="Tiếng Việt">Tiếng Việt</option>
+              <option value="English">English</option>
+            </select>
+          </div>
+
+          <div className={styles.filterGroup}>
+            <label className={styles.filterLabel}>Giá thuê (VNĐ)</label>
+            <div className={styles.priceRange}>
+              <input
+                type="number"
+                placeholder="Từ"
+                className={styles.priceInput}
+                value={filters.minPrice}
+                onChange={(e) => handleFilterChange("minPrice", e.target.value)}
+              />
+              <span>-</span>
+              <input
+                type="number"
+                placeholder="Đến"
+                className={styles.priceInput}
+                value={filters.maxPrice}
+                onChange={(e) => handleFilterChange("maxPrice", e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className={styles.filterGroup}>
             <label className={styles.filterLabel}>Sắp xếp</label>
             <select
               className={styles.filterSelect}
-              value={filters.sort}
-              onChange={(e) => handleFilterChange("sort", e.target.value)}
+              value={filters.sortDir}
+              onChange={(e) => handleFilterChange("sortDir", e.target.value)}
             >
-              <option value="publish_date_desc">Mới nhất</option>
-              <option value="publish_date_asc">Cũ nhất</option>
-              <option value="price_asc">Giá tăng dần</option>
-              <option value="price_desc">Giá giảm dần</option>
-              <option value="name_asc">Tên A-Z</option>
-              <option value="name_desc">Tên Z-A</option>
+              <option value="desc">Mới nhất</option>
+              <option value="asc">Cũ nhất</option>
             </select>
           </div>
 
@@ -176,17 +311,24 @@ const Filter = ({ filters, setFilters }) => {
   )
 }
 
-const BookTable = ({ books }) => {
+const BookTable = ({ books, onRefresh, categories, authors }) => {
   const [showDeleteNoti, setShowDeleteNoti] = useState({ state: false })
-  const [isEditing, setIsEditing] = useState({ state: false})
+  const [isEditing, setIsEditing] = useState({ state: false })
+  const {showToast} = useToast()
 
-  // handle delete funcs 
   function handleShowDeleteNoti(bookId, bookName) {
     setShowDeleteNoti({ state: true, id: bookId, name: bookName })
   }
 
-  function handleDelete(id) {
-    console.log("delete book with id: ", id)
+  async function handleDelete(id) {
+    try {
+      await bookDelete(id)
+      showToast({type: 'success', message: 'Đã xóa sách thành công'})
+      onRefresh()
+    } catch (error) {
+      console.error('Error deleting book:', error)
+      showToast({type: 'error', message: 'Có lỗi khi xóa sách'})
+    }
   }
 
   function handleConfirmDelete() {
@@ -194,21 +336,40 @@ const BookTable = ({ books }) => {
     setShowDeleteNoti({ ...showDeleteNoti, state: false })
   }
 
-  // handle edits funcs
-  function handleSaveEditedBook(bookData) {
-    console.log("Saving edited book:", bookData)
-    setIsEditing({ state: false })
-  }
-
-  // get category and author names by id
-  const getCategoryName = (categoryId) => {
-    const category = categories.find((cat) => cat.id === categoryId)
-    return category ? category.name : "Không xác định"
-  }
-
-  const getAuthorName = (authorId) => {
-    const author = authors.find((auth) => auth.id === authorId)
-    return author ? author.name : "Không xác định"
+  async function handleSaveEditedBook(bookData) {
+    try {
+      const formData = new FormData()
+      const bookInfo = {
+        name: bookData.name,
+        description: bookData.description,
+        publisher: bookData.publisher,
+        publishDate: bookData.publish_date,
+        pages: bookData.pages,
+        language: bookData.language,
+        totalQuantity: bookData.totalQuantity,
+        stock: bookData.stock,
+        rentalPrice: bookData.rentalPrice,
+        depositPrice: bookData.depositPrice,
+        categoryId: bookData.categoryId,
+        authorsId: bookData.authorsId,
+        imageList: bookData.imageList
+      }
+      formData.append('book', JSON.stringify(bookInfo))
+      if (bookData.imageList) {
+        bookData.imageList.forEach((image, index) => {
+          if (image.file) {
+            formData.append('images', image.file)
+            formData.append(`isDefault${index}`, image.isDefault)
+          }
+        })
+      }
+      await updateBookPut(bookInfo, isEditing.book.id)
+      showToast({type: 'success', message: 'Cập nhật sách thành công'})
+      onRefresh()
+    } catch (error) {
+      console.error('Error updating book:', error)
+      showToast({type: 'error', message: 'Có lỗi khi cập nhật sách'})
+    }
   }
 
   if (books.length === 0) {
@@ -242,7 +403,7 @@ const BookTable = ({ books }) => {
               <td>
                 <div className={styles.bookImage}>
                   <img
-                    src={book.imageList.find((img) => img.isDefault)?.url || "/placeholder.svg?height=70&width=50"}
+                    src={book.imageList?.find((img) => img.isDefault === "true")?.url || "/placeholder.svg?height=70&width=50"}
                     alt={book.name}
                   />
                 </div>
@@ -253,22 +414,29 @@ const BookTable = ({ books }) => {
                   <p>{book.description}</p>
                 </div>
               </td>
-              <td>{getAuthorName(book.authorsId)}</td>
-              <td>{getCategoryName(book.categoryId)}</td>
+              <td>{book.author?.name || "Không xác định"}</td>
+              <td>{book.category?.name || "Không xác định"}</td>
               <td>
-                <span className={book.stock > 0 ? styles.inStock : styles.outOfStock}>{book.stock}</span>
+                <span className={book.stock > 0 ? styles.inStock : styles.outOfStock}>
+                  {book.stock}
+                </span>
               </td>
               <td>
-                <span className={styles.renting}>{book.totalQuantity - book.stock}</span>
+                <span className={styles.renting}>{book.quantityRented || 0}</span>
               </td>
               <td className={styles.price}>{(+book.rentalPrice).toLocaleString("vi-VN")} VNĐ</td>
               <td>
                 <div className={styles.actionButtons}>
-                  <button className={styles.editButton}>
-                    <Edit size={16} 
-                      onClick={()=>setIsEditing({state: true, book: book})}/>
+                  <button 
+                    className={styles.editButton}
+                    onClick={() => setIsEditing({state: true, book: book})}
+                  >
+                    <Edit size={16} />
                   </button>
-                  <button className={styles.deleteButton} onClick={() => handleShowDeleteNoti(book.id, book.name)}>
+                  <button 
+                    className={styles.deleteButton} 
+                    onClick={() => handleShowDeleteNoti(book.id, book.name)}
+                  >
                     <Trash2 size={16} />
                   </button>
                 </div>
@@ -278,7 +446,7 @@ const BookTable = ({ books }) => {
         </tbody>
       </table>
       
-      {/* show notification */}
+      {/* Show notification */}
       {showDeleteNoti.state && (
         <Notification
           handleConfirm={handleConfirmDelete}
@@ -287,12 +455,12 @@ const BookTable = ({ books }) => {
         />
       )}
 
-      {/*show edit form*/}
+      {/* Show edit form */}
       {isEditing.state && (
         <div className={styles.bookFormContainer}>
           <BookForm
             book={isEditing.book}
-            onSave={(bookData) => handleSaveEditedBook(bookData)}
+            onSave={handleSaveEditedBook}
             onCancel={() => setIsEditing({ state: false })}
             categories={categories}
             authors={authors}
@@ -303,89 +471,3 @@ const BookTable = ({ books }) => {
     </div>
   )
 }
-
-const books = [
-  {
-    id: 1,
-    name: "Lập trình React",
-    description: "Học React từ cơ bản đến nâng cao với các ví dụ thực tế",
-    title: "React Programming Guide",
-    publisher: "NXB Thông tin và Truyền thông",
-    publish_date: "2024-01-15",
-    pages: 456,
-    language: "Tiếng Việt",
-    totalQuantity: 50,
-    stock: 35,
-    rentalPrice: 15000,
-    depositPrice: 100000,
-    status: "Available",
-    categoryId: 1,
-    authorsId: 1,
-    imageList: [
-      { isDefault: true, url: "/auth.jpg" },
-      { isDefault: false, url: "/auth.jpg" },
-    ],
-  },
-  {
-    id: 2,
-    name: "JavaScript Nâng cao",
-    description: "Khám phá các khái niệm nâng cao trong JavaScript",
-    title: "Advanced JavaScript Concepts",
-    publisher: "NXB Giáo dục Việt Nam",
-    publish_date: "2023-12-20",
-    pages: 320,
-    language: "Tiếng Việt",
-    totalQuantity: 30,
-    stock: 20,
-    rentalPrice: 20000,
-    depositPrice: 120000,
-    status: "Available",
-    categoryId: 1,
-    authorsId: 2,
-    imageList: [{ isDefault: true, url: "/auth.jpg" }],
-  },
-  {
-    id: 3,
-    name: "Python cho Data Science",
-    description: "Ứng dụng Python trong phân tích dữ liệu và machine learning",
-    title: "Python for Data Science",
-    publisher: "NXB Khoa học và Kỹ thuật",
-    publish_date: "2024-03-10",
-    pages: 520,
-    language: "Tiếng Việt",
-    totalQuantity: 25,
-    stock: 0,
-    rentalPrice: 25000,
-    depositPrice: 150000,
-    status: "OutOfStock",
-    categoryId: 2,
-    authorsId: 3,
-    imageList: [{ isDefault: true, url: "/auth.jpg" }],
-  },
-]
-
-const categories = [
-  { id: 1, name: "Lịch sử" },
-  { id: 2, name: "Văn học" },
-  { id: 3, name: "Khoa học" },
-  { id: 4, name: "Giáo dục" },
-  { id: 5, name: "Kinh tế" },
-  { id: 6, name: "Tâm lý" },
-  { id: 7, name: "Tôn giáo" },
-  { id: 8, name: "Thể thao" },
-  { id: 9, name: "Du lịch" },
-  { id: 10, name: "Nấu ăn" },
-]
-
-const authors = [
-  { id: 1, name: "Nguyễn Văn A" },
-  { id: 2, name: "Trần Thị B" },
-  { id: 3, name: "Lê Văn C" },
-  { id: 4, name: "Phạm Thị D" },
-  { id: 5, name: "Hoàng Văn E" },
-  { id: 6, name: "Nguyễn Thị F" },
-  { id: 7, name: "Trần Văn G" },
-  { id: 8, name: "Lê Thị H" },
-  { id: 9, name: "Phạm Văn I" },
-  { id: 10, name: "Hoàng Thị J" },
-]

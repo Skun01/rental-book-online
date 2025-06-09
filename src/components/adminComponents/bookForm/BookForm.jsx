@@ -11,53 +11,62 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    title: "",
     publisher: "",
-    publish_date: "",
+    publishDate: "",
     pages: "",
     language: "Tiếng Việt",
     totalQuantity: "",
     stock: "",
     rentalPrice: "",
     depositPrice: "",
-    status: "Available",
+    status: "Active",
     categoryId: "",
     authorsId: "",
     imageList: [],
   })
 
-  // handle if have books information to edit
   useEffect(() => {
     if (book) {
       setFormData({
-        ...book,
-        publish_date: book.publish_date?.split("T")[0] || "",
+        name: book.name || "",
+        description: book.description || "",
+        publisher: book.publisher || "",
+        publishDate: book.publishDate ? book.publishDate.split("T")[0] : "",
+        pages: book.pages || "",
+        language: book.language || "Tiếng Việt",
+        totalQuantity: book.totalQuantity || "",
+        stock: book.stock || "",
+        rentalPrice: book.rentalPrice || "",
+        depositPrice: book.depositPrice || "",
+        status: book.status || "Active",
+        categoryId: book.category?.id || "",
+        authorsId: book.author?.id || "",
+        imageList: [],
       })
-      // display images
+
+      // Display existing images
       if (book.imageList && book.imageList.length > 0) {
-        const mainImg = book.imageList.find((img) => img.isDefault)
+        const mainImg = book.imageList.find((img) => img.isDefault === "true")
         if (mainImg) {
           setMainImage({ name: "main", url: mainImg.url })
         }
 
-        const subImages = book.imageList.filter((img) => !img.isDefault).slice(0, 3)
+        const subImages = book.imageList.filter((img) => img.isDefault === "false").slice(0, 3)
         setImageList(subImages.map((img, index) => ({ name: `sub-${index}`, url: img.url })))
       }
     } else {
-      // reset form to create new book
       setFormData({
         name: "",
         description: "",
-        title: "",
         publisher: "",
-        publish_date: "",
+        publishDate: "",
         pages: "",
         language: "Tiếng Việt",
         totalQuantity: "",
         stock: "",
         rentalPrice: "",
         depositPrice: "",
-        status: "Available",
+        status: "Active",
         categoryId: "",
         authorsId: "",
         imageList: [],
@@ -116,7 +125,6 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
       [name]: value,
     }))
 
-    // set stock if empty
     if (name === "totalQuantity" && !formData.stock) {
       setFormData((prev) => ({
         ...prev,
@@ -125,12 +133,11 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
     }
   }
 
-
-  // handle submit to add or edit books
+  // Handle submit to add or edit books
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    // Validate 
+    // Validation
     if (!formData.name.trim()) {
       alert("Vui lòng nhập tên sách")
       return
@@ -146,7 +153,7 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
       return
     }
 
-    // get total images
+    // Prepare image list
     const processedImageList = []
     if (mainImage) {
       processedImageList.push({
@@ -165,14 +172,19 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
     })
 
     const processedData = {
-      ...formData,
+      name: formData.name,
+      description: formData.description,
+      publisher: formData.publisher,
+      publishDate: new Date(formData.publishDate).toISOString(),
       pages: Number.parseInt(formData.pages) || 0,
+      language: formData.language,
       totalQuantity: Number.parseInt(formData.totalQuantity) || 0,
       stock: Number.parseInt(formData.stock) || 0,
       rentalPrice: Number.parseInt(formData.rentalPrice) || 0,
       depositPrice: Number.parseInt(formData.depositPrice) || 0,
-      categoryId: Number.parseInt(formData.categoryId) || null,
-      authorsId: Number.parseInt(formData.authorsId) || null,
+      status: formData.status,
+      categoryId: Number.parseInt(formData.categoryId),
+      authorsId: Number.parseInt(formData.authorsId),
       imageList: processedImageList,
     }
 
@@ -180,9 +192,9 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
   }
 
   if (!isOpen) return null
+
   return (
     <div className={styles.formOverlay}>
-      {/* header */}
       <div className={styles.formContainer}>
         <div className={styles.formHeader}>
           <h2 className={styles.formTitle}>{book ? "Chỉnh sửa sách" : "Thêm sách mới"}</h2>
@@ -194,9 +206,8 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formSections}>
 
-            {/* basic information */}
+            {/* Basic Information */}
             <div className={styles.formSection}>
-
               <h3 className={styles.sectionTitle}>
                 <FileText size={18} />
                 Thông tin cơ bản
@@ -204,27 +215,15 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
 
               <div className={styles.formRow}>
                 <div className={styles.formGroup}>
-                  <label className={styles.formLabel}>Tên sách</label>
+                  <label className={styles.formLabel}>Tên sách *</label>
                   <input
                     type="text"
                     name="name"
-                    value={formData.name || ""}
+                    value={formData.name}
                     onChange={handleInputChange}
                     required
                     className={styles.formInput}
                     placeholder="Nhập tên sách"
-                  />
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label className={styles.formLabel}>Tiêu đề</label>
-                  <input
-                    type="text"
-                    name="title"
-                    value={formData.title || ""}
-                    onChange={handleInputChange}
-                    className={styles.formInput}
-                    placeholder="Nhập tiêu đề sách"
                   />
                 </div>
               </div>
@@ -233,7 +232,7 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
                 <label className={styles.formLabel}>Mô tả</label>
                 <textarea
                   name="description"
-                  value={formData.description || ""}
+                  value={formData.description}
                   onChange={handleInputChange}
                   rows={4}
                   className={styles.formTextarea}
@@ -247,7 +246,7 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
                   <input
                     type="text"
                     name="publisher"
-                    value={formData.publisher || ""}
+                    value={formData.publisher}
                     onChange={handleInputChange}
                     className={styles.formInput}
                     placeholder="Nhập tên nhà xuất bản"
@@ -258,8 +257,8 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
                   <label className={styles.formLabel}>Ngày xuất bản</label>
                   <input
                     type="date"
-                    name="publish_date"
-                    value={formData.publish_date || ""}
+                    name="publishDate"
+                    value={formData.publishDate}
                     onChange={handleInputChange}
                     className={styles.formInput}
                   />
@@ -280,7 +279,7 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
                   <input
                     type="number"
                     name="pages"
-                    value={formData.pages || ""}
+                    value={formData.pages}
                     onChange={handleInputChange}
                     min="1"
                     className={styles.formInput}
@@ -292,7 +291,7 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
                   <label className={styles.formLabel}>Ngôn ngữ</label>
                   <select
                     name="language"
-                    value={formData.language || "Tiếng Việt"}
+                    value={formData.language}
                     onChange={handleInputChange}
                     className={styles.formSelect}
                   >
@@ -300,34 +299,20 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
                     <option value="English">English</option>
                   </select>
                 </div>
-
-                <div className={styles.formGroup}>
-                  <label className={styles.formLabel}>Trạng thái</label>
-                  <select
-                    name="status"
-                    value={formData.status || "Available"}
-                    onChange={handleInputChange}
-                    className={styles.formSelect}
-                  >
-                    <option value="Available">Có sẵn</option>
-                    <option value="OutOfStock">Hết hàng</option>
-                    <option value="Discontinued">Ngừng kinh doanh</option>
-                  </select>
-                </div>
               </div>
 
               <div className={styles.formRow}>
                 <div className={styles.formGroup}>
-                  <label className={styles.formLabel}>Danh mục</label>
+                  <label className={styles.formLabel}>Danh mục *</label>
                   <select
                     name="categoryId"
-                    value={formData.categoryId || ""}
+                    value={formData.categoryId}
                     onChange={handleInputChange}
                     required
                     className={styles.formSelect}
                   >
                     <option value="">Chọn danh mục</option>
-                    {categories.map((category) => (
+                    {categories && categories.map((category) => (
                       <option key={category.id} value={category.id}>
                         {category.name}
                       </option>
@@ -336,16 +321,16 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label className={styles.formLabel}>Tác giả</label>
+                  <label className={styles.formLabel}>Tác giả *</label>
                   <select
                     name="authorsId"
-                    value={formData.authorsId || ""}
+                    value={formData.authorsId}
                     onChange={handleInputChange}
                     required
                     className={styles.formSelect}
                   >
                     <option value="">Chọn tác giả</option>
-                    {authors.map((author) => (
+                    {authors && authors.map((author) => (
                       <option key={author.id} value={author.id}>
                         {author.name}
                       </option>
@@ -355,11 +340,11 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
               </div>
             </div>
 
-            {/* price and stock */}
+            {/* Quantity and Price */}
             <div className={styles.formSection}>
               <h3 className={styles.sectionTitle}>
                 <DollarSign size={18} />
-                <span>Số lượng và giá</span>
+                Số lượng và giá
               </h3>
 
               <div className={styles.formRow}>
@@ -368,7 +353,7 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
                   <input
                     type="number"
                     name="totalQuantity"
-                    value={formData.totalQuantity || ""}
+                    value={formData.totalQuantity}
                     onChange={handleInputChange}
                     min="0"
                     className={styles.formInput}
@@ -381,7 +366,7 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
                   <input
                     type="number"
                     name="stock"
-                    value={formData.stock || ""}
+                    value={formData.stock}
                     onChange={handleInputChange}
                     min="0"
                     max={formData.totalQuantity || 999999}
@@ -389,13 +374,15 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
                     placeholder="0"
                   />
                 </div>
+              </div>
 
+              <div className={styles.formRow}>
                 <div className={styles.formGroup}>
                   <label className={styles.formLabel}>Giá thuê (VNĐ)</label>
                   <input
                     type="number"
                     name="rentalPrice"
-                    value={formData.rentalPrice || ""}
+                    value={formData.rentalPrice}
                     onChange={handleInputChange}
                     min="0"
                     className={styles.formInput}
@@ -408,7 +395,7 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
                   <input
                     type="number"
                     name="depositPrice"
-                    value={formData.depositPrice || ""}
+                    value={formData.depositPrice}
                     onChange={handleInputChange}
                     min="0"
                     className={styles.formInput}
@@ -431,7 +418,7 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
                   <div className={styles.imagePreview}>
                     {mainImage ? (
                       <>
-                        <img src={mainImage.url || "/auth.jpg"} alt={mainImage.name} />
+                        <img src={mainImage.url} alt={mainImage.name} />
                         <X className={styles.previewImageDelete} onClick={() => handleDeleteImage("main")} />
                       </>
                     ) : (
@@ -458,7 +445,7 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
                   <div className={styles.imagePreviewContainer}>
                     {imageList.map((image, index) => (
                       <div className={styles.imagePreview} key={index}>
-                        <img src={image.url || "/placeholder.svg"} alt={image.name} />
+                        <img src={image.url} alt={image.name} />
                         <X className={styles.previewImageDelete} onClick={() => handleDeleteImage(index)} />
                       </div>
                     ))}
