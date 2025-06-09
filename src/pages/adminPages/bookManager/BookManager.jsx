@@ -1,6 +1,7 @@
 import styles from "./BookManager.module.css"
 import { Search, FilterIcon as Funnel, ChevronDown, Plus, Trash2, Edit } from "lucide-react"
 import { useState, useEffect } from "react"
+import axios from "axios"
 import Notification from "../../../components/adminComponents/notification/Notification"
 import BookForm from "../../../components/adminComponents/bookForm/BookForm"
 import {allBookGet, bookDelete, updateBookPut, createBookPost} from "../../../api/bookApi"
@@ -8,6 +9,36 @@ import {allCategoryGet} from "../../../api/categoryApi"
 import {allAuthorGet} from "../../../api/authorApi"
 import { useToast } from "../../../contexts/ToastContext"
 
+const token = localStorage.getItem('token')
+
+const uploadImageApi = async (file, token) => {
+  try {
+    const formData = new FormData()
+    formData.append('files', file)
+    
+    const response = await axios.post('http://localhost:8080/api/v1/upload/server', formData, {
+      headers: {
+        'Authorization': `${token}`,
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+    
+    if (response.data && Array.isArray(response.data.data) && response.data.data.length > 0) {
+      return response.data.data[0]
+    } else {
+      throw new Error('No image URL returned from server')
+    }
+  } catch (error) {
+    console.error('Upload error:', error)
+    if (error.response) {
+      throw new Error(`Upload failed: ${error.response.data.message || error.response.statusText}`)
+    } else if (error.request) {
+      throw new Error('Upload failed: No response from server')
+    } else {
+      throw new Error(`Upload failed: ${error.message}`)
+    }
+  }
+}
 
 export default function BookManager() {
   const [books, setBooks] = useState([])
@@ -94,12 +125,40 @@ export default function BookManager() {
 
   async function handleSaveBook(bookData) {
     try {
-      const formData = new FormData()
+      setLoading(true)
+      showToast({type: 'info', message: 'Đang xử lý...'})
+      console.log(bookData)
+      // Upload ảnh và tạo imageList
+      const processedImageList = []
+      
+      if (bookData.imageList && bookData.imageList.length > 0) {
+        for (const image of bookData.imageList) {
+          if (image.file) {
+            try {
+              const uploadedUrl = await uploadImageApi(image.file, token)
+              processedImageList.push({
+                url: uploadedUrl,
+                isDefault: image.isDefault.toString()
+              })
+            } catch (error) {
+              console.error('Error uploading image:', error)
+              showToast({type: 'error', message: `Lỗi khi upload ảnh: ${error.message}`})
+              return
+            }
+          } else if (image.url) {
+            processedImageList.push({
+              url: image.url,
+              isDefault: image.isDefault.toString()
+            })
+          }
+        }
+      }
+
       const bookInfo = {
         name: bookData.name,
         description: bookData.description,
         publisher: bookData.publisher,
-        publishDate: bookData.publish_date,
+        publishDate: bookData.publishDate,
         pages: bookData.pages,
         language: bookData.language,
         totalQuantity: bookData.totalQuantity,
@@ -108,28 +167,19 @@ export default function BookManager() {
         depositPrice: bookData.depositPrice,
         status: bookData.status,
         categoryId: bookData.categoryId,
-        authorId: bookData.authorsId
+        authorsId: bookData.authorsId,
+        imageList: processedImageList
       }
-      
-      formData.append('book', JSON.stringify(bookInfo))
-      
-      if (bookData.imageList) {
-        bookData.imageList.forEach((image, index) => {
-          if (image.file) {
-            formData.append('images', image.file)
-            formData.append(`isDefault${index}`, image.isDefault)
-          }
-        })
-      }
-
-      console.log(bookData)
-      await createBookPost(bookData)
+      console.log(bookInfo)
+      await createBookPost(bookInfo)
       setAddNewBook(false)
       fetchBooks()
-      showToast({type: 'success', message: `Thêm sách thành công!`})
+      showToast({type: 'success', message: 'Thêm sách thành công!'})
     } catch (error) {
       console.error('Error saving book:', error)
-      showToast({type: 'error', message: `Có lỗi khi thêm sửa sách`})
+      showToast({type: 'error', message: 'Có lỗi khi thêm sách!'})
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -153,7 +203,11 @@ export default function BookManager() {
 
         <div className={styles.toolActions}>
           <Filter filters={filters} setFilters={setFilters} categories={categories} authors={authors} />
-          <button className={styles.addButton} onClick={() => setAddNewBook(true)}>
+          <button 
+            className={styles.addButton} 
+            onClick={() => setAddNewBook(true)}
+            disabled={loading}
+          >
             <Plus size={20} />
             <span>Thêm sách mới</span>
           </button>
@@ -164,7 +218,13 @@ export default function BookManager() {
         {loading ? (
           <div className={styles.loading}>Đang tải...</div>
         ) : (
-          <BookTable books={books} onRefresh={fetchBooks} categories={categories} authors={authors} />
+          <BookTable 
+            books={books} 
+            onRefresh={fetchBooks} 
+            categories={categories} 
+            authors={authors}
+            setLoading={setLoading}
+          />
         )}
       </div>
 
@@ -311,7 +371,7 @@ const Filter = ({ filters, setFilters, categories, authors }) => {
   )
 }
 
-const BookTable = ({ books, onRefresh, categories, authors }) => {
+const BookTable = ({ books, onRefresh, categories, authors, setLoading }) => {
   const [showDeleteNoti, setShowDeleteNoti] = useState({ state: false })
   const [isEditing, setIsEditing] = useState({ state: false })
   const {showToast} = useToast()
@@ -322,12 +382,15 @@ const BookTable = ({ books, onRefresh, categories, authors }) => {
 
   async function handleDelete(id) {
     try {
+      setLoading(true)
       await bookDelete(id)
       showToast({type: 'success', message: 'Đã xóa sách thành công'})
       onRefresh()
     } catch (error) {
       console.error('Error deleting book:', error)
       showToast({type: 'error', message: 'Có lỗi khi xóa sách'})
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -338,12 +401,38 @@ const BookTable = ({ books, onRefresh, categories, authors }) => {
 
   async function handleSaveEditedBook(bookData) {
     try {
-      const formData = new FormData()
+      setLoading(true)
+      showToast({type: 'info', message: 'Đang xử lý...'})
+      const processedImageList = []
+      
+      if (bookData.imageList && bookData.imageList.length > 0) {
+        for (const image of bookData.imageList) {
+          if (image.file) {
+            try {
+              const uploadedUrl = await uploadImageApi(image.file, token)
+              processedImageList.push({
+                url: uploadedUrl,
+                isDefault: image.isDefault.toString()
+              })
+            } catch (error) {
+              console.error('Error uploading image:', error)
+              showToast({type: 'error', message: `Lỗi khi upload ảnh: ${error.message}`})
+              return
+            }
+          } else if (image.url) {
+            processedImageList.push({
+              url: image.url,
+              isDefault: image.isDefault.toString()
+            })
+          }
+        }
+      }
+
       const bookInfo = {
         name: bookData.name,
         description: bookData.description,
         publisher: bookData.publisher,
-        publishDate: bookData.publish_date,
+        publishDate: bookData.publishDate,
         pages: bookData.pages,
         language: bookData.language,
         totalQuantity: bookData.totalQuantity,
@@ -352,23 +441,17 @@ const BookTable = ({ books, onRefresh, categories, authors }) => {
         depositPrice: bookData.depositPrice,
         categoryId: bookData.categoryId,
         authorsId: bookData.authorsId,
-        imageList: bookData.imageList
+        imageList: processedImageList
       }
-      formData.append('book', JSON.stringify(bookInfo))
-      if (bookData.imageList) {
-        bookData.imageList.forEach((image, index) => {
-          if (image.file) {
-            formData.append('images', image.file)
-            formData.append(`isDefault${index}`, image.isDefault)
-          }
-        })
-      }
+      console.log(bookInfo)
       await updateBookPut(bookInfo, isEditing.book.id)
       showToast({type: 'success', message: 'Cập nhật sách thành công'})
       onRefresh()
     } catch (error) {
       console.error('Error updating book:', error)
       showToast({type: 'error', message: 'Có lỗi khi cập nhật sách'})
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -405,6 +488,9 @@ const BookTable = ({ books, onRefresh, categories, authors }) => {
                   <img
                     src={book.imageList?.find((img) => img.isDefault === "true")?.url || "/placeholder.svg?height=70&width=50"}
                     alt={book.name}
+                    onError={(e) => {
+                      e.target.src = "/placeholder.svg?height=70&width=50"
+                    }}
                   />
                 </div>
               </td>

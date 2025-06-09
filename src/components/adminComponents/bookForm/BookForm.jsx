@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react"
 import { X, Save, FileText, BookOpen, DollarSign, ImageIcon, Upload } from "lucide-react"
 import styles from "./BookForm.module.css"
+import { useToast } from "../../../contexts/ToastContext"
 
 const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }) => {
   const [imageList, setImageList] = useState([])
-  const [imageListFiles, setImageListFiles] = useState([])
   const [mainImage, setMainImage] = useState(null)
-  const [mainImageFile, setMainImageFile] = useState(null)
+  const [uploading, setUploading] = useState(false)
+  const {showToast} = useToast()
 
   const [formData, setFormData] = useState({
     name: "",
@@ -46,15 +47,27 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
 
       // Display existing images
       if (book.imageList && book.imageList.length > 0) {
-        const mainImg = book.imageList.find((img) => img.isDefault === "true")
-        if (mainImg) {
-          setMainImage({ name: "main", url: mainImg.url })
-        }
+        const processedImages = []
+        
+        book.imageList.forEach((img) => {
+          processedImages.push({
+            url: img.url,
+            isDefault: img.isDefault === "true",
+            file: null, // Existing images don't have file
+            name: img.isDefault === "true" ? "main" : `sub-${processedImages.length}`
+          })
+        })
 
-        const subImages = book.imageList.filter((img) => img.isDefault === "false").slice(0, 3)
-        setImageList(subImages.map((img, index) => ({ name: `sub-${index}`, url: img.url })))
+        const mainImg = processedImages.find(img => img.isDefault)
+        const subImages = processedImages.filter(img => !img.isDefault).slice(0, 3)
+        
+        if (mainImg) {
+          setMainImage(mainImg)
+        }
+        setImageList(subImages)
       }
     } else {
+      // Reset form for new book
       setFormData({
         name: "",
         description: "",
@@ -73,8 +86,6 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
       })
       setMainImage(null)
       setImageList([])
-      setMainImageFile(null)
-      setImageListFiles([])
     }
   }, [book, isOpen])
 
@@ -82,39 +93,78 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
   const handleAddMainImage = (e) => {
     const file = e.target.files[0]
     if (file) {
-      setMainImageFile(file)
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        showToast({type: 'error', message: 'Vui lòng chọn file ảnh!'})
+        return
+      }
+      
+      // Validate file size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        showToast({type: 'error', message: 'Kích thước file không được vượt quá 5MB!'})
+        return
+      }
+
       const image = {
         name: file.name,
         url: URL.createObjectURL(file),
+        file: file,
+        isDefault: true
       }
       setMainImage(image)
     }
   }
 
   // Handle sub images upload
-  function handleAddSubImages(e) {
+  const handleAddSubImages = (e) => {
     const files = Array.from(e.target.files)
     const remainingSlots = 3 - imageList.length
     const filesToAdd = files.slice(0, remainingSlots)
 
-    setImageListFiles([...imageListFiles, ...filesToAdd])
+    // Validate each file
+    for (const file of filesToAdd) {
+      if (!file.type.startsWith('image/')) {
+        showToast({type: 'error', message: 'Vui lòng chỉ chọn file ảnh!'})
+        return
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        showToast({type: 'error', message: 'Kích thước file không được vượt quá 5MB!'})
+        return
+      }
+    }
 
-    const images = filesToAdd.map((file) => ({
+    const newImages = filesToAdd.map((file) => ({
       name: file.name,
       url: URL.createObjectURL(file),
+      file: file,
+      isDefault: false
     }))
 
-    setImageList((prev) => [...prev, ...images])
+    setImageList((prev) => [...prev, ...newImages])
   }
 
   // Handle delete image
   const handleDeleteImage = (type) => {
     if (type === "main") {
+      // Clean up URL if it's a blob
+      if (mainImage && mainImage.url.startsWith('blob:')) {
+        URL.revokeObjectURL(mainImage.url)
+      }
       setMainImage(null)
-      setMainImageFile(null)
+      
+      // Reset file input
+      const fileInput = document.getElementById('MainImage-upload')
+      if (fileInput) {
+        fileInput.value = ''
+      }
     } else {
-      setImageList((prev) => prev.filter((_, index) => index !== type))
-      setImageListFiles((prev) => prev.filter((_, index) => index !== type))
+      setImageList((prev) => {
+        const imageToDelete = prev[type]
+        if (imageToDelete && imageToDelete.url.startsWith('blob:')) {
+          URL.revokeObjectURL(imageToDelete.url)
+        }
+        return prev.filter((_, index) => index !== type)
+      })
     }
   }
 
@@ -134,62 +184,96 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
   }
 
   // Handle submit to add or edit books
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
 
     // Validation
     if (!formData.name.trim()) {
-      alert("Vui lòng nhập tên sách")
+      showToast({type: 'error', message: 'Vui lòng nhập tên sách!'})
       return
     }
 
     if (!formData.categoryId || !formData.authorsId) {
-      alert("Vui lòng chọn danh mục và tác giả")
+      showToast({type: 'error', message: 'Vui lòng chọn danh mục và tác giả!'})
       return
     }
 
     if (Number.parseInt(formData.stock) > Number.parseInt(formData.totalQuantity)) {
-      alert("Tồn kho không thể lớn hơn tổng số lượng")
+      showToast({type: 'error', message: 'Tồn kho không thể lớn hơn tổng số lượng!'})
       return
     }
 
-    // Prepare image list
-    const processedImageList = []
-    if (mainImage) {
-      processedImageList.push({
-        isDefault: true,
-        url: mainImage.url,
-        file: mainImageFile,
+    try {
+      setUploading(true)
+
+      // Prepare image list
+      const processedImageList = []
+      
+      // Add main image
+      if (mainImage) {
+        processedImageList.push({
+          isDefault: true,
+          url: mainImage.url,
+          file: mainImage.file
+        })
+      }
+
+      // Add sub images
+      imageList.forEach((img) => {
+        processedImageList.push({
+          isDefault: false,
+          url: img.url,
+          file: img.file
+        })
       })
-    }
 
-    imageList.forEach((img, index) => {
-      processedImageList.push({
-        isDefault: false,
-        url: img.url,
-        file: imageListFiles[index],
+      const processedData = {
+        name: formData.name.trim(),
+        description: formData.description.trim(),
+        publisher: formData.publisher.trim(),
+        publishDate: formData.publishDate ? new Date(formData.publishDate).toISOString() : null,
+        pages: Number.parseInt(formData.pages) || 0,
+        language: formData.language,
+        totalQuantity: Number.parseInt(formData.totalQuantity) || 0,
+        stock: Number.parseInt(formData.stock) || 0,
+        rentalPrice: Number.parseFloat(formData.rentalPrice) || 0,
+        depositPrice: Number.parseFloat(formData.depositPrice) || 0,
+        status: formData.status,
+        categoryId: Number.parseInt(formData.categoryId),
+        authorsId: Number.parseInt(formData.authorsId),
+        imageList: processedImageList,
+      }
+      console.log(processedData)
+      await onSave(processedData)
+      
+      // Clean up blob URLs
+      processedImageList.forEach(img => {
+        if (img.url && img.url.startsWith('blob:')) {
+          URL.revokeObjectURL(img.url)
+        }
       })
-    })
-
-    const processedData = {
-      name: formData.name,
-      description: formData.description,
-      publisher: formData.publisher,
-      publishDate: new Date(formData.publishDate).toISOString(),
-      pages: Number.parseInt(formData.pages) || 0,
-      language: formData.language,
-      totalQuantity: Number.parseInt(formData.totalQuantity) || 0,
-      stock: Number.parseInt(formData.stock) || 0,
-      rentalPrice: Number.parseInt(formData.rentalPrice) || 0,
-      depositPrice: Number.parseInt(formData.depositPrice) || 0,
-      status: formData.status,
-      categoryId: Number.parseInt(formData.categoryId),
-      authorsId: Number.parseInt(formData.authorsId),
-      imageList: processedImageList,
+      
+    } catch (error) {
+      console.error("Error in form submission:", error)
+      showToast({type: 'error', message: 'Có lỗi xảy ra khi lưu sách!'})
+    } finally {
+      setUploading(false)
     }
-
-    onSave(processedData)
   }
+
+  // Clean up blob URLs when component unmounts
+  useEffect(() => {
+    return () => {
+      if (mainImage && mainImage.url.startsWith('blob:')) {
+        URL.revokeObjectURL(mainImage.url)
+      }
+      imageList.forEach(img => {
+        if (img.url && img.url.startsWith('blob:')) {
+          URL.revokeObjectURL(img.url)
+        }
+      })
+    }
+  }, [])
 
   if (!isOpen) return null
 
@@ -198,7 +282,7 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
       <div className={styles.formContainer}>
         <div className={styles.formHeader}>
           <h2 className={styles.formTitle}>{book ? "Chỉnh sửa sách" : "Thêm sách mới"}</h2>
-          <button onClick={onCancel} className={styles.closeButton}>
+          <button onClick={onCancel} className={styles.closeButton} disabled={uploading}>
             <X size={20} />
           </button>
         </div>
@@ -483,12 +567,12 @@ const BookForm = ({ book = null, onSave, onCancel, categories, authors, isOpen }
 
           {/* Form Actions */}
           <div className={styles.formActions}>
-            <button type="button" onClick={onCancel} className={styles.cancelButton}>
+            <button type="button" onClick={onCancel} className={styles.cancelButton} disabled={uploading}>
               Hủy
             </button>
-            <button type="submit" className={styles.saveButton}>
+            <button type="submit" className={styles.saveButton} disabled={uploading}>
               <Save size={16} />
-              {book ? "Cập nhật" : "Thêm sách"}
+              {uploading ? "Đang xử lý..." : (book ? "Cập nhật" : "Thêm sách")}
             </button>
           </div>
         </form>

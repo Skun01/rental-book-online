@@ -34,8 +34,11 @@ export async function createCategoryPost(categoryName, token){
   )
 }
 
-export async function deleteCategoryDelete(categoryId, token){
-  await axios.delete(`${BASEURL}/category/delete/${categoryId}`,
+export async function deleteCategoryPut(categoryId, token){
+  await axios.delete(`${BASEURL}/category/delete`,
+    {
+      idList: [categoryId]
+    },
     {
       headers: {
         Authorization: token
