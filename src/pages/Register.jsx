@@ -120,7 +120,6 @@ function Register({ onClose, switchToLogin }) {
           age: formData.age,
           password: formData.password,
         })
-        .then(res => console.log(res));
       
       // Switch to login after successful registration
       switchToLogin();

@@ -72,7 +72,6 @@ function Login({ onClose, switchToRegister }) {
       })
       .then(res => {
         const { accessToken, user } = res.data.data;
-        console.log(res)
         login(user, accessToken);
         if(user.role.name === "SUPER_ADMIN"){
           navigate('/admin/')

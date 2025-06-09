@@ -2,48 +2,110 @@ import styles from "./UserManager.module.css"
 import UserDetailModal from "../../../components/adminComponents/userDetailModal/UserDetailModal"
 import { Search, FilterIcon as Funnel, ChevronDown, Plus, Trash2, Ban, CheckCircle, User,
   Shield, Eye } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Notification from "../../../components/adminComponents/notification/Notification"
+import { AllUserGet, updateUserRolePut, deleteUserDelete,
+  createUserPost
+  } from "../../../api/userApi"
+import { useToast } from "../../../contexts/ToastContext"
+
+const token = localStorage.getItem('token')
 
 export default function UserManager() {
   const [addNewUser, setAddNewUser] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [filters, setFilters] = useState({
     role: "",
+    gender: "",
     ageRange: "",
-    sort: "created_desc",
+    sort: "age_asc",
   })
-
+  const [filteredUsers, setFilteredUsers] = useState([])
   const [viewUser, setViewUser] = useState(null)
+  const [loading, setLoading] = useState(false) 
+  const {showToast} = useToast()
 
+  useEffect(()=>{
+    async function getAllUser(){
+      setLoading(true)
+      try{
+        const params = new URLSearchParams({
+          page: '0',
+          size: '1000',
+          sortBy: getSortBy(filters.sort), 
+          sortDir: getSortDir(filters.sort),
+        })
+
+        if (searchTerm.trim()) {
+          params.append('keyword', searchTerm.trim())
+        }
+
+        if (filters.gender) {
+          params.append('gender', filters.gender)
+        }
+
+        if (filters.role) {
+          params.append('roleId', filters.role)
+        }
+
+        const apiUrl = `/user/all?${params.toString()}`
+        const userData = await AllUserGet(apiUrl, token)
+        setFilteredUsers(userData)
+      }catch(err){
+        console.error(`can't get all users: `, err)
+        showToast({type: 'error', message: 'Không thể tải danh sách người dùng!'})
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    if(token){
+      getAllUser()
+    }
+  }, [searchTerm, filters])
+  function getSortBy(sortValue) {
+    switch(sortValue) {
+      case 'age_asc':
+      case 'age_desc':
+        return 'age'
+      case 'name_asc':
+      case 'name_desc':
+        return 'fullName'
+      default:
+        return 'age'
+    }
+  }
+  function getSortDir(sortValue) {
+    return sortValue.includes('_desc') ? 'desc' : 'asc'
+  }
   function handleCancelAddNewUser() {
     setAddNewUser(false)
   }
 
-  function handleSaveUser(userData) {
-    console.log("Saving user:", userData)
-    // Thêm logic lưu user ở đây
-    setAddNewUser(false)
+  async function handleSaveUser(userData) {
+    try{
+      const newUser = await createUserPost(userData, token)
+      setAddNewUser(false)
+      setFilteredUsers([...filteredUsers, newUser])
+      showToast({type: 'success', message: 'Tạo người dùng thành công'})
+    }catch(err){
+      console.error(`can't create new user: `, err)
+      showToast({type: 'error', message: 'Không thể tạo người dùng!'})
+    }
   }
 
-  // Filter users based on search and filters
-  const filteredUsers = users.filter((user) => {
-    const matchesSearch = user.fullName.toLowerCase().includes(searchTerm.toLowerCase())
-
-    const matchesRole = !filters.role || user.role === filters.role
-
-    let matchesAge = true
-    if (filters.ageRange) {
-      const [min, max] = filters.ageRange.split("-").map(Number)
-      if (max) {
-        matchesAge = user.age >= min && user.age <= max
-      } else {
-        matchesAge = user.age >= min
-      }
+  const [searchTimeout, setSearchTimeout] = useState(null)
+  function handleSearchChange(e) {
+    const value = e.target.value
+    setSearchTerm(value)
+    if (searchTimeout) {
+      clearTimeout(searchTimeout)
     }
-
-    return matchesSearch && matchesRole && matchesAge
-  })
+    
+    const timeout = setTimeout(() => {
+    }, 500)
+    setSearchTimeout(timeout)
+  }
 
   return (
     <div className="adminTabPage">
@@ -56,7 +118,7 @@ export default function UserManager() {
             className={styles.searchBar}
             placeholder="Tìm kiếm theo tên người dùng..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={handleSearchChange}
           />
           <div className={styles.searchIcon}>
             <Search strokeWidth={2} />
@@ -73,7 +135,13 @@ export default function UserManager() {
       </div>
 
       <div className={styles.tableSection}>
-        <UserTable users={filteredUsers} setViewUser={setViewUser} />
+        {loading ? (
+          <div className={styles.loadingContainer}>
+            <p>Đang tải dữ liệu...</p>
+          </div>
+        ) : (
+          <UserTable users={filteredUsers} setViewUser={setViewUser} setUsers={setFilteredUsers}/>
+        )}
       </div>
 
       {addNewUser && <UserForm onSave={handleSaveUser} onCancel={handleCancelAddNewUser} />}
@@ -97,8 +165,8 @@ const Filter = ({ filters, setFilters }) => {
   const handleResetFilter = () => {
     setFilters({
       role: "",
-      ageRange: "",
-      sort: "created_desc",
+      gender: "",
+      sort: "age_asc",
     })
     setIsOpen(false)
   }
@@ -121,40 +189,36 @@ const Filter = ({ filters, setFilters }) => {
               onChange={(e) => handleFilterChange("role", e.target.value)}
             >
               <option value="">Tất cả vai trò</option>
-              <option value="admin">Admin</option>
-              <option value="user">User</option>
+              <option value="2">Nhân viên</option>
+              <option value="3">Người dùng</option>
             </select>
           </div>
 
           <div className={styles.filterGroup}>
-            <label className={styles.filterLabel}>Độ tuổi</label>
+            <label className={styles.filterLabel}>Giới tính</label>
             <select
               className={styles.filterSelect}
-              value={filters.ageRange}
-              onChange={(e) => handleFilterChange("ageRange", e.target.value)}
+              value={filters.gender}
+              onChange={(e) => handleFilterChange("gender", e.target.value)}
             >
-              <option value="">Tất cả độ tuổi</option>
-              <option value="18-25">18-25 tuổi</option>
-              <option value="26-35">26-35 tuổi</option>
-              <option value="36-45">36-45 tuổi</option>
-              <option value="46-60">46-60 tuổi</option>
-              <option value="60">Trên 60 tuổi</option>
+              <option value="">Tất cả giới tính</option>
+              <option value="Male">Nam</option>
+              <option value="Female">Nữ</option>
+              <option value="Other">Khác</option>
             </select>
           </div>
 
           <div className={styles.filterGroup}>
-            <label className={styles.filterLabel}>Sắp xếp</label>
+            <label className={styles.filterLabel}>Sắp xếp theo tuổi</label>
             <select
               className={styles.filterSelect}
               value={filters.sort}
               onChange={(e) => handleFilterChange("sort", e.target.value)}
             >
-              <option value="created_desc">Mới nhất</option>
-              <option value="created_asc">Cũ nhất</option>
-              <option value="name_asc">Tên A-Z</option>
-              <option value="name_desc">Tên Z-A</option>
               <option value="age_asc">Tuổi tăng dần</option>
               <option value="age_desc">Tuổi giảm dần</option>
+              <option value="name_asc">Tên A-Z</option>
+              <option value="name_desc">Tên Z-A</option>
             </select>
           </div>
 
@@ -172,56 +236,47 @@ const Filter = ({ filters, setFilters }) => {
   )
 }
 
-const UserTable = ({ users, setViewUser }) => {
+const UserTable = ({ users, setViewUser, setUsers }) => {
   const [showDeleteNoti, setShowDeleteNoti] = useState({ state: false })
   const [showBlockNoti, setShowBlockNoti] = useState({ state: false })
   const [editingRole, setEditingRole] = useState(null)
-  const [newRole, setNewRole] = useState("")
+  const [newRoleId, setNewRoleId] = useState("")
 
   function handleShowDeleteNoti(userId, userName) {
     setShowDeleteNoti({ state: true, id: userId, name: userName })
   }
 
-  function handleShowBlockNoti(userId, userName, currentStatus) {
-    setShowBlockNoti({
-      state: true,
-      id: userId,
-      name: userName,
-      action: currentStatus === "Active" ? "block" : "unblock",
-    })
-  }
-
   function handleEditRole(user) {
     setEditingRole(user.id)
-    setNewRole(user.role)
+    setNewRoleId(user.role?.id)
   }
 
-  function handleSaveRole(userId) {
-    console.log(`Update user ${userId} role to: ${newRole}`)
-    // Thêm logic cập nhật role ở đây
+  async function handleSaveRole(userId) {
+    try{
+      await updateUserRolePut(userId, +newRoleId, token)
+    }catch(err){
+      console.error(`can't update user role: `, err)
+    }
     setEditingRole(null)
   }
 
   function handleCancelEditRole() {
     setEditingRole(null)
-    setNewRole("")
+    setNewRoleId("")
   }
 
-  function handleDelete(id) {
-    console.log("delete user with id: ", id)
-  }
-
-  function handleBlockUser(id, action) {
-    console.log(`${action} user with id: `, id)
-  }
-
-  function handleConfirmDelete() {
-    handleDelete(showDeleteNoti.id)
-    setShowDeleteNoti({ ...showDeleteNoti, state: false })
+  async function handleConfirmDelete() {
+    try{
+      await deleteUserDelete(showDeleteNoti.id, token)
+      const newUsers = users.filter((user)=>user.id !== showDeleteNoti.id)
+      setUsers(newUsers)
+      setShowDeleteNoti({ ...showDeleteNoti, state: false })
+    }catch(err){
+      console.error(`can't delete user: `, err)
+    }
   }
 
   function handleConfirmBlock() {
-    handleBlockUser(showBlockNoti.id, showBlockNoti.action)
     setShowBlockNoti({ ...showBlockNoti, state: false })
   }
 
@@ -229,9 +284,9 @@ const UserTable = ({ users, setViewUser }) => {
     if (editingRole === user.id) {
       return (
         <div className={styles.roleEditContainer}>
-          <select className={styles.roleSelect} value={newRole} onChange={(e) => setNewRole(e.target.value)}>
-            <option value="user">User</option>
-            <option value="admin">Admin</option>
+          <select className={styles.roleSelect} value={newRoleId} onChange={(e) => setNewRoleId(e.target.value)}>
+            <option value="2">Nhân viên</option>
+            <option value="3">Người dùng</option>
           </select>
           <div className={styles.roleEditActions}>
             <button className={styles.saveRoleButton} onClick={() => handleSaveRole(user.id)} title="Lưu">
@@ -244,19 +299,18 @@ const UserTable = ({ users, setViewUser }) => {
         </div>
       )
     }
-
-    if (user.role === "admin") {
+    if (user.role?.name === "STAFF") {
       return (
         <span className={styles.roleAdmin} onClick={() => handleEditRole(user)}>
           <Shield size={12} />
-          Admin
+          Nhân viên
         </span>
       )
     }
     return (
       <span className={styles.roleUser} onClick={() => handleEditRole(user)}>
         <User size={12} />
-        User
+        Người dùng
       </span>
     )
   }
@@ -267,8 +321,6 @@ const UserTable = ({ users, setViewUser }) => {
         return <span className={styles.statusActive}>Hoạt động</span>
       case "Blocked":
         return <span className={styles.statusBlocked}>Bị khóa</span>
-      case "Inactive":
-        return <span className={styles.statusInactive}>Không hoạt động</span>
       default:
         return <span className={styles.statusUnknown}>Không xác định</span>
     }
@@ -297,7 +349,6 @@ const UserTable = ({ users, setViewUser }) => {
             <th>Đang thuê</th>
             <th>Quá hạn</th>
             <th>Đơn đã đặt</th>
-            <th>Đơn chờ</th>
             <th>Đơn đã trả</th>
             <th>Trạng thái</th>
             <th>Tùy chọn</th>
@@ -309,7 +360,7 @@ const UserTable = ({ users, setViewUser }) => {
               <td>#{user.id}</td>
               <td>
                 <div className={styles.userImage}>
-                  <img src={user.imageUrl || "/placeholder.svg?height=40&width=40"} alt={user.fullName} />
+                  <img src={user.imageUrl || "/author.jpg"} alt={user.fullName} />
                 </div>
               </td>
               <td>
@@ -328,13 +379,10 @@ const UserTable = ({ users, setViewUser }) => {
                 </span>
               </td>
               <td>
-                <span className={styles.completedOrders}>{user.completedOrders || 0}</span>
+                <span className={styles.completedOrders}>{user.totalRental || 0}</span>
               </td>
               <td>
-                <span className={styles.pendingOrders}>{user.pendingOrders || 0}</span>
-              </td>
-              <td>
-                <span className={styles.returnedOrders}>{user.returnedOrders || 0}</span>
+                <span className={styles.returnedOrders}>{user.totalRented || 0}</span>
               </td>
               <td>{getStatusBadge(user.status)}</td>
               <td>
@@ -342,24 +390,6 @@ const UserTable = ({ users, setViewUser }) => {
                   <button className={styles.viewButton} title="Xem chi tiết" onClick={() => setViewUser(user)}>
                     <Eye size={16} />
                   </button>
-
-                  {user.status === "Active" ? (
-                    <button
-                      className={styles.blockButton}
-                      title="Khóa tài khoản"
-                      onClick={() => handleShowBlockNoti(user.id, user.fullName, user.status)}
-                    >
-                      <Ban size={16} />
-                    </button>
-                  ) : (
-                    <button
-                      className={styles.unblockButton}
-                      title="Mở khóa tài khoản"
-                      onClick={() => handleShowBlockNoti(user.id, user.fullName, user.status)}
-                    >
-                      <CheckCircle size={16} />
-                    </button>
-                  )}
 
                   <button
                     className={styles.deleteButton}
@@ -402,11 +432,11 @@ const UserForm = ({ user = null, onSave, onCancel }) => {
     gender: user?.gender || "Male",
     age: user?.age || "",
     role: user?.role || "user",
-    imageUrl: user?.imageUrl || "",
+    avatar: user?.avatar || "",
   })
 
   const [imageFile, setImageFile] = useState(null)
-  const [imagePreview, setImagePreview] = useState(user?.imageUrl || null)
+  const [imagePreview, setImagePreview] = useState(user?.avatar || null)
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -427,7 +457,6 @@ const UserForm = ({ user = null, onSave, onCancel }) => {
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    // Validation
     if (!formData.email.trim() || !formData.fullName.trim()) {
       alert("Vui lòng nhập email và họ tên")
       return
@@ -457,7 +486,7 @@ const UserForm = ({ user = null, onSave, onCancel }) => {
     const processedData = {
       ...formData,
       age: Number.parseInt(formData.age) || null,
-      imageUrl: imagePreview,
+      avatar: imagePreview,
       imageFile: imageFile,
     }
 
@@ -538,8 +567,8 @@ const UserForm = ({ user = null, onSave, onCancel }) => {
             <div className={styles.formGroup}>
               <label className={styles.formLabel}>Vai trò</label>
               <select name="role" className={styles.formSelect} value={formData.role} onChange={handleInputChange}>
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
+                <option value="2">Nhân viên</option>
+                <option value="3">Người dùng</option>
               </select>
             </div>
           </div>
@@ -567,178 +596,3 @@ const UserForm = ({ user = null, onSave, onCancel }) => {
     </div>
   )
 }
-
-// Mock data
-const users = [
-  {
-    id: 1,
-    email: "admin@bookstore.com",
-    fullName: "Nguyễn Văn Admin",
-    gender: "Male",
-    age: 30,
-    role: "admin",
-    imageUrl: "/auth.jpg",
-    status: "Active",
-    rentingBooks: 0,
-    overdueBooks: 0,
-    completedOrders: 15,
-    pendingOrders: 2,
-    returnedOrders: 12,
-    createdAt: "2024-01-15",
-    rentingBooksList: [],
-    overdueBooksList: [],
-    completedOrdersList: [
-      { id: 1, orderId: "ORD-001", date: "2024-01-15" },
-      { id: 2, orderId: "ORD-002", date: "2024-01-20" },
-    ],
-    pendingOrdersList: [
-      { id: 3, orderId: "ORD-003", date: "2024-01-25" },
-      { id: 4, orderId: "ORD-004", date: "2024-01-26" },
-    ],
-    returnedOrdersList: [
-      { id: 5, orderId: "RET-001", date: "2024-01-10" },
-      { id: 6, orderId: "RET-002", date: "2024-01-12" },
-    ],
-  },
-  {
-    id: 2,
-    email: "nguyen.van.a@gmail.com",
-    fullName: "Nguyễn Văn A",
-    gender: "Male",
-    age: 25,
-    role: "user",
-    imageUrl: "/auth.jpg",
-    status: "Active",
-    rentingBooks: 3,
-    overdueBooks: 1,
-    completedOrders: 8,
-    pendingOrders: 1,
-    returnedOrders: 6,
-    createdAt: "2024-01-20",
-    rentingBooksList: [
-      { id: 1, title: "Đắc Nhân Tâm" },
-      { id: 2, title: "Nhà Giả Kim" },
-      { id: 3, title: "Sapiens" },
-    ],
-    overdueBooksList: [{ id: 4, title: "Atomic Habits", overdueDays: 3 }],
-    completedOrdersList: [
-      { id: 7, orderId: "ORD-005", date: "2024-01-18" },
-      { id: 8, orderId: "ORD-006", date: "2024-01-22" },
-    ],
-    pendingOrdersList: [{ id: 9, orderId: "ORD-007", date: "2024-01-27" }],
-    returnedOrdersList: [
-      { id: 10, orderId: "RET-003", date: "2024-01-14" },
-      { id: 11, orderId: "RET-004", date: "2024-01-16" },
-    ],
-  },
-  {
-    id: 3,
-    email: "tran.thi.b@gmail.com",
-    fullName: "Trần Thị B",
-    gender: "Female",
-    age: 22,
-    role: "user",
-    imageUrl: "/auth.jpg",
-    status: "Active",
-    rentingBooks: 2,
-    overdueBooks: 0,
-    completedOrders: 12,
-    pendingOrders: 0,
-    returnedOrders: 10,
-    createdAt: "2024-02-10",
-    rentingBooksList: [
-      { id: 5, title: "Thinking Fast and Slow" },
-      { id: 6, title: "The Psychology of Money" },
-    ],
-    overdueBooksList: [],
-    completedOrdersList: [
-      { id: 12, orderId: "ORD-008", date: "2024-02-08" },
-      { id: 13, orderId: "ORD-009", date: "2024-02-12" },
-    ],
-    pendingOrdersList: [],
-    returnedOrdersList: [
-      { id: 14, orderId: "RET-005", date: "2024-02-05" },
-      { id: 15, orderId: "RET-006", date: "2024-02-07" },
-    ],
-  },
-  {
-    id: 4,
-    email: "le.van.c@gmail.com",
-    fullName: "Lê Văn C",
-    gender: "Male",
-    age: 35,
-    role: "user",
-    imageUrl: null,
-    status: "Blocked",
-    rentingBooks: 0,
-    overdueBooks: 3,
-    completedOrders: 5,
-    pendingOrders: 0,
-    returnedOrders: 2,
-    createdAt: "2024-01-25",
-    rentingBooksList: [],
-    overdueBooksList: [
-      { id: 7, title: "Clean Code", overdueDays: 15 },
-      { id: 8, title: "Design Patterns", overdueDays: 8 },
-      { id: 9, title: "Refactoring", overdueDays: 5 },
-    ],
-    completedOrdersList: [{ id: 16, orderId: "ORD-010", date: "2024-01-23" }],
-    pendingOrdersList: [],
-    returnedOrdersList: [{ id: 17, orderId: "RET-007", date: "2024-01-20" }],
-  },
-  {
-    id: 5,
-    email: "pham.thi.d@gmail.com",
-    fullName: "Phạm Thị D",
-    gender: "Female",
-    age: 28,
-    role: "user",
-    imageUrl: "/auth.jpg",
-    status: "Active",
-    rentingBooks: 1,
-    overdueBooks: 0,
-    completedOrders: 20,
-    pendingOrders: 3,
-    returnedOrders: 18,
-    createdAt: "2024-03-05",
-    rentingBooksList: [{ id: 10, title: "Rich Dad Poor Dad" }],
-    overdueBooksList: [],
-    completedOrdersList: [
-      { id: 18, orderId: "ORD-011", date: "2024-03-03" },
-      { id: 19, orderId: "ORD-012", date: "2024-03-07" },
-    ],
-    pendingOrdersList: [
-      { id: 20, orderId: "ORD-013", date: "2024-03-08" },
-      { id: 21, orderId: "ORD-014", date: "2024-03-09" },
-      { id: 22, orderId: "ORD-015", date: "2024-03-10" },
-    ],
-    returnedOrdersList: [
-      { id: 23, orderId: "RET-008", date: "2024-03-01" },
-      { id: 24, orderId: "RET-009", date: "2024-03-04" },
-    ],
-  },
-  {
-    id: 6,
-    email: "hoang.van.e@gmail.com",
-    fullName: "Hoàng Văn E",
-    gender: "Male",
-    age: 45,
-    role: "user",
-    imageUrl: null,
-    status: "Inactive",
-    rentingBooks: 0,
-    overdueBooks: 0,
-    completedOrders: 3,
-    pendingOrders: 0,
-    returnedOrders: 3,
-    createdAt: "2023-12-15",
-    rentingBooksList: [],
-    overdueBooksList: [],
-    completedOrdersList: [{ id: 25, orderId: "ORD-016", date: "2023-12-13" }],
-    pendingOrdersList: [],
-    returnedOrdersList: [
-      { id: 26, orderId: "RET-010", date: "2023-12-10" },
-      { id: 27, orderId: "RET-011", date: "2023-12-12" },
-    ],
-  },
-]

@@ -1,11 +1,30 @@
 import styles from "../../../pages/adminPages/userManager/UserManager.module.css"
 import {ExternalLink} from 'lucide-react'
+import { useEffect, useState } from "react"
+import {userAllRentalOrderGet, userAllReturnedOrderGet} from '../../../api/orderApi'
+import OrderDetailModal from '../orderDetailModal/OrderDetailModal'
 
+const token = localStorage.getItem('token')
 const UserDetailModal = ({ user, onClose }) => {
-  const handleOrderClick = (orderId) => {
-    console.log("View order details:", orderId)
-    
-  }
+  const [ProcessingRentalOrder, setProcessingRentalOrder] = useState([])
+  const [returnedOrder, setReturnedOrder] = useState([])
+  const [showDetailModal, setShowDetailModal] = useState(null)
+  useEffect(()=>{
+    async function getData(){
+      try{
+        const rentalData = await userAllRentalOrderGet(user.id, token)
+        setProcessingRentalOrder(rentalData.filter(rental=>rental.orderStatus === 'Processing'))
+        const returnedData = await userAllReturnedOrderGet(user.id, token)
+        setReturnedOrder(returnedData)
+      }catch(err){
+        console.error(`can't get all rental orders: `, err)
+      }
+    }
+
+    if(token){
+      getData()
+    }
+  }, [])
 
   const handleBookClick = (bookId) => {
     console.log("View book details:", bookId)
@@ -28,15 +47,15 @@ const UserDetailModal = ({ user, onClose }) => {
             <h3 className={styles.sectionTitle}>Thông tin cơ bản</h3>
             <div className={styles.userBasicInfo}>
               <div className={styles.userAvatar}>
-                <img src={user.imageUrl || "/placeholder.svg?height=80&width=80"} alt={user.fullName} />
+                <img src={user.imageUrl || "/author.jpg"} alt={user.fullName} />
               </div>
               <div className={styles.userDetails}>
                 <h4>{user.fullName}</h4>
                 <p>Email: {user.email}</p>
                 <p>Tuổi: {user.age}</p>
                 <p>Giới tính: {user.gender === "Male" ? "Nam" : user.gender === "Female" ? "Nữ" : "Khác"}</p>
-                <p>Vai trò: {user.role === "admin" ? "Admin" : "User"}</p>
-                <p>Trạng thái: {user.status === "Active" ? "Hoạt động" : "Không hoạt động"}</p>
+                <p>Vai trò: {user.role?.name === "admin" ? "Admin" : "User"}</p>
+                <p>Trạng thái: {(user.status && user.status === "Active" ? "Hoạt động" : "Không hoạt động") || 'Chưa biết'}</p>
               </div>
             </div>
           </div>
@@ -58,7 +77,7 @@ const UserDetailModal = ({ user, onClose }) => {
                 <span className={styles.statLabel}>Đơn đã đặt</span>
               </div>
               <div className={styles.statItem}>
-                <span className={styles.statNumber}>{user.pendingOrders || 0}</span>
+                <span className={styles.statNumber}>{ProcessingRentalOrder.length || 0}</span>
                 <span className={styles.statLabel}>Đơn chờ</span>
               </div>
               <div className={styles.statItem}>
@@ -117,7 +136,7 @@ const UserDetailModal = ({ user, onClose }) => {
                   <span className={styles.orderDate}>{new Date(order.date).toLocaleDateString("vi-VN")}</span>
                   <button
                     className={styles.viewDetailButton}
-                    onClick={() => handleOrderClick(order.orderId)}
+                    onClick={() => setShowDetailModal(order)}
                     title="Xem chi tiết đơn hàng"
                   >
                     <ExternalLink size={14} />
@@ -129,15 +148,15 @@ const UserDetailModal = ({ user, onClose }) => {
 
           {/* Pending Orders */}
           <div className={styles.detailSection}>
-            <h3 className={styles.sectionTitle}>Đơn hàng đang chờ ({user.pendingOrders || 0})</h3>
+            <h3 className={styles.sectionTitle}>Đơn hàng đang chờ ({ProcessingRentalOrder.length || 0})</h3>
             <div className={styles.itemsList}>
-              {user.pendingOrdersList?.map((order) => (
+              {ProcessingRentalOrder.map((order) => (
                 <div key={order.id} className={styles.itemCard}>
-                  <span className={styles.itemName}>#{order.orderId}</span>
-                  <span className={styles.orderDate}>{new Date(order.date).toLocaleDateString("vi-VN")}</span>
+                  <span className={styles.itemName}>#{order.id}</span>
+                  <span className={styles.orderDate}>{new Date(order.createAt).toLocaleDateString("vi-VN")}</span>
                   <button
                     className={styles.viewDetailButton}
-                    onClick={() => handleOrderClick(order.orderId)}
+                    onClick={() => setShowDetailModal(order)}
                     title="Xem chi tiết đơn hàng"
                   >
                     <ExternalLink size={14} />
@@ -151,13 +170,13 @@ const UserDetailModal = ({ user, onClose }) => {
           <div className={styles.detailSection}>
             <h3 className={styles.sectionTitle}>Đơn hàng đã trả ({user.returnedOrders || 0})</h3>
             <div className={styles.itemsList}>
-              {user.returnedOrdersList?.map((order) => (
+              {returnedOrder.map((order) => (
                 <div key={order.id} className={styles.itemCard}>
                   <span className={styles.itemName}>#{order.orderId}</span>
                   <span className={styles.orderDate}>{new Date(order.date).toLocaleDateString("vi-VN")}</span>
                   <button
                     className={styles.viewDetailButton}
-                    onClick={() => handleOrderClick(order.orderId)}
+                    onClick={() => setShowDetailModal(order)}
                     title="Xem chi tiết đơn hàng"
                   >
                     <ExternalLink size={14} />
@@ -166,6 +185,11 @@ const UserDetailModal = ({ user, onClose }) => {
               )) || <p className={styles.noItems}>Không có đơn hàng đã trả</p>}
             </div>
           </div>
+
+          {/* detail order modal */}
+          {showDetailModal && (
+            <OrderDetailModal order={showDetailModal} onClose={()=>setShowDetailModal(null)}/>
+          )}
         </div>
       </div>
     </div>

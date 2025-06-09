@@ -1,11 +1,11 @@
 import styles from "../../../pages/adminPages/orderManager/OrderManager.module.css"
-import {Calendar, MapPin, CreditCard,  User, BookOpen} from "lucide-react"
+import {Calendar, MapPin, CreditCard, User, BookOpen} from "lucide-react"
 
 const OrderDetailModal = ({ order, onClose }) => {
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("vi-VN", {
       day: "2-digit",
-      month: "2-digit",
+      month: "2-digit", 
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
@@ -14,26 +14,59 @@ const OrderDetailModal = ({ order, onClose }) => {
 
   const getPaymentMethodText = (method) => {
     const methods = {
-      CASH: "Tiền mặt",
-      CARD: "Thẻ ngân hàng",
-      MOMO: "Ví MoMo",
+      Cash: "Tiền mặt",
+      Card: "Thẻ ngân hàng", 
+      MoMo: "Ví MoMo",
     }
     return methods[method] || method
   }
 
   const getDeliveryMethodText = (method) => {
     const methods = {
-      "library-pickup": "Nhận tại thư viện",
-      "home-delivery": "Giao hàng tận nơi",
+      Offline: "Nhận tại thư viện",
+      Online: "Giao hàng tận nơi",
     }
     return methods[method] || method
+  }
+
+  const getOrderStatusText = (status) => {
+    const statuses = {
+      Processing: "Đang xử lý",
+      Confirmed: "Đã xác nhận", 
+      Delivered: "Đã giao hàng",
+      Completed: "Hoàn thành",
+      Cancelled: "Đã hủy"
+    }
+    return statuses[status] || status
+  }
+
+  const getPaymentStatusText = (status) => {
+    const statuses = {
+      Paid: "Đã thanh toán",
+      Unpaid: "Chưa thanh toán",
+      Partial: "Thanh toán một phần"
+    }
+    return statuses[status] || status
+  }
+
+  const formatAddress = () => {
+    const addressParts = [order.street, order.ward, order.district, order.city].filter(Boolean)
+    return addressParts.length > 0 ? addressParts.join(", ") : "Không có thông tin địa chỉ"
+  }
+
+  const calculateRentalDays = (rentalDate, rentedDate) => {
+    const start = new Date(rentalDate)
+    const end = new Date(rentedDate)
+    const diffTime = Math.abs(end - start)
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    return diffDays
   }
 
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modalContainer}>
         <div className={styles.modalHeader}>
-          <h2>Chi tiết đơn hàng #{order.orderId}</h2>
+          <h2>Chi tiết đơn hàng #{order.id}</h2>
           <button onClick={onClose} className={styles.closeButton}>
             ×
           </button>
@@ -49,16 +82,18 @@ const OrderDetailModal = ({ order, onClose }) => {
             <div className={styles.infoGrid}>
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>Họ tên:</span>
-                <span className={styles.infoValue}>{order.customerName}</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Email:</span>
-                <span className={styles.infoValue}>{order.customerEmail}</span>
+                <span className={styles.infoValue}>{order.fullName}</span>
               </div>
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>Số điện thoại:</span>
-                <span className={styles.infoValue}>{order.customerPhone}</span>
+                <span className={styles.infoValue}>{order.phone}</span>
               </div>
+              {order.notes && (
+                <div className={styles.infoItem}>
+                  <span className={styles.infoLabel}>Ghi chú:</span>
+                  <span className={styles.infoValue}>{order.notes}</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -70,8 +105,20 @@ const OrderDetailModal = ({ order, onClose }) => {
             </h3>
             <div className={styles.infoGrid}>
               <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Ngày đặt:</span>
-                <span className={styles.infoValue}>{formatDate(order.orderDate)}</span>
+                <span className={styles.infoLabel}>Ngày tạo:</span>
+                <span className={styles.infoValue}>{formatDate(order.createAt)}</span>
+              </div>
+              <div className={styles.infoItem}>
+                <span className={styles.infoLabel}>Ngày nhận:</span>
+                <span className={styles.infoValue}>{formatDate(order.receiveDay)}</span>
+              </div>
+              <div className={styles.infoItem}>
+                <span className={styles.infoLabel}>Trạng thái đơn hàng:</span>
+                <span className={styles.infoValue}>{getOrderStatusText(order.orderStatus)}</span>
+              </div>
+              <div className={styles.infoItem}>
+                <span className={styles.infoLabel}>Trạng thái thanh toán:</span>
+                <span className={styles.infoValue}>{getPaymentStatusText(order.paymentStatus)}</span>
               </div>
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>Phương thức thanh toán:</span>
@@ -85,13 +132,13 @@ const OrderDetailModal = ({ order, onClose }) => {
           </div>
 
           {/* Delivery Address */}
-          {order.deliveryMethod === "home-delivery" && (
+          {order.deliveryMethod === "Online" && (
             <div className={styles.detailSection}>
               <h3 className={styles.sectionTitle}>
                 <MapPin size={18} />
                 Địa chỉ giao hàng
               </h3>
-              <p className={styles.addressText}>{order.address}</p>
+              <p className={styles.addressText}>{formatAddress()}</p>
             </div>
           )}
 
@@ -105,20 +152,23 @@ const OrderDetailModal = ({ order, onClose }) => {
               {order.items.map((item) => (
                 <div key={item.id} className={styles.orderItem}>
                   <div className={styles.itemImage}>
-                    <img src={item.cover_image || "/placeholder.svg"} alt={item.title} />
+                    <img src={item.imageUrl || "/placeholder.svg"} alt={item.bookName} />
                     {item.quantity > 1 && <span className={styles.itemQuantity}>{item.quantity}</span>}
                   </div>
                   <div className={styles.itemInfo}>
-                    <h4>{item.title}</h4>
-                    <p>{item.author}</p>
+                    <h4>{item.bookName}</h4>
                     <div className={styles.itemDetails}>
-                      <span>Thời gian thuê: {item.rent_day} ngày</span>
-                      <span>Giá thuê: {item.rental_price.toLocaleString("vi-VN")}đ/ngày</span>
-                      <span>Tiền cọc: {item.deposit_price.toLocaleString("vi-VN")}đ</span>
+                      <span>Ngày thuê: {formatDate(item.rentalDate)}</span>
+                      <span>Ngày trả: {formatDate(item.rentedDate)}</span>
+                      <span>Thời gian thuê: {calculateRentalDays(item.rentalDate, item.rentedDate)} ngày</span>
+                      <span>Giá thuê: {item.rentalPrice.toLocaleString("vi-VN")}đ</span>
+                      <span>Tiền cọc: {item.depositPrice.toLocaleString("vi-VN")}đ</span>
+                      <span>Số lượng: {item.quantity}</span>
+                      <span>Trạng thái: {item.itemStatus === 'Rented' ? 'Đang chờ' : 'Đang thuê'}</span>
                     </div>
                   </div>
                   <div className={styles.itemTotal}>
-                    {(item.rental_price * item.quantity * item.rent_day).toLocaleString("vi-VN")}đ
+                    {item.totalRental.toLocaleString("vi-VN")}đ
                   </div>
                 </div>
               ))}
@@ -134,21 +184,15 @@ const OrderDetailModal = ({ order, onClose }) => {
             <div className={styles.paymentSummary}>
               <div className={styles.summaryRow}>
                 <span>Tổng tiền thuê:</span>
-                <span>{order.totalRental.toLocaleString("vi-VN")}đ</span>
+                <span>{order.totalPrice.toLocaleString("vi-VN")}đ</span>
               </div>
-              {order.shippingFee > 0 && (
-                <div className={styles.summaryRow}>
-                  <span>Phí vận chuyển:</span>
-                  <span>{order.shippingFee.toLocaleString("vi-VN")}đ</span>
-                </div>
-              )}
+              <div className={styles.summaryRow}>
+                <span>Tổng tiền cọc:</span>
+                <span>{order.depositPrice.toLocaleString("vi-VN")}đ</span>
+              </div>
               <div className={styles.summaryTotal}>
                 <span>Tổng thanh toán:</span>
-                <span>{order.totalPayment.toLocaleString("vi-VN")}đ</span>
-              </div>
-              <div className={styles.depositInfo}>
-                <span>Tiền đặt cọc:</span>
-                <span>{order.totalDeposit.toLocaleString("vi-VN")}đ</span>
+                <span>{(order.totalPrice + order.depositPrice).toLocaleString("vi-VN")}đ</span>
               </div>
             </div>
           </div>

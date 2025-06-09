@@ -2,8 +2,18 @@ import styles from './Home.module.css';
 import {BookOpenCheck, MoreHorizontal, CircleDollarSign, 
   SquareLibrary, Users, Clock, Banknote,
   Book, User, AlertCircle, CheckCircle} from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getTotalBook } from '../../../api/bookApi';
 export default function Home() {
+  const [totalBook, setTotalBook] = useState()
+  useEffect(()=>{
+    async function getData(){
+      const data = await getTotalBook()
+      setTotalBook(data)
+    }
+    getData()
+  }, [])
+
   return (
     <div className="adminTabPage">
       <div className="adminPageTitle">Trang chủ</div>
@@ -11,12 +21,6 @@ export default function Home() {
         <div className={styles.homeHeader}>
           <div className={styles.homeCard}>
             <div className={styles.cardRow}>
-              <BodyCard
-                title="Sách đang có"
-                value="145"
-              >
-                <SquareLibrary size={30} color="#4154f1" />
-              </BodyCard>
               <BodyCard
                 title="Sách đang cho thuê"
                 value="20"
@@ -28,6 +32,14 @@ export default function Home() {
                 value="6"
               >
                 <Clock size={30} color="#dc2626" />
+              </BodyCard>
+
+              <BodyCard
+                title="Sách đang có"
+                value={totalBook}
+                filter = {false}
+              >
+                <SquareLibrary size={30} color="#4154f1" />
               </BodyCard>
             </div>
             <div className={styles.cardRow}>
@@ -267,12 +279,13 @@ function BodyCard({
   title = "Sales", 
   value = "145", 
   isMoney = false,
+  filter = true,
   children,
 }) {
   return (
     <div className={styles.card}>
       <div className={styles.cardHeaderContainer}>
-        <CardHeader title={title} />
+        <CardHeader title={title} filter={filter}/>
       </div>
       <div className={styles.cardBody}>
         <div className={styles.iconWrapper}>
@@ -288,7 +301,7 @@ function BodyCard({
   )
 }
 
-function CardHeader({title = ""}){
+function CardHeader({title = "", filter = true}){
   const [filterOpen, setFilterOpen] = useState(false);
   const [filterValue, setFilterValue] = useState("Hôm nay");
   const filterList = [
@@ -301,12 +314,15 @@ function CardHeader({title = ""}){
     <div className={styles.cardHeader}>
         <div className={styles.titleSection}>
           <h3 className={styles.title}>{title}</h3>
-          <span className={styles.subtitle}>| {filterValue}</span>
+          {filter && <span className={styles.subtitle}>| {filterValue}</span>}
         </div>
-        <button className={styles.moreButton}
-          onClick={() => setFilterOpen(!filterOpen)}>
-          <MoreHorizontal size={20} />
-        </button>
+        {filter && (
+          <button className={styles.moreButton}
+            onClick={() => setFilterOpen(!filterOpen)}
+          >
+            <MoreHorizontal size={20} />
+          </button>
+        )}
         {filterOpen && (
           <div className={styles.filterContainer}>
             {filterList.map((item)=>(
