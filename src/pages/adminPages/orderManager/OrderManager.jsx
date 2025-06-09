@@ -2,31 +2,62 @@ import styles from "./OrderManager.module.css"
 import { Search, FilterIcon as Funnel, ChevronDown, Eye, CheckCircle, XCircle, Clock, Package,
   Truck, Edit,
 } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import OrderDetailModal from "../../../components/adminComponents/orderDetailModal/OrderDetailModal.jsx"
+import {getAllOrderGet} from '../../../api/orderApi.jsx'
 
 export default function OrderManager() {
   const [searchTerm, setSearchTerm] = useState("")
   const [filters, setFilters] = useState({
-    status: "",
+    orderStatus: "",
     paymentMethod: "",
+    paymentStatus: "",
     deliveryMethod: "",
     sort: "created_desc",
   })
   const [selectedOrder, setSelectedOrder] = useState(null)
+  const [orders, setOrders] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  // Fetch orders from API
+  const fetchOrders = async () => {
+    setLoading(true)
+    setError(null)
+    
+    try {
+      const params = new URLSearchParams({
+        page: 0,
+        size: 1000,
+        sortDir: 'desc',
+        ...(filters.orderStatus && { orderStatus: filters.orderStatus }),
+        ...(filters.paymentMethod && { paymentMethod: filters.paymentMethod }),
+        ...(filters.paymentStatus && { paymentStatus: filters.paymentStatus }),
+      })
+
+      const rentalOrder = await getAllOrderGet()
+    
+      setOrders(rentalOrder || [])
+    } catch (err) {
+      setError(err.message)
+      console.error('Error fetching orders:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchOrders()
+  }, [filters])
 
   // Filter orders based on search and filters
   const filteredOrders = orders.filter((order) => {
     const matchesSearch =
-      order.orderId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customerEmail.toLowerCase().includes(searchTerm.toLowerCase())
+      order.id.toString().includes(searchTerm.toLowerCase()) ||
+      order.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.phone.includes(searchTerm)
 
-    const matchesStatus = !filters.status || order.status === filters.status
-    const matchesPayment = !filters.paymentMethod || order.paymentMethod === filters.paymentMethod
-    const matchesDelivery = !filters.deliveryMethod || order.deliveryMethod === filters.deliveryMethod
-
-    return matchesSearch && matchesStatus && matchesPayment && matchesDelivery
+    return matchesSearch
   })
 
   return (
@@ -38,7 +69,7 @@ export default function OrderManager() {
           <input
             type="text"
             className={styles.searchBar}
-            placeholder="Tìm kiếm theo mã đơn, tên khách hàng..."
+            placeholder="Tìm kiếm theo mã đơn, tên khách hàng, số điện thoại..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -53,7 +84,11 @@ export default function OrderManager() {
       </div>
 
       <div className={styles.tableSection}>
-        <OrderTable orders={filteredOrders} setSelectedOrder={setSelectedOrder} />
+        {loading && <div className={styles.loading}>Đang tải dữ liệu...</div>}
+        {error && <div className={styles.error}>Lỗi: {error}</div>}
+        {!loading && !error && (
+          <OrderTable orders={filteredOrders} setSelectedOrder={setSelectedOrder} />
+        )}
       </div>
 
       {selectedOrder && <OrderDetailModal order={selectedOrder} onClose={() => setSelectedOrder(null)} />}
@@ -74,8 +109,9 @@ const Filter = ({ filters, setFilters }) => {
 
   const handleResetFilter = () => {
     setFilters({
-      status: "",
+      orderStatus: "",
       paymentMethod: "",
+      paymentStatus: "",
       deliveryMethod: "",
       sort: "created_desc",
     })
@@ -93,19 +129,19 @@ const Filter = ({ filters, setFilters }) => {
       {isOpen && (
         <div className={styles.filterDropdown}>
           <div className={styles.filterGroup}>
-            <label className={styles.filterLabel}>Trạng thái</label>
+            <label className={styles.filterLabel}>Trạng thái đơn hàng</label>
             <select
               className={styles.filterSelect}
-              value={filters.status}
-              onChange={(e) => handleFilterChange("status", e.target.value)}
+              value={filters.orderStatus}
+              onChange={(e) => handleFilterChange("orderStatus", e.target.value)}
             >
               <option value="">Tất cả trạng thái</option>
-              <option value="pending">Chờ xác nhận</option>
-              <option value="confirmed">Đã xác nhận</option>
-              <option value="preparing">Đang chuẩn bị</option>
-              <option value="shipping">Đang giao hàng</option>
-              <option value="delivered">Đã giao hàng</option>
-              <option value="cancelled">Đã hủy</option>
+              <option value="Pending">Chờ xác nhận</option>
+              <option value="Processing">Đang xử lý</option>
+              <option value="Shipped">Đã giao hàng</option>
+              <option value="Delivered">Đã giao thành công</option>
+              <option value="Cancelled">Đã hủy</option>
+              <option value="Returned">Đã trả</option>
             </select>
           </div>
 
@@ -117,9 +153,25 @@ const Filter = ({ filters, setFilters }) => {
               onChange={(e) => handleFilterChange("paymentMethod", e.target.value)}
             >
               <option value="">Tất cả phương thức</option>
-              <option value="CASH">Tiền mặt</option>
-              <option value="CARD">Thẻ ngân hàng</option>
-              <option value="MOMO">Ví MoMo</option>
+              <option value="Cash">Tiền mặt</option>
+              <option value="Card">Thẻ ngân hàng</option>
+              <option value="MoMo">Ví MoMo</option>
+              <option value="Banking">Chuyển khoản</option>
+            </select>
+          </div>
+
+          <div className={styles.filterGroup}>
+            <label className={styles.filterLabel}>Trạng thái thanh toán</label>
+            <select
+              className={styles.filterSelect}
+              value={filters.paymentStatus}
+              onChange={(e) => handleFilterChange("paymentStatus", e.target.value)}
+            >
+              <option value="">Tất cả trạng thái</option>
+              <option value="Paid">Đã thanh toán</option>
+              <option value="Unpaid">Chưa thanh toán</option>
+              <option value="Partial">Thanh toán một phần</option>
+              <option value="Refunded">Đã hoàn tiền</option>
             </select>
           </div>
 
@@ -131,22 +183,8 @@ const Filter = ({ filters, setFilters }) => {
               onChange={(e) => handleFilterChange("deliveryMethod", e.target.value)}
             >
               <option value="">Tất cả phương thức</option>
-              <option value="library-pickup">Nhận tại thư viện</option>
-              <option value="home-delivery">Giao hàng tận nơi</option>
-            </select>
-          </div>
-
-          <div className={styles.filterGroup}>
-            <label className={styles.filterLabel}>Sắp xếp</label>
-            <select
-              className={styles.filterSelect}
-              value={filters.sort}
-              onChange={(e) => handleFilterChange("sort", e.target.value)}
-            >
-              <option value="created_desc">Mới nhất</option>
-              <option value="created_asc">Cũ nhất</option>
-              <option value="total_desc">Giá trị cao nhất</option>
-              <option value="total_asc">Giá trị thấp nhất</option>
+              <option value="Offline">Nhận tại thư viện</option>
+              <option value="Online">Giao hàng tận nơi</option>
             </select>
           </div>
 
@@ -170,12 +208,13 @@ const OrderTable = ({ orders, setSelectedOrder }) => {
 
   function handleEditOrder(order) {
     setEditingOrder(order.id)
-    setNewStatus(order.status)
+    setNewStatus(order.orderStatus)
   }
 
   function handleSaveStatus(orderId) {
     console.log(`Update order ${orderId} to status: ${newStatus}`)
-    // Thêm logic cập nhật trạng thái ở đây
+    // TODO: Implement API call to update order status
+    // Example: PUT http://localhost:8080/api/v1/order/rental/${orderId}/status
     setEditingOrder(null)
   }
 
@@ -186,15 +225,15 @@ const OrderTable = ({ orders, setSelectedOrder }) => {
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      pending: { label: "Chờ xác nhận", class: styles.statusPending, icon: Clock },
-      confirmed: { label: "Đã xác nhận", class: styles.statusConfirmed, icon: CheckCircle },
-      preparing: { label: "Đang chuẩn bị", class: styles.statusPreparing, icon: Package },
-      shipping: { label: "Đang giao hàng", class: styles.statusShipping, icon: Truck },
-      delivered: { label: "Đã giao hàng", class: styles.statusDelivered, icon: CheckCircle },
-      cancelled: { label: "Đã hủy", class: styles.statusCancelled, icon: XCircle },
+      Pending: { label: "Chờ xác nhận", class: styles.statusPending, icon: Clock },
+      Processing: { label: "Đang xử lý", class: styles.statusConfirmed, icon: Package },
+      Shipped: { label: "Đã giao hàng", class: styles.statusShipping, icon: Truck },
+      Delivered: { label: "Đã giao thành công", class: styles.statusDelivered, icon: CheckCircle },
+      Cancelled: { label: "Đã hủy", class: styles.statusCancelled, icon: XCircle },
+      Returned: { label: "Đã trả", class: styles.statusDelivered, icon: CheckCircle },
     }
 
-    const config = statusConfig[status] || statusConfig.pending
+    const config = statusConfig[status] || statusConfig.Pending
     const IconComponent = config.icon
 
     return (
@@ -205,25 +244,47 @@ const OrderTable = ({ orders, setSelectedOrder }) => {
     )
   }
 
+  const getPaymentStatusBadge = (status) => {
+    const statusConfig = {
+      Paid: { label: "Đã thanh toán", class: styles.statusDelivered },
+      Unpaid: { label: "Chưa thanh toán", class: styles.statusPending },
+      Partial: { label: "Thanh toán một phần", class: styles.statusPreparing },
+      Refunded: { label: "Đã hoàn tiền", class: styles.statusCancelled },
+    }
+
+    const config = statusConfig[status] || statusConfig.Unpaid
+
+    return (
+      <span className={config.class}>
+        {config.label}
+      </span>
+    )
+  }
+
   const getPaymentMethodText = (method) => {
     const methods = {
-      CASH: "Tiền mặt",
-      CARD: "Thẻ ngân hàng",
-      MOMO: "Ví MoMo",
+      Cash: "Tiền mặt",
+      Card: "Thẻ ngân hàng",
+      MoMo: "Ví MoMo",
+      Banking: "Chuyển khoản",
     }
     return methods[method] || method
   }
 
   const getDeliveryMethodText = (method) => {
     const methods = {
-      "library-pickup": "Nhận tại thư viện",
-      "home-delivery": "Giao hàng tận nơi",
+      Offline: "Nhận tại thư viện",
+      Online: "Giao hàng tận nơi",
     }
     return methods[method] || method
   }
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("vi-VN")
+  }
+
+  const getTotalBooks = (items) => {
+    return items?.reduce((total, item) => total + item.quantity, 0) || 0
   }
 
   if (orders.length === 0) {
@@ -245,8 +306,9 @@ const OrderTable = ({ orders, setSelectedOrder }) => {
             <th>Khách hàng</th>
             <th>Ngày đặt</th>
             <th>Số sách</th>
-            <th>Tổng tiền</th>
+            <th>Tổng tiền thuê</th>
             <th>Thanh toán</th>
+            <th>Tình trạng</th>
             <th>Giao hàng</th>
             <th>Trạng thái</th>
             <th>Tùy chọn</th>
@@ -256,22 +318,23 @@ const OrderTable = ({ orders, setSelectedOrder }) => {
           {orders.map((order) => (
             <tr key={order.id}>
               <td>
-                <span className={styles.orderId}>#{order.orderId}</span>
+                <span className={styles.orderId}>#{order.id}</span>
               </td>
               <td>
                 <div className={styles.customerInfo}>
-                  <h4>{order.customerName}</h4>
-                  <p>{order.customerEmail}</p>
+                  <h4>{order.fullName}</h4>
+                  <p>{order.phone}</p>
                 </div>
               </td>
-              <td>{formatDate(order.orderDate)}</td>
+              <td>{formatDate(order.createAt)}</td>
               <td>
-                <span className={styles.bookCount}>{order.totalBooks} cuốn</span>
+                <span className={styles.bookCount}>{getTotalBooks(order.items)} cuốn</span>
               </td>
               <td>
-                <span className={styles.totalAmount}>{order.totalPayment.toLocaleString("vi-VN")}đ</span>
+                <span className={styles.totalAmount}>{order.totalPrice?.toLocaleString("vi-VN")}đ</span>
               </td>
               <td>{getPaymentMethodText(order.paymentMethod)}</td>
+              <td>{getPaymentStatusBadge(order.paymentStatus)}</td>
               <td>{getDeliveryMethodText(order.deliveryMethod)}</td>
               <td>
                 {editingOrder === order.id ? (
@@ -281,17 +344,17 @@ const OrderTable = ({ orders, setSelectedOrder }) => {
                       value={newStatus}
                       onChange={(e) => setNewStatus(e.target.value)}
                     >
-                      <option value="pending">Chờ xác nhận</option>
-                      <option value="confirmed">Đã xác nhận</option>
-                      <option value="preparing">Đang chuẩn bị</option>
-                      <option value="shipping">Đang giao hàng</option>
-                      <option value="delivered">Đã giao hàng</option>
-                      <option value="cancelled">Đã hủy</option>
+                      <option value="Pending">Chờ xác nhận</option>
+                      <option value="Processing">Đang xử lý</option>
+                      <option value="Shipped">Đã giao hàng</option>
+                      <option value="Delivered">Đã giao thành công</option>
+                      <option value="Cancelled">Đã hủy</option>
+                      <option value="Returned">Đã trả</option>
                     </select>
                     <div className={styles.statusEditActions}>
                       <button
                         className={styles.saveStatusButton}
-                        onClick={() => handleSaveStatus(order.orderId)}
+                        onClick={() => handleSaveStatus(order.id)}
                         title="Lưu"
                       >
                         <CheckCircle size={14} />
@@ -302,7 +365,7 @@ const OrderTable = ({ orders, setSelectedOrder }) => {
                     </div>
                   </div>
                 ) : (
-                  getStatusBadge(order.status)
+                  getStatusBadge(order.orderStatus)
                 )}
               </td>
               <td>
@@ -326,106 +389,3 @@ const OrderTable = ({ orders, setSelectedOrder }) => {
     </div>
   )
 }
-
-
-
-// Mock data
-const orders = [
-  {
-    id: 1,
-    orderId: "ORD-5823",
-    customerName: "Nguyễn Văn A",
-    customerEmail: "nguyen.van.a@gmail.com",
-    customerPhone: "0123456789",
-    orderDate: "2024-01-15T10:30:00",
-    status: "pending",
-    paymentMethod: "CARD",
-    deliveryMethod: "home-delivery",
-    address: "123 Đường ABC, Quận 1, Hồ Chí Minh",
-    totalBooks: 3,
-    totalRental: 80000,
-    totalDeposit: 320000,
-    shippingFee: 30000,
-    totalPayment: 110000,
-    items: [
-      {
-        id: 1,
-        title: "Đắc Nhân Tâm",
-        author: "Dale Carnegie",
-        cover_image: "/Book.jpg",
-        rental_price: 25000,
-        deposit_price: 100000,
-        quantity: 2,
-        rent_day: 20,
-      },
-      {
-        id: 2,
-        title: "Nhà Giả Kim",
-        author: "Paulo Coelho",
-        cover_image: "/Book.jpg",
-        rental_price: 30000,
-        deposit_price: 120000,
-        quantity: 1,
-        rent_day: 14,
-      },
-    ],
-  },
-  {
-    id: 2,
-    orderId: "ORD-5824",
-    customerName: "Trần Thị B",
-    customerEmail: "tran.thi.b@gmail.com",
-    customerPhone: "0987654321",
-    orderDate: "2024-01-16T14:20:00",
-    status: "confirmed",
-    paymentMethod: "MOMO",
-    deliveryMethod: "library-pickup",
-    address: "",
-    totalBooks: 2,
-    totalRental: 60000,
-    totalDeposit: 200000,
-    shippingFee: 0,
-    totalPayment: 60000,
-    items: [
-      {
-        id: 3,
-        title: "Sapiens",
-        author: "Yuval Noah Harari",
-        cover_image: "/Book.jpg",
-        rental_price: 30000,
-        deposit_price: 100000,
-        quantity: 2,
-        rent_day: 10,
-      },
-    ],
-  },
-  {
-    id: 3,
-    orderId: "ORD-5825",
-    customerName: "Lê Văn C",
-    customerEmail: "le.van.c@gmail.com",
-    customerPhone: "0369852147",
-    orderDate: "2024-01-17T09:15:00",
-    status: "delivered",
-    paymentMethod: "CASH",
-    deliveryMethod: "home-delivery",
-    address: "456 Đường XYZ, Quận 3, Hồ Chí Minh",
-    totalBooks: 1,
-    totalRental: 45000,
-    totalDeposit: 150000,
-    shippingFee: 30000,
-    totalPayment: 75000,
-    items: [
-      {
-        id: 4,
-        title: "Atomic Habits",
-        author: "James Clear",
-        cover_image: "/Book.jpg",
-        rental_price: 45000,
-        deposit_price: 150000,
-        quantity: 1,
-        rent_day: 15,
-      },
-    ],
-  },
-]

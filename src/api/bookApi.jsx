@@ -31,3 +31,4 @@ export async function booksByCategoryIdGet(categoryId){
   const res = await axios.get(`${BASEURL}/book/all?page=0&size=100&sortDir=asc&categoryId=${categoryId}`)
   return res.data.data.result.content
 }
+
