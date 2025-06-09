@@ -103,6 +103,15 @@
   border-bottom: 1px solid #e2e8f0;
 }
 
+th.sortableHeader{
+  cursor: pointer;
+  color: black;
+  display: flex;
+  gap: 2px;
+  justify-content: center;
+  align-items: center;
+}
+
 .table td {
   padding: 1rem;
   vertical-align: middle;
