@@ -9,6 +9,7 @@ import SearchSuggest from "./SearchSuggest"
 import Login from "../../../pages/Login"
 import Register from "../../../pages/Register"
 import axios from "axios"
+import NotificationDropdown from "./NotificationDropdown"
 
 
 function NavBar(){
@@ -185,9 +186,7 @@ function NavBar(){
         </ul>
 
         {/* notification */}
-        <div className={styles.mainNotification}>
-          <Bell className={styles.notifiIcon}/>
-        </div>
+        <NotificationDropdown />
 
         {/* authentication */}
         <div className={styles.mainUser}>

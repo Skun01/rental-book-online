@@ -1,15 +1,18 @@
 import styles from './Home.module.css';
 import {BookOpenCheck, MoreHorizontal, CircleDollarSign, 
   SquareLibrary, Users, Clock, Banknote,
-  Book, User, AlertCircle, CheckCircle} from 'lucide-react';
+  Book, User, AlertCircle, CheckCircle, Bell} from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getTotalBook } from '../../../api/bookApi';
 import { numberUserGet } from '../../../api/userApi';
 import { getRevenueGet } from '../../../api/revenueApi';
+import axios from 'axios';
+
 export default function Home() {
   const [totalBook, setTotalBook] = useState(0)
   const [totalUser, setTotalUser] = useState(0)
   const [revenue, setRevenue] = useState({})
+  
   useEffect(()=>{
     async function getData(){
       try{
@@ -49,7 +52,6 @@ export default function Home() {
               <BodyCard
                 title="Sách đang có"
                 value={totalBook}
-                filter = {false}
               >
                 <SquareLibrary size={30} color="#4154f1" />
               </BodyCard>
@@ -129,14 +131,13 @@ function TopBookCard() {
       image: '/auth.jpg',
       totalRentPrice: 2000000
     }
-
   ]
- const sortedBooks = books.sort((a, b) => b.rentNumber - a.rentNumber);
+  const sortedBooks = books.sort((a, b) => b.rentNumber - a.rentNumber);
 
   return (
     <div className={styles.card}>
       <div className={styles.cardHeaderContainer}>
-        <CardHeader title="Sách được thuê nhiều nhất" />
+        <CardHeader title="Sách được thuê nhiều nhất" filter={false} />
       </div>
       
       <div className={styles.cardBody}>
@@ -182,99 +183,159 @@ function TopBookCard() {
   );
 }
 
-
-// card hiển thị thông báo
+// card hiển thị thông báo từ API
 function ActivityNode() {
-  const activities = [
-    {
-      id: 1,
-      type: 'rent',
-      message: 'Nguyễn Văn A đã thuê sách "Lập trình React"',
-      time: '2 phút trước',
-      icon: <Book size={16} />,
-      color: 'blue'
-    },
-    {
-      id: 2,
-      type: 'return',
-      message: 'Trần Thị B đã trả sách "JavaScript cơ bản"',
-      time: '15 phút trước',
-      icon: <CheckCircle size={16} />,
-      color: 'green'
-    },
-    {
-      id: 3,
-      type: 'overdue',
-      message: 'Sách "Python cho người mới bắt đầu" đã quá hạn trả',
-      time: '30 phút trước',
-      icon: <AlertCircle size={16} />,
-      color: 'red'
-    },
-    {
-      id: 4,
-      type: 'register',
-      message: 'Người dùng mới Lê Văn C đã đăng ký tài khoản',
-      time: '1 giờ trước',
-      icon: <User size={16} />,
-      color: 'orange'
-    },
-    {
-      id: 5,
-      type: 'rent',
-      message: 'Phạm Thị D đã thuê sách "Node.js Advanced"',
-      time: '2 giờ trước',
-      icon: <Book size={16} />,
-      color: 'blue'
-    },
-    {
-      id: 6,
-      type: 'return',
-      message: 'Hoàng Văn E đã trả sách "Database Design"',
-      time: '3 giờ trước',
-      icon: <CheckCircle size={16} />,
-      color: 'green'
-    },
-    {
-      id: 7,
-      type: 'overdue',
-      message: 'Sách "HTML & CSS" của Nguyễn Thị F đã quá hạn 2 ngày',
-      time: '1 ngày trước',
-      icon: <AlertCircle size={16} />,
-      color: 'red'
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Fetch notifications from API
+  const fetchNotifications = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get(
+        'http://localhost:8080/api/v1/notification/all?page=0&size=10&active=CREATE'
+      );
+      
+      if (response.data && response.data.data && response.data.data.content) {
+        // Sort notifications by createAt (newest first) and take only first 10
+        const sortedNotifications = response.data.data.content
+          .sort((a, b) => new Date(b.createAt) - new Date(a.createAt))
+          .slice(0, 10);
+        setNotifications(sortedNotifications);
+      }
+    } catch (err) {
+      console.error("Error fetching notifications:", err);
+      setError("Không thể tải thông báo");
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  // Format date for display
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now - date) / (1000 * 60));
+    
+    if (diffInMinutes < 1) return "Vừa xong";
+    if (diffInMinutes < 60) return `${diffInMinutes} phút trước`;
+    
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours} giờ trước`;
+    
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) return `${diffInDays} ngày trước`;
+    
+    return date.toLocaleDateString('vi-VN');
+  };
+
+  // Get notification type and icon based on description
+  const getNotificationTypeAndIcon = (description) => {
+    if (description.includes("được thêm") || description.includes("đăng ký")) {
+      return { 
+        icon: <User size={16} />, 
+        color: 'blue',
+        type: 'add'
+      };
+    }
+    if (description.includes("được cập nhật")) {
+      return { 
+        icon: <CheckCircle size={16} />, 
+        color: 'green',
+        type: 'update'
+      };
+    }
+    if (description.includes("được xóa") || description.includes("quá hạn")) {
+      return { 
+        icon: <AlertCircle size={16} />, 
+        color: 'red',
+        type: 'delete'
+      };
+    }
+    if (description.includes("thuê")) {
+      return { 
+        icon: <Book size={16} />, 
+        color: 'blue',
+        type: 'rent'
+      };
+    }
+    if (description.includes("trả")) {
+      return { 
+        icon: <CheckCircle size={16} />, 
+        color: 'green',
+        type: 'return'
+      };
+    }
+    return { 
+      icon: <Bell size={16} />, 
+      color: 'blue',
+      type: 'default'
+    };
+  };
 
   return (
     <div className={styles.card}>
       <div className={styles.activityListHeader}>
-        <CardHeader title="Hoạt động gần đây" />
+        <CardHeader title="Hoạt động gần đây" filter={false} />
       </div>
       
       <div className={styles.activityList}>
-        {activities.map((activity, index) => (
-          <div key={activity.id} className={styles.activityItem}>
-            {/* Timeline line */}
-            <div className={styles.timeline}>
-              <div className={`${styles.timelineIcon} ${styles[`icon${activity.color.charAt(0).toUpperCase() + activity.color.slice(1)}`]}`}>
-                {activity.icon}
-              </div>
-              {index !== activities.length - 1 && (
-                <div className={styles.timelineLine}></div>
-              )}
-            </div>
-            
-            {/* Activity content */}
-            <div className={styles.activityContent}>
-              <div className={styles.activityMessage}>
-                {activity.message}
-              </div>
-              <div className={styles.activityTime}>
-                <Clock size={12} />
-                <span>{activity.time}</span>
-              </div>
-            </div>
+        {loading ? (
+          <div className={styles.loadingState}>
+            <div className={styles.spinner}></div>
+            <p>Đang tải thông báo...</p>
           </div>
-        ))}
+        ) : error ? (
+          <div className={styles.errorState}>
+            <p>{error}</p>
+            <button 
+              className={styles.retryButton}
+              onClick={fetchNotifications}
+            >
+              Thử lại
+            </button>
+          </div>
+        ) : notifications.length === 0 ? (
+          <div className={styles.emptyState}>
+            <Bell size={48} className={styles.emptyIcon} />
+            <p>Không có thông báo nào</p>
+          </div>
+        ) : (
+          notifications.map((notification, index) => {
+            const { icon, color } = getNotificationTypeAndIcon(notification.description);
+            
+            return (
+              <div key={notification.id} className={styles.activityItem}>
+                {/* Timeline line */}
+                <div className={styles.timeline}>
+                  <div className={`${styles.timelineIcon} ${styles[`icon${color.charAt(0).toUpperCase() + color.slice(1)}`]}`}>
+                    {icon}
+                  </div>
+                  {index !== notifications.length - 1 && (
+                    <div className={styles.timelineLine}></div>
+                  )}
+                </div>
+                
+                {/* Activity content */}
+                <div className={styles.activityContent}>
+                  <div className={styles.activityMessage}>
+                    {notification.description}
+                  </div>
+                  <div className={styles.activityTime}>
+                    <Clock size={12} />
+                    <span>{formatDate(notification.createAt)}</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
       
       <div className={styles.viewMore}>
@@ -286,18 +347,17 @@ function ActivityNode() {
   )
 }
 
-// card hiển thị thông tin tổng hợp
+// card hiển thị thông tin tổng hợp (đã xóa filter)
 function BodyCard({ 
   title = "Sales", 
   value = "145", 
   isMoney = false,
-  filter = true,
   children,
 }) {
   return (
     <div className={styles.card}>
       <div className={styles.cardHeaderContainer}>
-        <CardHeader title={title} filter={filter}/>
+        <CardHeader title={title} filter={false}/>
       </div>
       <div className={styles.cardBody}>
         <div className={styles.iconWrapper}>
@@ -313,7 +373,7 @@ function BodyCard({
   )
 }
 
-function CardHeader({title = "", filter = true}){
+function CardHeader({title = "", filter = false}){
   const [filterOpen, setFilterOpen] = useState(false);
   const [filterValue, setFilterValue] = useState("Hôm nay");
   const filterList = [
@@ -322,6 +382,7 @@ function CardHeader({title = "", filter = true}){
     { id: 3, name: "Năm nay" },
     { id: 4, name: "Từ trước tới nay" }
   ]
+  
   return (
     <div className={styles.cardHeader}>
         <div className={styles.titleSection}>
