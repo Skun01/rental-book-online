@@ -51,7 +51,7 @@ const ListBookPage = ({pageTitle}) => {
     async function getSpecificData(){
       try {
         if(pageTitle === "category") {
-          await axios.get(`http://localhost:8080/api/v1/category/${id}`)
+          await axios.get(`http://localhost:8080/api/v1/category/by/${id}`)
             .then(response=>{
               setTitle(response.data.data.name)
             })
@@ -61,7 +61,7 @@ const ListBookPage = ({pageTitle}) => {
               setTotalPage(response.data.data.result.totalPages)
             })
         } else if(pageTitle === "author") {
-          await axios.get(`http://localhost:8080/api/v1/author/${id}`)
+          await axios.get(`http://localhost:8080/api/v1/author/by/${id}`)
             .then(response=>{
               setTitle(response.data.data.name)
             })
