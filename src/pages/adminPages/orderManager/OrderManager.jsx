@@ -19,8 +19,7 @@ export default function OrderManager() {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-
-  // Fetch orders from API
+  
   const fetchOrders = async () => {
     setLoading(true)
     setError(null)
@@ -138,10 +137,8 @@ const Filter = ({ filters, setFilters }) => {
               <option value="">Tất cả trạng thái</option>
               <option value="Pending">Chờ xác nhận</option>
               <option value="Processing">Đang xử lý</option>
-              <option value="Shipped">Đã giao hàng</option>
               <option value="Delivered">Đã giao thành công</option>
               <option value="Cancelled">Đã hủy</option>
-              <option value="Returned">Đã trả</option>
             </select>
           </div>
 
@@ -154,7 +151,6 @@ const Filter = ({ filters, setFilters }) => {
             >
               <option value="">Tất cả phương thức</option>
               <option value="Cash">Tiền mặt</option>
-              <option value="Card">Thẻ ngân hàng</option>
               <option value="MoMo">Ví MoMo</option>
               <option value="Banking">Chuyển khoản</option>
             </select>
@@ -170,8 +166,6 @@ const Filter = ({ filters, setFilters }) => {
               <option value="">Tất cả trạng thái</option>
               <option value="Paid">Đã thanh toán</option>
               <option value="Unpaid">Chưa thanh toán</option>
-              <option value="Partial">Thanh toán một phần</option>
-              <option value="Refunded">Đã hoàn tiền</option>
             </select>
           </div>
 

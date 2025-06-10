@@ -1,7 +1,7 @@
 import styles from './SideBar.module.css'
 import { Link } from 'react-router-dom'
 import { LayoutGrid, BookOpen, Users, Library, ShoppingCart, 
-  RotateCcw, ChartBarStacked, Book, BookA, ChevronUp} from 'lucide-react'
+  RotateCcw, ChartBarStacked, Book, BookA, ChevronUp, Network} from 'lucide-react'
 import { useState } from 'react'
 
 export default function SideBar(){
@@ -86,6 +86,14 @@ export default function SideBar(){
           <Link className={styles.navLink} to='returns-manage'>
             <RotateCcw strokeWidth={1}/>
             <span>Đơn trả sách</span>
+          </Link>
+        </li>
+
+        <li className={`${styles.navRow} ${activeTab === 'branch' ? styles.active : ''}`} 
+            onClick={() => handleTabClick('branch')}>
+          <Link className={styles.navLink} to='branchs-manage'>
+            <Network strokeWidth={1}/>
+            <span>Chi nhánh</span>
           </Link>
         </li>
 

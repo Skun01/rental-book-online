@@ -6,6 +6,8 @@ import AuthorManager from "../pages/adminPages/authorManager/AuthorManager";
 import UserManager from "../pages/adminPages/userManager/UserManager";
 import OrderManager from "../pages/adminPages/orderManager/OrderManager";
 import ReturnManager from "../pages/adminPages/returnManager/ReturnManager";
+import RentalBookManager from "../pages/adminPages/rentalBookManager/RentalBookManager";
+import BranchManager from "../pages/adminPages/branchManager/BranchManager";
 const routes= [
   {
     path:"/admin",
@@ -39,6 +41,14 @@ const routes= [
         path: 'returns-manage',
         element: <ReturnManager/>
       },
+      {
+        path: 'rentals-manage', 
+        element: <RentalBookManager/>
+      },
+      {
+        path: 'branchs-manage',
+        element: <BranchManager/>
+      }
     ]
   }
 ]

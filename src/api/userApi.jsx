@@ -12,6 +12,12 @@ export async function AllUserGet(apiUrl, token) {
   return res.data.data.content
 }
 
+export async function numberUserGet() {
+  const res = await axios.get(`${BASEURL}/user/all?page=0&size=10000&sortDir=asc`)
+  return res.data.data.content.length
+}
+
+
 export async function updateUserRolePut(userId, roleId, token){
   await axios.put(`${BASEURL}/user/update/role`,
     {

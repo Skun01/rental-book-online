@@ -4,12 +4,24 @@ import {BookOpenCheck, MoreHorizontal, CircleDollarSign,
   Book, User, AlertCircle, CheckCircle} from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getTotalBook } from '../../../api/bookApi';
+import { numberUserGet } from '../../../api/userApi';
+import { getRevenueGet } from '../../../api/revenueApi';
 export default function Home() {
-  const [totalBook, setTotalBook] = useState()
+  const [totalBook, setTotalBook] = useState(0)
+  const [totalUser, setTotalUser] = useState(0)
+  const [revenue, setRevenue] = useState({})
   useEffect(()=>{
     async function getData(){
-      const data = await getTotalBook()
-      setTotalBook(data)
+      try{
+        const data = await getTotalBook()
+        setTotalBook(data)
+        const allRevenueData = await getRevenueGet()
+        setRevenue(allRevenueData)
+        const dataNumberUser = await numberUserGet()
+        setTotalUser(dataNumberUser)
+      }catch(err){
+        console.error(`can't get revenue data: `, err)
+      }
     }
     getData()
   }, [])
@@ -45,14 +57,14 @@ export default function Home() {
             <div className={styles.cardRow}>
               <BodyCard
                 title="Doanh thu"
-                value='20000000'
+                value={revenue.totalRental || 0}
                 isMoney={true}
               >
                 <CircleDollarSign size={30} color='#2eca6a'/>
               </BodyCard>
               <BodyCard
                 title="Tiền đang cọc"
-                value='9867300'
+                value={revenue.totalDeposit || 0}
                 isMoney={true}
               >
                 <Banknote size={30} color='#f59e0b'/>
@@ -61,7 +73,7 @@ export default function Home() {
             <div className={styles.cardRow}>
               <BodyCard
                 title="Người dùng"
-                value="20"
+                value={totalUser}
               >
                 <Users size={30} color='#ff771d'/>
               </BodyCard>
