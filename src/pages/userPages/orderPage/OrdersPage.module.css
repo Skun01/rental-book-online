@@ -183,9 +183,19 @@
   color: #3b82f6;
 }
 
+.statusDelivering {
+  background-color: rgba(168, 85, 247, 0.2);
+  color: #a855f7;
+}
+
 .statusCompleted {
   background-color: rgba(16, 185, 129, 0.2);
   color: #10b981;
+}
+
+.statusReturned {
+  background-color: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
 }
 
 .statusCancelled {
@@ -247,6 +257,14 @@
 .detailValue {
   color: #f1f5f9;
   font-weight: 500;
+}
+
+.paidStatus {
+  color: #10b981 !important;
+}
+
+.unpaidStatus {
+  color: #f59e0b !important;
 }
 
 .orderActions {
@@ -360,5 +378,14 @@
 
   .orderDetails {
     grid-template-columns: 1fr;
+  }
+
+  .filterButtons {
+    gap: 0.5rem;
+  }
+
+  .filterButton {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
   }
 }
