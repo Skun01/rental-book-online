@@ -13,10 +13,9 @@ const NavBarTab = ({book, navList = ['Mô tả sản phẩm', 'Bình luận', 'S
     if(tabNumber !== index) setTabNumber(index);
   }
 
-  // Update nav list with dynamic review count
   const updatedNavList = navList.map((item, index) => {
     if (index === 1) {
-      return `Bình luận (${reviewCount})`;
+      return `Bình luận${reviewCount === 0 ? '' : ` (${reviewCount})`}`;
     }
     return item;
   });
@@ -79,19 +78,35 @@ const BookDescription = ({bookDescript})=>{
 // BookReviewInput
 const BookReviewInput = ({book, setReviewCount}) => {
   const [rating, setRating] = useState(0);
-  const [reviews, setReviews] = useState([]);
+  const [allReviews, setAllReviews] = useState([]);
+  const [parentReviews, setParentReviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const {currentUser} = useAuth()
   const [user] = useState({
-    id: currentUser.id, // Replace with actual user ID from authentication
+    id: currentUser.id,
     name: currentUser.name,
     avatar: currentUser.avatar || '/author.jpg'
   });
+
   const handleRatingChange = (newRating) => {
     setRating(newRating);
   };
 
-  // Fetch reviews for the book
+  const organizeReviews = (reviews) => {
+    const parentReviews = reviews.filter(review => review.parentId === null);
+    const childReviews = reviews.filter(review => review.parentId !== null);
+    
+    const reviewsWithReplies = parentReviews.map(parent => {
+      const replies = childReviews.filter(child => child.parentId === parent.id);
+      return {
+        ...parent,
+        replies: replies
+      };
+    });
+    
+    return reviewsWithReplies;
+  };
+
   const fetchReviews = async () => {
     if (!book?.id) return;
     
@@ -99,8 +114,16 @@ const BookReviewInput = ({book, setReviewCount}) => {
     try {
       const response = await axios.get(`http://localhost:8080/api/v1/review/by/book/${book.id}?page=0&size=100`);
       if (response.data.code === 200) {
-        setReviews(response.data.data.content);
-        setReviewCount(response.data.data.totalElements);
+        const reviews = response.data.data.content;
+        setAllReviews(reviews);
+        
+        // Organize reviews
+        const organized = organizeReviews(reviews);
+        setParentReviews(organized);
+        
+        // Set total count (only parent reviews for the counter)
+        const parentCount = reviews.filter(review => review.parentId === null).length;
+        setReviewCount(parentCount);
       }
     } catch (error) {
       console.error('Error fetching reviews:', error);
@@ -162,7 +185,7 @@ const BookReviewInput = ({book, setReviewCount}) => {
         {loading ? (
           <div style={{color: '#fff', textAlign: 'center'}}>Đang tải bình luận...</div>
         ) : (
-          reviews.map((review) => (
+          parentReviews.map((review) => (
             <BookReviewCard 
               key={review.id} 
               review={review}
@@ -251,25 +274,6 @@ const InputReviewBox = ({haveRating = false, rating, setRating, bookId, userId, 
 const BookReviewCard = ({review, currentUserId, onReviewDeleted, onReplySubmitted})=>{
   const [viewReplies, setViewReplies] = useState(false);
   const [showReplyBox, setShowReplyBox] = useState(false);
-  const [replies, setReplies] = useState([]);
-  const [loadingReplies, setLoadingReplies] = useState(false);
-
-  // Fetch replies for this review
-  const fetchReplies = async () => {
-    if (!review.id) return;
-    
-    setLoadingReplies(true);
-    try {
-      const response = await axios.get(`http://localhost:8080/api/v1/review/by/parent/${review.id}?page=0&size=100`);
-      if (response.data.code === 200) {
-        setReplies(response.data.data.content);
-      }
-    } catch (error) {
-      console.error('Error fetching replies:', error);
-    } finally {
-      setLoadingReplies(false);
-    }
-  };
 
   // Delete review
   const handleDelete = async () => {
@@ -285,9 +289,6 @@ const BookReviewCard = ({review, currentUserId, onReviewDeleted, onReplySubmitte
   };
 
   const handleViewReplies = () => {
-    if (!viewReplies && replies.length === 0) {
-      fetchReplies();
-    }
     setViewReplies(!viewReplies);
   };
 
@@ -297,7 +298,6 @@ const BookReviewCard = ({review, currentUserId, onReviewDeleted, onReplySubmitte
 
   const handleReplySubmitted = () => {
     setShowReplyBox(false);
-    fetchReplies();
     if (onReplySubmitted) onReplySubmitted();
   };
 
@@ -319,24 +319,24 @@ const BookReviewCard = ({review, currentUserId, onReviewDeleted, onReplySubmitte
       <div className={styles.userInfo}>
         <img 
           src={review.user?.avatar || '/author.jpg'} 
-          alt={`${review.user?.name || 'User'}'s avatar`} 
+          alt={`${review.user?.fullName || 'User'}'s avatar`} 
           className={styles.avatar}
         />
         <div className={styles.userCommentHeader}>
           <div className={styles.userCommentInfor}>
-            {review.rate && (
+            {review.rate && review.rate > 0 && !review.parentId && (
               <div className={styles.rated}>
                 {review.rate} <Star className={styles.ratedIcon}/>
               </div>
             )}
             
-            <span className={styles.username}>{review.user?.name || 'Người dùng'}</span>
+            <span className={styles.username}>{review.user?.fullName || 'Người dùng'}</span>
             <span className={styles.commentTime}>
-              {review.createdAt ? formatDate(review.createdAt) : '1 giờ trước'}
+              {review.createAt ? formatDate(review.createAt) : '1 giờ trước'}
             </span>
             
             {/* Delete button for review owner */}
-            {review.user?.id === currentUserId && (
+            {review.user?.userId === currentUserId && (
               <div className={styles.deleteButton} onClick={handleDelete}>
                 <Trash2 size={16} />
               </div>
@@ -371,34 +371,30 @@ const BookReviewCard = ({review, currentUserId, onReviewDeleted, onReplySubmitte
             </div>
           )}
 
-          {/* View replies */}
-          {replies.length > 0 && (
+          {/* View replies button - only show if there are replies */}
+          {review.replies && review.replies.length > 0 && (
             <div className={styles.viewReply}>
               <div className={`${styles.viewReplyIcon} ${viewReplies ? styles.replyActive : ""}`}>
                 <ChevronUp size={14}/>
               </div>
               <span className={styles.replyText} onClick={handleViewReplies}>
-                {viewReplies ? 'Ẩn phản hồi' : `Xem ${replies.length} phản hồi`}
+                {viewReplies ? 'Ẩn phản hồi' : `Xem ${review.replies.length} phản hồi`}
               </span>
             </div>
           )}
 
           {/* Display replies */}
-          {viewReplies && (
+          {viewReplies && review.replies && review.replies.length > 0 && (
             <div className={styles.repliesContainer}>
-              {loadingReplies ? (
-                <div style={{color: '#aaa', fontSize: '14px'}}>Đang tải phản hồi...</div>
-              ) : (
-                replies.map((reply) => (
-                  <BookReviewCard 
-                    key={reply.id}
-                    review={reply}
-                    currentUserId={currentUserId}
-                    onReviewDeleted={fetchReplies}
-                    onReplySubmitted={fetchReplies}
-                  />
-                ))
-              )}
+              {review.replies.map((reply) => (
+                <BookReviewCard 
+                  key={reply.id}
+                  review={reply}
+                  currentUserId={currentUserId}
+                  onReviewDeleted={onReviewDeleted}
+                  onReplySubmitted={onReplySubmitted}
+                />
+              ))}
             </div>
           )}
         </div>
