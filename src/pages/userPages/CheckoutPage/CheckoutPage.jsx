@@ -5,14 +5,82 @@ import { useNavigate, useLocation } from "react-router-dom"
 import { useAuth } from "../../../contexts/AuthContext"
 import { useToast } from "../../../contexts/ToastContext"
 import axios from "axios"
+import {MapPin, Info, Clock} from 'lucide-react'
+
+// API function để lấy danh sách chi nhánh
+const getAllBranches = async () => {
+  try {
+    const token = localStorage.getItem('token')
+    const response = await axios.get('http://localhost:8080/api/v1/branch/all?page=0&size=1000&sortDir=asc', {
+      headers: {
+        'Authorization': `${token}`
+      }
+    })
+    return response.data.data.content
+  } catch (error) {
+    console.error('Error fetching branches:', error)
+    throw error
+  }
+}
+
+// Component hiển thị thông tin chi tiết chi nhánh
+const BranchCard = ({ branch, isSelected, onSelect }) => {
+  const formatTime = (timeString) => {
+    if (!timeString) return "N/A"
+    try {
+      const time = timeString.split('T')[1]?.split('Z')[0] || timeString
+      const [hours, minutes] = time.split(':')
+      return `${hours}:${minutes}`
+    } catch (error) {
+      return "N/A"
+    }
+  }
+
+  const formatAddress = (branch) => {
+    const parts = [branch.street, branch.ward, branch.district, branch.city].filter(Boolean)
+    return parts.join(', ') || "Chưa có địa chỉ"
+  }
+
+  return (
+    <div 
+      className={`${styles.branchCard} ${isSelected ? styles.selectedBranch : ''}`}
+      onClick={() => onSelect(branch.id)}
+    >
+      <div className={styles.branchHeader}>
+        <input
+          type="radio"
+          name="branchSelection"
+          checked={isSelected}
+          onChange={() => onSelect(branch.id)}
+          className={styles.branchRadio}
+        />
+        <h4 className={styles.branchName}>{branch.name}</h4>
+      </div>
+      
+      <div className={styles.branchDetails}>
+        <div className={styles.branchAddress}>
+          <span className={styles.addressIcon}><MapPin size={15}/></span>
+          <span>{formatAddress(branch)}</span>
+        </div>
+        
+        <div className={styles.branchHours}>
+          <span className={styles.timeIcon}><Clock size={15}/></span>
+          <span>Giờ mở cửa: {formatTime(branch.openTime)} - {formatTime(branch.closeTime)}</span>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 const CheckoutPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [branches, setBranches] = useState([])
+  const [loadingBranches, setLoadingBranches] = useState(false)
   const [formData, setFormData] = useState({
     fullName: "",
     phone: "",
     deliveryMethod: "offline", // [offline, online]
-    branchId: 1,
+    branchId: null, // Changed to null initially
     pickupDate: "",
     address: "",
     city: "",
@@ -21,7 +89,7 @@ const CheckoutPage = () => {
     street: "",
     notes: "",
     paymentMethod: "EWallet",
-    paymentStatus:  "Unpaid", 
+    paymentStatus: "Unpaid", 
     shippingMethod: "Standard",
     accountNumber: "",
     receiveDay: ""
@@ -30,6 +98,7 @@ const CheckoutPage = () => {
   const [addresses, setAddresses] = useState([])
   const [selectedAddressId, setSelectedAddressId] = useState(null)
   const [showNewAddressForm, setShowNewAddressForm] = useState(false)
+  
   const { getTotalPrice, getTotalDeposit, getCartItemCount, cartItems, 
     restoreCartItems, getPostCartItems, clearCart } = useCart()
   const { currentUser } = useAuth()
@@ -37,7 +106,28 @@ const CheckoutPage = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const OtherSiteData = location.state;
-  
+
+  // Fetch branches when component mounts
+  useEffect(() => {
+    const fetchBranches = async () => {
+      try {
+        setLoadingBranches(true)
+        const branchesData = await getAllBranches()
+        setBranches(branchesData)
+        // Auto-select first branch if available
+        if (branchesData.length > 0) {
+          setFormData(prev => ({ ...prev, branchId: branchesData[0].id }))
+        }
+      } catch (error) {
+        console.error("Error fetching branches:", error)
+        showToast({ type: 'error', message: 'Lỗi khi tải danh sách chi nhánh!' })
+      } finally {
+        setLoadingBranches(false)
+      }
+    }
+
+    fetchBranches()
+  }, [showToast])
 
   // Tạo lịch chọn 3 ngày liên tục để đến nhận sách khi nhận tại thư viện
   const getAvailablePickupDates = () => {
@@ -58,10 +148,9 @@ const CheckoutPage = () => {
     return dates
   }
 
-
   // xử lý lấy ngày nhận dự kiến
   const getExpectedDate = () => {
-    if (formData.deliveryMethod === "library-pickup") {
+    if (formData.deliveryMethod === "Offline") {
       if (formData.pickupDate) {
         const date = new Date(formData.pickupDate)
         return `${date.toLocaleDateString("vi-VN", {
@@ -132,6 +221,14 @@ const CheckoutPage = () => {
     }
   }
 
+  // Handle branch selection
+  const handleBranchSelect = (branchId) => {
+    setFormData(prev => ({ ...prev, branchId }))
+    if (errors.branchId) {
+      setErrors(prev => ({ ...prev, branchId: "" }))
+    }
+  }
+
   // validate form before sending
   const validateForm = () => {
     const newErrors = {}
@@ -144,6 +241,7 @@ const CheckoutPage = () => {
     }
 
     if (formData.deliveryMethod === "Offline") {
+      if (!formData.branchId) newErrors.branchId = "Vui lòng chọn chi nhánh"
       if (!formData.pickupDate) newErrors.pickupDate = "Vui lòng chọn ngày nhận sách"
     }
 
@@ -175,7 +273,7 @@ const CheckoutPage = () => {
     if(formData.deliveryMethod === "Offline"){
       return {...basicData, 
         branchId: +formData.branchId,
-        receiveDay:  new Date(formData.pickupDate).toISOString()
+        receiveDay: new Date(formData.pickupDate).toISOString()
       }
     }else{
       return {...basicData,
@@ -298,18 +396,24 @@ const CheckoutPage = () => {
                 {formData.deliveryMethod === "Offline" && (
                   <div className={styles.deliverySection}>
                     <div className={styles.formGroup}>
-
-                      {/* get tensha of toshokan */}
-                      <label htmlFor="branchId">Địa điểm nhận sách</label>
-                      <select id="branchId" name="branchId" value={formData.branchId} 
-                        onChange={handleInputChange}>
-                        <option value= {1}>
-                          Thư viện tòa A11 cơ sở 1 Đại Học Công Nghiệp Hà nội, Minh Khai, Bắc Từ Liêm Hà Nội
-                        </option>
-                        <option value={2}>
-                          Thư viện tòa C3 cơ sở 3 Đại Học Công Nghiệp Hà nội, Phủ lý, Hà Nam
-                        </option>
-                      </select>
+                      <label>Chọn chi nhánh nhận sách</label>
+                      {loadingBranches ? (
+                        <div className={styles.loadingBranches}>Đang tải danh sách chi nhánh...</div>
+                      ) : branches.length > 0 ? (
+                        <div className={styles.branchSelection}>
+                          {branches.map((branch) => (
+                            <BranchCard
+                              key={branch.id}
+                              branch={branch}
+                              isSelected={formData.branchId === branch.id}
+                              onSelect={handleBranchSelect}
+                            />
+                          ))}
+                        </div>
+                      ) : (
+                        <div className={styles.noBranches}>Không có chi nhánh nào khả dụng</div>
+                      )}
+                      {errors.branchId && <span className={styles.errorMessage}>{errors.branchId}</span>}
                     </div>
 
                     <h3>Thời gian hẹn nhận sách</h3>
@@ -349,7 +453,7 @@ const CheckoutPage = () => {
                 {formData.deliveryMethod === "Online" && (
                   <div className={styles.deliverySection}>
                     <h3>Thông tin giao hàng</h3>
-                    {addresses.length > 0 && (
+                    {addresses.length >= 0 && (
                       <div className={styles.savedAddresses}>
                         <h4>Địa chỉ đã lưu</h4>
                         <div className={styles.addressList}>
@@ -443,15 +547,6 @@ const CheckoutPage = () => {
               <div className={styles.formSection}>
                 <h2>Phương Thức Thanh Toán</h2>
                 <div className={styles.paymentOptions}>
-                  <div className={styles.paymentOption}>
-                    <input type="radio" id="e-wallet" name="paymentMethod" value="EWallet" 
-                      checked={formData.paymentMethod === "EWallet"} onChange={handleInputChange}
-                    />
-                    <label htmlFor="e-wallet">
-                      <span className={styles.optionTitle}>Ví điện tử</span>
-                      <span className={styles.optionDescription}>Thanh toán bằng MoMo, ZaloPay, v.v.</span>
-                    </label>
-                  </div>
                   <div className={styles.paymentOption}>
                     <input type="radio" id="cash" name="paymentMethod" value="Cash" 
                       checked={formData.paymentMethod === "Cash"} onChange={handleInputChange}

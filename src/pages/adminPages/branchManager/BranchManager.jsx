@@ -262,18 +262,15 @@ const BranchTable = ({ branches, onRefresh, setLoading }) => {
   }
 
   const formatTime = (timeString) => {
-    if (!timeString) return "N/A"
-    try {
-      const date = new Date(timeString)
-      return date.toLocaleTimeString('vi-VN', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        hour12: false 
-      })
-    } catch (error) {
-      return "N/A"
-    }
+  if (!timeString) return "N/A"
+  try {
+    const time = timeString.split('T')[1]?.split('Z')[0] || timeString
+    const [hours, minutes] = time.split(':')
+    return `${hours}:${minutes}`
+  } catch (error) {
+    return "N/A"
   }
+}
 
   const formatAddress = (branch) => {
     const parts = [branch.street, branch.ward, branch.district, branch.city].filter(Boolean)
@@ -379,10 +376,10 @@ function BranchForm({ branch, onSave, onCancel }) {
   const [ward, setWard] = useState(branch?.ward || "")
   const [street, setStreet] = useState(branch?.street || "")
   const [openTime, setOpenTime] = useState(
-    branch?.openTime ? new Date(branch.openTime).toTimeString().slice(0, 5) : ""
+    branch?.openTime ? branch.openTime.split('T')[1]?.split('Z')[0]?.slice(0, 5) || "" : ""
   )
   const [closeTime, setCloseTime] = useState(
-    branch?.closeTime ? new Date(branch.closeTime).toTimeString().slice(0, 5) : ""
+    branch?.closeTime ? branch.closeTime.split('T')[1]?.split('Z')[0]?.slice(0, 5) || "" : ""
   )
   const [submitting, setSubmitting] = useState(false)
   const {showToast} = useToast()
@@ -390,7 +387,7 @@ function BranchForm({ branch, onSave, onCancel }) {
   const formatTimeForSubmit = (timeString) => {
     if (!timeString) return null
     const today = new Date().toISOString().split('T')[0]
-    return `${today}T${timeString}:00.000Z`
+    return `${today}T${timeString}:00Z`
   }
 
   async function handleSubmit(e) {
