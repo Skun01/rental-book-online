@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { Link, useParams, useLocation } from "react-router-dom"
 import { CheckCircle, ArrowRight, ShoppingBag, Calendar, MapPin, CreditCard, AlertTriangle, X,
-  Truck, XCircle, HelpCircle, Check, Clock, ArrowLeft} from "lucide-react"
+  Truck, XCircle, HelpCircle, Check, Clock, ArrowLeft, ExternalLink} from "lucide-react"
 import { useToast } from "../../../contexts/ToastContext"
 import axios from "axios"
 import styles from "./OrderSuccessPage.module.css"
@@ -12,12 +12,39 @@ const OrderSuccessPage = () => {
   const [loading, setLoading] = useState(true)
   const [cancelling, setCancelling] = useState(false)
   const [showCancelModal, setShowCancelModal] = useState(false)
+  const [processingPayment, setProcessingPayment] = useState(false)
+  const [paymentResult, setPaymentResult] = useState(null)
   const location = useLocation()
   const {orderId} = useParams()
   const {order} = location.state || {}
+
   useEffect(()=>{
     window.scrollTo({top: 0, behavior: 'instant'})
   }, [])
+
+  // Check payment result from URL parameters
+  useEffect(() => {
+  const urlParams = new URLSearchParams(location.search)
+  const vnpResponseCode = urlParams.get('vnp_ResponseCode')
+  const vnpTransactionStatus = urlParams.get('vnp_TransactionStatus')
+  
+  // Chỉ xử lý khi có payment callback và chưa xử lý trước đó
+  if (vnpResponseCode !== null && paymentResult === null) {
+    if (vnpResponseCode === '00' && vnpTransactionStatus === '00') {
+      // Payment successful
+      setPaymentResult('success')
+      showToast({ 
+        type: "success", 
+        message: "Thanh toán thành công! Đơn hàng của bạn đã được thanh toán." 
+      })
+      // TODO: Call API to update payment status to "Paid"
+      // updatePaymentStatus(orderId, 'Paid')
+    } else {
+      setPaymentResult('failed')
+    }
+  }
+}, [location.search, paymentResult, showToast, orderId])
+
   useEffect(() => {
     const fetchOrderDetails = async () => {
       if(order){
@@ -95,6 +122,50 @@ const OrderSuccessPage = () => {
     return Math.ceil(timeDiff / (1000 * 3600 * 24))
   }
 
+  // Handle online payment
+  const handleOnlinePayment = async () => {
+    setProcessingPayment(true)
+    try {
+      const bearer = localStorage.getItem("token")
+      const currentUrl = window.location.origin + window.location.pathname
+      
+      const paymentData = {
+        orderId: orderData.id.toString(),
+        amount: orderData.totalPrice,
+        currency: "VND",
+        returnUrl: `${currentUrl}?payment=success`,
+        cancelUrl: `${currentUrl}?payment=cancel`,
+        description: `Thanh toán đơn hàng #${orderData.id}`
+      }
+
+      const response = await axios.post(
+        `http://localhost:8080/api/v1/payment/create`,
+        paymentData,
+        {
+          headers: {
+            Authorization: `${bearer}`,
+            'Content-Type': 'application/json'
+          },
+        }
+      )
+
+      if (response.data.paymentUrl) {
+        // Redirect to payment URL
+        window.location.href = response.data.paymentUrl
+      } else {
+        throw new Error('Không nhận được URL thanh toán')
+      }
+    } catch (error) {
+      console.error("Error creating payment:", error)
+      showToast({ 
+        type: "error", 
+        message: "Không thể tạo thanh toán. Vui lòng thử lại." 
+      })
+    } finally {
+      setProcessingPayment(false)
+    }
+  }
+
   // Handle order cancellation
   const handleCancelOrder = async () => {
     setCancelling(true)
@@ -121,6 +192,14 @@ const OrderSuccessPage = () => {
     } finally {
       setCancelling(false)
     }
+  }
+
+  // Check if online payment is available
+  const canPayOnline = () => {
+    return orderData && 
+           orderData.paymentMethod === 'BankTransfer' && 
+           orderData.paymentStatus === 'Unpaid' &&
+           orderData.orderStatus !== 'Cancelled'
   }
 
   if (loading) {
@@ -161,7 +240,7 @@ const OrderSuccessPage = () => {
   }
 
   const statusInfo = getStatusInfo(orderData.orderStatus)
-  const paymentInfo = getPaymentStatusInfo(orderData.paymentStatus)
+  const paymentInfo = getPaymentStatusInfo(paymentResult === 'success' ? 'Paid' : orderData.paymentStatus)
   const isLibraryPickup = orderData.deliveryMethod === 'Offline'
 
   return (
@@ -182,16 +261,51 @@ const OrderSuccessPage = () => {
                 ? "Đơn hàng của bạn đã được hủy. Nếu bạn đã thanh toán, chúng tôi sẽ hoàn tiền trong 3-5 ngày làm việc."
                 : "Cảm ơn bạn đã đặt hàng. Đơn hàng của bạn đã được xác nhận và đang được xử lý."}
             </p>
+            
+            {/* Payment result notification */}
+            {paymentResult === 'success' && (
+              <div className={styles.paymentSuccessNotification}>
+                <CheckCircle size={20} />
+                <span>Thanh toán đã được xử lý thành công!</span>
+              </div>
+            )}
+            {paymentResult === 'failed' && (
+              <div className={styles.paymentFailedNotification}>
+                <XCircle size={20} />
+                <span>Thanh toán không thành công. Bạn có thể thử lại bên dưới.</span>
+              </div>
+            )}
           </div>
 
           <div className={styles.orderInfoSection}>
             <div className={styles.orderHeaderWithActions}>
               <h2 className={styles.sectionTitle}>Thông tin đơn hàng</h2>
-              {statusInfo.canCancel && orderData.orderStatus !== "Cancelled" && (
-                <button className={styles.cancelButton} onClick={() => setShowCancelModal(true)} disabled={cancelling}>
-                  {cancelling ? "Đang hủy..." : "Hủy đơn hàng"}
-                </button>
-              )}
+              <div className={styles.orderActions}>
+                {canPayOnline() && (
+                  <button 
+                    className={styles.paymentButton} 
+                    onClick={handleOnlinePayment}
+                    disabled={processingPayment}
+                  >
+                    {processingPayment ? (
+                      <>
+                        <div className={styles.paymentSpinner}></div>
+                        <span>Đang xử lý...</span>
+                      </>
+                    ) : (
+                      <>
+                        <ExternalLink size={16} />
+                        <span>Thanh toán ngay</span>
+                      </>
+                    )}
+                  </button>
+                )}
+                {statusInfo.canCancel && orderData.orderStatus !== "Cancelled" && (
+                  <button className={styles.cancelButton} onClick={() => setShowCancelModal(true)} disabled={cancelling}>
+                    {cancelling ? "Đang hủy..." : "Hủy đơn hàng"}
+                  </button>
+                )}
+              </div>
             </div>
 
             <div className={styles.orderInfo}>
