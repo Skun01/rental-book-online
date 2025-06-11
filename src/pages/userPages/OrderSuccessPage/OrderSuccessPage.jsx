@@ -369,7 +369,6 @@ const OrderSuccessPage = () => {
             <h2 className={styles.sectionTitle}>Sách đã thuê</h2>
             <div className={styles.orderItems}>
               {orderData.items.map((item) => {
-                const rentalDays = calculateRentalDays(item.rentalDate, item.rentedDate)
                 return (
                   <div key={item.id} className={styles.orderItem}>
                     <div className={styles.itemImage}>
@@ -380,10 +379,7 @@ const OrderSuccessPage = () => {
                       <h3 className={styles.itemTitle}>{item.bookName}</h3>
                       <p className={styles.itemAuthor}>{item.bookAuthor || "Tác giả không xác định"}</p>
                       <div className={styles.itemRentDetails}>
-                        <span className={styles.itemRentDays}>Thời gian thuê: {rentalDays} ngày</span>
-                        <span className={styles.itemRentPeriod}>
-                          ({formatDate(item.receiveDay || item.createAt)} - {formatDate(item.rentedDate)})
-                        </span>
+                        <span className={styles.itemRentDays}>Thời gian thuê: {item.timeRental} ngày</span>
                       </div>
                       <div className={styles.itemPrice}>
                         {item.totalRental.toLocaleString("vi-VN")}đ

@@ -1,186 +1,362 @@
-import { useState } from "react"
-import { Book, AlertTriangle, ArrowLeft, Truck, Home } from "lucide-react"
+import { useState, useEffect } from "react"
+import { useLocation, useNavigate } from "react-router-dom"
+import { useAuth } from "../../../contexts/AuthContext"
+import { useToast } from "../../../contexts/ToastContext"
+import axios from "axios"
+import { ArrowLeft, MapPin, Clock, Book, AlertTriangle } from "lucide-react"
 import styles from "./ReturnBooksPage.module.css"
 
-// Sample data based on your JSON structure
-const sampleReturnData = {
-  id: 9007199254740991,
-  city: "Hồ Chí Minh",
-  district: "Quận 1",
-  ward: "Phường Bến Nghé",
-  street: "123 Đường Nguyễn Huệ",
-  notes: "Giao hàng vào buổi sáng",
-  fullName: "Nguyễn Văn An",
-  phone: "0901234567",
-  deliveryMethod: "online",
-  orderStatus: "pending",
-  paymentStatus: "pending",
-  paymentMethod: "cash",
-  receiveDay: "2025-06-06T09:00:00.000Z",
-  userId: 123456,
-  items: [
-    {
-      id: 1,
-      rentalDate: "2025-05-01T00:00:00.000Z",
-      rentedDate: "2025-05-01T00:00:00.000Z",
-      bookName: "Người tối cổ",
-      imageUrl: "/placeholder.svg?height=280&width=200",
-      rentalPrice: 15000,
-      depositPrice: 50000,
-      quantity: 1,
-      totalRental: 15000,
-      totalDeposit: 50000,
-      itemStatus: "active",
-      createAt: "2025-05-01T00:00:00.000Z",
-      updateAt: "2025-06-05T00:00:00.000Z",
-      createBy: "user123",
-      updateBy: "user123",
-    },
-    {
-      id: 2,
-      rentalDate: "2025-04-20T00:00:00.000Z",
-      rentedDate: "2025-04-20T00:00:00.000Z",
-      bookName: "Dế Mèn phiêu lưu ký",
-      imageUrl: "/placeholder.svg?height=280&width=200",
-      rentalPrice: 12000,
-      depositPrice: 45000,
-      quantity: 1,
-      totalRental: 12000,
-      totalDeposit: 45000,
-      itemStatus: "active",
-      createAt: "2025-04-20T00:00:00.000Z",
-      updateAt: "2025-06-05T00:00:00.000Z",
-      createBy: "user123",
-      updateBy: "user123",
-    },
-    {
-      id: 3,
-      rentalDate: "2025-04-10T00:00:00.000Z",
-      rentedDate: "2025-04-10T00:00:00.000Z",
-      bookName: "Tắt đèn",
-      imageUrl: "/placeholder.svg?height=280&width=200",
-      rentalPrice: 18000,
-      depositPrice: 60000,
-      quantity: 1,
-      totalRental: 18000,
-      totalDeposit: 60000,
-      itemStatus: "overdue",
-      createAt: "2025-04-10T00:00:00.000Z",
-      updateAt: "2025-06-05T00:00:00.000Z",
-      createBy: "user123",
-      updateBy: "user123",
-    },
-  ],
-  createAt: "2025-06-05T02:15:13.087Z",
-  updateAt: "2025-06-05T02:15:13.087Z",
-  createBy: "user123",
-  updateBy: "user123",
+// API function to get all branches
+const getAllBranches = async () => {
+  try {
+    const token = localStorage.getItem("token")
+    const response = await axios.get("http://localhost:8080/api/v1/branch/all?page=0&size=1000&sortDir=asc", {
+      headers: {
+        Authorization: `${token}`,
+      },
+    })
+    return response.data.data.content
+  } catch (error) {
+    console.error("Error fetching branches:", error)
+    throw error
+  }
 }
 
-const ReturnBooks = () => {
-  const [returnMethod, setReturnMethod] = useState("library")
-  const [formData, setFormData] = useState({
-    fullName: sampleReturnData.fullName,
-    phone: sampleReturnData.phone,
-    city: sampleReturnData.city,
-    district: sampleReturnData.district,
-    ward: sampleReturnData.ward,
-    street: sampleReturnData.street,
-    notes: sampleReturnData.notes,
-    branchId: 1,
-    returnDate: "",
-    refundMethod: "bank", // bank, wallet, cash
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [errors, setErrors] = useState({})
+// Branch Card Component
+const BranchCard = ({ branch, isSelected, onSelect }) => {
+  const formatTime = (timeString) => {
+    if (!timeString) return "N/A"
+    try {
+      const time = timeString.split("T")[1]?.split("Z")[0] || timeString
+      const [hours, minutes] = time.split(":")
+      return `${hours}:${minutes}`
+    } catch (error) {
+      return "N/A"
+    }
+  }
 
-  const handleReturnMethodChange = (method) => {
-    setReturnMethod(method)
+  const formatAddress = (branch) => {
+    const parts = [branch.street, branch.ward, branch.district, branch.city].filter(Boolean)
+    return parts.join(", ") || "Chưa có địa chỉ"
+  }
+
+  return (
+    <div
+      className={`${styles.branchCard} ${isSelected ? styles.selectedBranch : ""}`}
+      onClick={() => onSelect(branch.id)}
+    >
+      <div className={styles.branchHeader}>
+        <input
+          type="radio"
+          name="branchSelection"
+          checked={isSelected}
+          onChange={() => onSelect(branch.id)}
+          className={styles.branchRadio}
+        />
+        <h4 className={styles.branchName}>{branch.name}</h4>
+      </div>
+
+      <div className={styles.branchDetails}>
+        <div className={styles.branchAddress}>
+          <span className={styles.addressIcon}>
+            <MapPin size={15} />
+          </span>
+          <span>{formatAddress(branch)}</span>
+        </div>
+
+        <div className={styles.branchHours}>
+          <span className={styles.timeIcon}>
+            <Clock size={15} />
+          </span>
+          <span>
+            Giờ mở cửa: {formatTime(branch.openTime)} - {formatTime(branch.closeTime)}
+          </span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const ReturnBooksPage = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [branches, setBranches] = useState([])
+  const [loadingBranches, setLoadingBranches] = useState(false)
+  const [booksToReturn, setBooksToReturn] = useState([])
+  const [loadingBooks, setLoadingBooks] = useState(true)
+  const [formData, setFormData] = useState({
+    fullName: "",
+    phone: "",
+    deliveryMethod: "Offline", // [Offline, Online]
+    branchId: null,
+    returnDate: "",
+    city: "",
+    district: "",
+    ward: "",
+    street: "",
+    notes: "",
+    paymentMethod: "Cash",
+    paymentStatus: "Unpaid",
+    shippingMethod: "Express",
+  })
+  const [errors, setErrors] = useState({})
+  const [addresses, setAddresses] = useState([])
+  const [selectedAddressId, setSelectedAddressId] = useState(null)
+  const [showNewAddressForm, setShowNewAddressForm] = useState(false)
+
+  const { currentUser } = useAuth()
+  const { showToast } = useToast()
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  const navigationData = location.state?.booksToReturn || []
+  console.log(navigationData)
+  useEffect(() => {
+    const fetchBranches = async () => {
+      try {
+        setLoadingBranches(true)
+        const branchesData = await getAllBranches()
+        setBranches(branchesData)
+        if (branchesData.length > 0) {
+          setFormData((prev) => ({ ...prev, branchId: branchesData[0].id }))
+        }
+      } catch (error) {
+        console.error("Error fetching branches:", error)
+        showToast({ type: "error", message: "Lỗi khi tải danh sách chi nhánh!" })
+      } finally {
+        setLoadingBranches(false)
+      }
+    }
+
+    fetchBranches()
+  }, [showToast])
+
+  useEffect(() => {
+    const fetchBookDetails = async () => {
+      if (navigationData.length === 0) {
+        setLoadingBooks(false)
+        return
+      }
+
+      try {
+        setLoadingBooks(true)
+        const bookDetails = navigationData
+        setBooksToReturn(bookDetails)
+      } catch (error) {
+        console.error("Error fetching book details:", error)
+        showToast({ type: "error", message: "Lỗi khi tải thông tin sách!" })
+      } finally {
+        setLoadingBooks(false)
+      }
+    }
+
+    fetchBookDetails()
+  }, [navigationData, showToast])
+
+  // Get user addresses
+  useEffect(() => {
+    const fetchUserAddresses = async () => {
+      try {
+        const bearer = localStorage.getItem("token")
+        const response = await axios.get(
+          `http://localhost:8080/api/v1/address/by/user/${currentUser.id}?page=0&size=10`,
+          {
+            headers: {
+              Authorization: `${bearer}`,
+            },
+          },
+        )
+        setAddresses(response.data.data.content)
+        const defaultAddress = response.data.data.content.find((addr) => addr.is_default)
+        if (defaultAddress) {
+          setSelectedAddressId(defaultAddress.id)
+          setFormData((prev) => ({
+            ...prev,
+            city: defaultAddress.city,
+            district: defaultAddress.district,
+            ward: defaultAddress.ward,
+            street: defaultAddress.street,
+          }))
+        }
+      } catch (error) {
+        console.error("Error fetching addresses:", error)
+      }
+    }
+
+    if (currentUser?.id) {
+      fetchUserAddresses()
+    }
+  }, [currentUser?.id])
+
+  // Get available return dates (next 7 days)
+  const getAvailableReturnDates = () => {
+    const dates = []
+    for (let i = 1; i <= 7; i++) {
+      const date = new Date()
+      date.setDate(date.getDate() + i)
+      dates.push({
+        value: date.toISOString().split("T")[0],
+        label: date.toLocaleDateString("vi-VN", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
+      })
+    }
+    return dates
+  }
+
+  // Get expected return date
+  const getExpectedDate = () => {
+    if (formData.deliveryMethod === "Offline") {
+      if (formData.returnDate) {
+        const date = new Date(formData.returnDate)
+        return `${date.toLocaleDateString("vi-VN", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+        })}`
+      }
+      return "Chưa chọn thời gian"
+    } else {
+      const days = formData.shippingMethod === "Express" ? 1 : 3
+      const date = new Date()
+      date.setDate(date.getDate() + days)
+      return date.toLocaleDateString("vi-VN", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+      })
+    }
   }
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
+    const { name, value, type, checked } = e.target
+    setFormData({
+      ...formData,
+      [name]: type === "checkbox" ? checked : value,
+    })
 
     if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
+      setErrors({
+        ...errors,
         [name]: "",
-      }))
+      })
     }
   }
 
-  const getAvailableReturnDates = () => {
-    const dates = []
-    const today = new Date()
-    
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(today)
-      date.setDate(today.getDate() + i)
-      
-      const dayNames = ["Chủ nhật", "Thứ hai", "Thứ ba", "Thứ tư", "Thứ năm", "Thứ sáu", "Thứ bảy"]
-      const dayName = dayNames[date.getDay()]
-      const dateStr = date.toLocaleDateString("vi-VN")
-      
-      dates.push({
-        value: date.toISOString().split('T')[0],
-        label: i === 0 ? `Hôm nay (${dateStr})` : `${dayName} (${dateStr})`
-      })
+  const handleBranchSelect = (branchId) => {
+    setFormData((prev) => ({ ...prev, branchId }))
+    if (errors.branchId) {
+      setErrors((prev) => ({ ...prev, branchId: "" }))
     }
-    
-    return dates
+  }
+
+  const handleAddressSelect = (addressId) => {
+    if (addressId === "new") {
+      setSelectedAddressId(null)
+      setShowNewAddressForm(true)
+      setFormData((prev) => ({
+        ...prev,
+        city: "",
+        district: "",
+        ward: "",
+        street: "",
+      }))
+    } else {
+      const selectedAddress = addresses.find((addr) => addr.id === addressId)
+      if (selectedAddress) {
+        setSelectedAddressId(addressId)
+        setShowNewAddressForm(false)
+        setFormData((prev) => ({
+          ...prev,
+          city: selectedAddress.city,
+          district: selectedAddress.district,
+          ward: selectedAddress.ward,
+          street: selectedAddress.street,
+        }))
+      }
+    }
   }
 
   const validateForm = () => {
     const newErrors = {}
+    if (!formData.fullName.trim()) newErrors.fullName = "Họ và tên là bắt buộc"
 
-    if (returnMethod === "online") {
-      if (!formData.fullName.trim()) newErrors.fullName = "Họ và tên là bắt buộc"
-      if (!formData.phone.trim()) {
-        newErrors.phone = "Số điện thoại là bắt buộc"
-      } else if (!/^[0-9]{10,11}$/.test(formData.phone.replace(/\s/g, ""))) {
-        newErrors.phone = "Số điện thoại không hợp lệ"
-      }
-      if (!formData.street.trim()) newErrors.street = "Địa chỉ là bắt buộc"
+    if (!formData.phone.trim()) {
+      newErrors.phone = "Số điện thoại là bắt buộc"
+    } else if (!/^[0-9]{10,11}$/.test(formData.phone.replace(/\s/g, ""))) {
+      newErrors.phone = "Số điện thoại không hợp lệ"
+    }
+
+    if (formData.deliveryMethod === "Offline") {
+      if (!formData.branchId) newErrors.branchId = "Vui lòng chọn chi nhánh"
+      if (!formData.returnDate) newErrors.returnDate = "Vui lòng chọn ngày trả sách"
+    }
+
+    if (formData.deliveryMethod === "Online") {
       if (!formData.city.trim()) newErrors.city = "Thành phố là bắt buộc"
       if (!formData.district.trim()) newErrors.district = "Quận/Huyện là bắt buộc"
+      if (!formData.ward.trim()) newErrors.ward = "Phường/Xã là bắt buộc"
+      if (!formData.street.trim()) newErrors.street = "Đường/Phố là bắt buộc"
     }
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
+  const getReturnData = () => {
+    const basicData = {
+      userId: currentUser.id,
+      fullName: formData.fullName,
+      phone: formData.phone,
+      notes: formData.notes,
+      deliveryMethod: formData.deliveryMethod,
+      paymentMethod: formData.paymentMethod,
+      paymentStatus: formData.paymentStatus,
+      itemIdLists: navigationData.map(item=>item.id)
+    }
+
+    if (formData.deliveryMethod === "Offline") {
+      return {
+        ...basicData,
+        branchId: +formData.branchId,
+        rentedDay: new Date(formData.returnDate).toISOString(),
+      }
+    } else {
+      return {
+        ...basicData,
+        city: formData.city,
+        district: formData.district,
+        ward: formData.ward,
+        street: formData.street,
+        shippingMethod: formData.shippingMethod,
+        rentedDay: new Date(
+          Date.now() + (formData.shippingMethod === "Express" ? 24 : 72) * 60 * 60 * 1000,
+        ).toISOString(),
+      }
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
-
     if (validateForm()) {
       setIsSubmitting(true)
       try {
-        // Prepare data for backend
-        const returnPayload = {
-          ...sampleReturnData,
-          city: formData.city,
-          district: formData.district,
-          ward: formData.ward,
-          street: formData.street,
-          notes: formData.notes,
-          fullName: formData.fullName,
-          phone: formData.phone,
-          deliveryMethod: returnMethod,
-          receiveDay: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-        }
+        const returnData = getReturnData()
+        const bearer = localStorage.getItem("token")
+        console.log(returnData)
+        await axios.post("http://localhost:8080/api/v1/order/rented/create", returnData, {
+          headers: {
+            Authorization: `${bearer}`,
+          },
+        })
 
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1500))
-
-        console.log("Data to send to backend:", returnPayload)
-        alert("Đã gửi yêu cầu trả sách thành công!")
+        showToast({ type: "success", message: "Yêu cầu trả sách đã được gửi thành công!" })
+        navigate("/my-orders") // Navigate back to orders page
       } catch (error) {
-        console.error("Error:", error)
-        setErrors({ submit: "Có lỗi khi xử lý trả sách. Vui lòng thử lại." })
+        console.error("Lỗi khi gửi yêu cầu trả sách:", error)
+        showToast({ type: "error", message: "Có lỗi khi xử lý yêu cầu trả sách" })
       } finally {
         setIsSubmitting(false)
       }
@@ -188,41 +364,36 @@ const ReturnBooks = () => {
   }
 
   const getTotalDeposit = () => {
-    return sampleReturnData.items.reduce((total, item) => total + item.totalDeposit, 0)
+    return booksToReturn.reduce((total, item) => total + (item.totalDeposit || item.depositPrice * item.quantity), 0)
   }
 
   const getTotalRental = () => {
-    return sampleReturnData.items.reduce((total, item) => total + item.totalRental, 0)
-  }
-
-  const getTotalOverdueFee = () => {
-    return sampleReturnData.items
-      .filter((item) => item.itemStatus === "overdue")
-      .reduce((total, item) => total + item.rentalPrice * 0.5, 0) // 50% phí phạt
-  }
-
-  const getTotalRefund = () => {
-    return getTotalDeposit() - getTotalRental() - getTotalOverdueFee()
+    return booksToReturn.reduce((total, item) => total + (item.totalRental || item.rentalPrice * item.quantity), 0)
   }
 
   const formatDate = (dateString) => {
-    const options = {
+    return new Date(dateString).toLocaleDateString("vi-VN", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
-    }
-    return new Date(dateString).toLocaleDateString("vi-VN", options)
+    })
   }
 
   const getStatusDisplay = (status) => {
     switch (status) {
-      case "active":
+      case "Processing":
         return {
-          text: "Đang thuê",
-          className: styles.statusActive,
+          text: "Đang xử lý",
+          className: styles.statusProcessing,
           icon: <Book size={16} />,
         }
-      case "overdue":
+      case "Received":
+        return {
+          text: "Đã nhận",
+          className: styles.statusReceived,
+          icon: <Book size={16} />,
+        }
+      case "Overdue":
         return {
           text: "Quá hạn",
           className: styles.statusOverdue,
@@ -232,91 +403,140 @@ const ReturnBooks = () => {
         return {
           text: status,
           className: "",
-          icon: null,
+          icon: <Book size={16} />,
         }
     }
+  }
+
+  if (loadingBooks) {
+    return (
+      <div className={styles.returnBooksPage}>
+        <div className={styles.container}>
+          <div className={styles.loadingState}>Đang tải thông tin sách...</div>
+        </div>
+      </div>
+    )
+  }
+
+  if (booksToReturn.length === 0) {
+    return (
+      <div className={styles.returnBooksPage}>
+        <div className={styles.container}>
+          <div className={styles.emptyState}>
+            <h2>Không có sách để trả</h2>
+            <button onClick={() => navigate("/my-orders")} className={styles.backButton}>
+              <ArrowLeft size={20} />
+              Quay lại danh sách đơn hàng
+            </button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className={styles.returnBooksPage}>
       <div className={styles.container}>
         <div className={styles.pageHeader}>
-          <button className={styles.backButton}>
+          <button onClick={() => navigate(-1)} className={styles.backButton}>
             <ArrowLeft size={20} />
-            <span>Quay lại danh sách sách</span>
+            <span>Quay lại</span>
           </button>
-          <h1 className={styles.pageTitle}>Trả sách</h1>
+          <h1 className={styles.pageTitle}>Trả Sách</h1>
         </div>
 
-        <div className={styles.returnContent}>
-          <div className={styles.returnForm}>
-            <form onSubmit={handleSubmit}>
+        <div className={styles.returnGrid}>
+          <div className={styles.returnFormContainer}>
+            <form onSubmit={handleSubmit} className={styles.returnForm}>
+              {/* Personal Information */}
               <div className={styles.formSection}>
-                <h2 className={styles.sectionTitle}>Phương thức trả sách</h2>
-                <div className={styles.returnMethods}>
+                <h2>Thông Tin Cá Nhân</h2>
+                <div className={styles.formGroup}>
+                  <label htmlFor="fullName">Họ và Tên</label>
+                  <input
+                    type="text"
+                    id="fullName"
+                    name="fullName"
+                    value={formData.fullName}
+                    onChange={handleInputChange}
+                    className={errors.fullName ? styles.error : ""}
+                  />
+                  {errors.fullName && <span className={styles.errorMessage}>{errors.fullName}</span>}
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label htmlFor="phone">Số Điện Thoại</label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className={errors.phone ? styles.error : ""}
+                  />
+                  {errors.phone && <span className={styles.errorMessage}>{errors.phone}</span>}
+                </div>
+              </div>
+
+              {/* Return Method */}
+              <div className={styles.formSection}>
+                <h2>Phương Thức Trả Sách</h2>
+                <div className={styles.deliveryOptions}>
                   <div className={styles.deliveryOption}>
                     <input
                       type="radio"
                       id="library-return"
-                      name="returnMethod"
-                      value="library"
-                      checked={returnMethod === "library"}
-                      onChange={(e) => handleReturnMethodChange(e.target.value)}
+                      name="deliveryMethod"
+                      value="Offline"
+                      checked={formData.deliveryMethod === "Offline"}
+                      onChange={handleInputChange}
                     />
                     <label htmlFor="library-return">
-                      <div className={styles.methodIcon}>
-                        <Home size={24} />
-                      </div>
-                      <div className={styles.methodInfo}>
-                        <span className={styles.optionTitle}>Trả tại thư viện</span>
-                        <span className={styles.optionDescription}>
-                          Mang sách đến trả trực tiếp tại một trong các chi nhánh thư viện
-                        </span>
-                      </div>
+                      <span className={styles.optionTitle}>Trả tại thư viện</span>
+                      <span className={styles.optionDescription}>
+                        Mang sách đến trả trực tiếp tại chi nhánh thư viện
+                      </span>
                     </label>
                   </div>
 
                   <div className={styles.deliveryOption}>
                     <input
                       type="radio"
-                      id="online-return"
-                      name="returnMethod"
-                      value="online"
-                      checked={returnMethod === "online"}
-                      onChange={(e) => handleReturnMethodChange(e.target.value)}
+                      id="pickup-return"
+                      name="deliveryMethod"
+                      value="Online"
+                      checked={formData.deliveryMethod === "Online"}
+                      onChange={handleInputChange}
                     />
-                    <label htmlFor="online-return">
-                      <div className={styles.methodIcon}>
-                        <Truck size={24} />
-                      </div>
-                      <div className={styles.methodInfo}>
-                        <span className={styles.optionTitle}>Trả online</span>
-                        <span className={styles.optionDescription}>
-                          Shipper sẽ đến địa chỉ của bạn để lấy sách và hoàn tiền
-                        </span>
-                      </div>
+                    <label htmlFor="pickup-return">
+                      <span className={styles.optionTitle}>Lấy sách tại nhà</span>
+                      <span className={styles.optionDescription}>Shipper sẽ đến lấy sách tại địa chỉ của bạn</span>
                     </label>
                   </div>
                 </div>
 
-                {/* Thông tin trả tại thư viện */}
-                {returnMethod === "library" && (
+                {/* Library Return Details */}
+                {formData.deliveryMethod === "Offline" && (
                   <div className={styles.deliverySection}>
                     <div className={styles.formGroup}>
-                      <label htmlFor="branchId">Địa điểm trả sách</label>
-                      <select
-                        id="branchId"
-                        name="branchId"
-                        value={formData.branchId}
-                        onChange={handleInputChange}
-                      >
-                        <option value={1}>
-                          Thư viện tòa A11 cơ sở 1 Đại Học Công Nghiệp Hà nội, Minh Khai, Bắc Từ Liêm Hà Nội
-                        </option>
-                        <option value={2}>
-                          Thư viện tòa C3 cơ sở 3 Đại Học Công Nghiệp Hà nội, Phủ lý, Hà Nam
-                        </option>
-                      </select>
+                      <label>Chọn chi nhánh trả sách</label>
+                      {loadingBranches ? (
+                        <div className={styles.loadingBranches}>Đang tải danh sách chi nhánh...</div>
+                      ) : branches.length > 0 ? (
+                        <div className={styles.branchSelection}>
+                          {branches.map((branch) => (
+                            <BranchCard
+                              key={branch.id}
+                              branch={branch}
+                              isSelected={formData.branchId === branch.id}
+                              onSelect={handleBranchSelect}
+                            />
+                          ))}
+                        </div>
+                      ) : (
+                        <div className={styles.noBranches}>Không có chi nhánh nào khả dụng</div>
+                      )}
+                      {errors.branchId && <span className={styles.errorMessage}>{errors.branchId}</span>}
                     </div>
 
                     <h3>Thời gian hẹn trả sách</h3>
@@ -344,239 +564,214 @@ const ReturnBooks = () => {
                         {errors.returnDate && <span className={styles.errorMessage}>{errors.returnDate}</span>}
                       </div>
                     </div>
+                  </div>
+                )}
 
-                    <h3>Phương thức hoàn tiền</h3>
-                    <div className={styles.refundMethods}>
-                      <div className={styles.refundOption}>
-                        <input
-                          type="radio"
-                          id="bank-refund"
-                          name="refundMethod"
-                          value="bank"
-                          checked={formData.refundMethod === "bank"}
-                          onChange={handleInputChange}
-                        />
-                        <label htmlFor="bank-refund">
-                          <span className={styles.refundTitle}>Chuyển khoản ngân hàng</span>
-                          <span className={styles.refundDescription}>Hoàn tiền vào tài khoản ngân hàng (1-2 ngày làm việc)</span>
-                        </label>
-                      </div>
+                {/* Online Return Details */}
+                {formData.deliveryMethod === "Online" && (
+                  <div className={styles.formGroup}>
+                    <label htmlFor="shippingMethod">Phương thức lấy sách</label>
+                    <select
+                      id="shippingMethod"
+                      name="shippingMethod"
+                      value={formData.shippingMethod}
+                      onChange={handleInputChange}
+                    >
+                      <option value="Standard">Tiêu chuẩn (3 ngày)</option>
+                      <option value="Express">Nhanh (1 ngày)</option>
+                    </select>
+                  </div>
+                )}
 
-                      <div className={styles.refundOption}>
-                        <input
-                          type="radio"
-                          id="wallet-refund"
-                          name="refundMethod"
-                          value="wallet"
-                          checked={formData.refundMethod === "wallet"}
-                          onChange={handleInputChange}
-                        />
-                        <label htmlFor="wallet-refund">
-                          <span className={styles.refundTitle}>Ví điện tử</span>
-                          <span className={styles.refundDescription}>Hoàn tiền vào ví trong app (ngay lập tức)</span>
-                        </label>
+                {/* Address Selection for Online Return */}
+                {formData.deliveryMethod === "Online" && (
+                  <div className={styles.deliverySection}>
+                    <h3>Thông tin lấy sách</h3>
+                    {addresses.length > 0 && (
+                      <div className={styles.savedAddresses}>
+                        <h4>Địa chỉ đã lưu</h4>
+                        <div className={styles.addressList}>
+                          {addresses.map((addr) => (
+                            <div
+                              key={addr.id}
+                              className={`${styles.addressCard} ${selectedAddressId === addr.id ? styles.selected : ""}`}
+                              onClick={() => handleAddressSelect(addr.id)}
+                            >
+                              <div className={styles.addressInfo}>
+                                <p>{addr.address}</p>
+                                <p>
+                                  {addr.street}, {addr.ward}, {addr.district}, {addr.city}
+                                </p>
+                                {addr.isDefault === "true" && <span className={styles.defaultBadge}>Mặc định</span>}
+                              </div>
+                            </div>
+                          ))}
+                          <div
+                            className={`${styles.addressCard} ${styles.newAddress} ${showNewAddressForm ? styles.selected : ""}`}
+                            onClick={() => handleAddressSelect("new")}
+                          >
+                            <div className={styles.addressInfo}>
+                              <p>+ Thêm địa chỉ mới</p>
+                            </div>
+                          </div>
+                        </div>
                       </div>
+                    )}
 
-                      <div className={styles.refundOption}>
-                        <input
-                          type="radio"
-                          id="cash-refund"
-                          name="refundMethod"
-                          value="cash"
-                          checked={formData.refundMethod === "cash"}
-                          onChange={handleInputChange}
-                        />
-                        <label htmlFor="cash-refund">
-                          <span className={styles.refundTitle}>Tiền mặt</span>
-                          <span className={styles.refundDescription}>Nhận tiền mặt tại thư viện khi trả sách</span>
-                        </label>
+                    {showNewAddressForm && (
+                      <div className={styles.addressForm}>
+                        <h4>Địa chỉ mới</h4>
+                        <div className={styles.formRow}>
+                          <div className={styles.formGroup}>
+                            <label htmlFor="city">Thành phố</label>
+                            <input
+                              type="text"
+                              id="city"
+                              name="city"
+                              value={formData.city}
+                              onChange={handleInputChange}
+                              className={errors.city ? styles.error : ""}
+                            />
+                            {errors.city && <span className={styles.errorMessage}>{errors.city}</span>}
+                          </div>
+
+                          <div className={styles.formGroup}>
+                            <label htmlFor="district">Quận/Huyện</label>
+                            <input
+                              type="text"
+                              id="district"
+                              name="district"
+                              value={formData.district}
+                              onChange={handleInputChange}
+                              className={errors.district ? styles.error : ""}
+                            />
+                            {errors.district && <span className={styles.errorMessage}>{errors.district}</span>}
+                          </div>
+                        </div>
+
+                        <div className={styles.formRow}>
+                          <div className={styles.formGroup}>
+                            <label htmlFor="ward">Phường/Xã</label>
+                            <input
+                              type="text"
+                              id="ward"
+                              name="ward"
+                              value={formData.ward}
+                              onChange={handleInputChange}
+                              className={errors.ward ? styles.error : ""}
+                            />
+                            {errors.ward && <span className={styles.errorMessage}>{errors.ward}</span>}
+                          </div>
+
+                          <div className={styles.formGroup}>
+                            <label htmlFor="street">Đường/Phố</label>
+                            <input
+                              type="text"
+                              id="street"
+                              name="street"
+                              value={formData.street}
+                              onChange={handleInputChange}
+                              className={errors.street ? styles.error : ""}
+                            />
+                            {errors.street && <span className={styles.errorMessage}>{errors.street}</span>}
+                          </div>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 )}
               </div>
 
-              {returnMethod === "online" && (
-                <div className={styles.formSection}>
-                  <h2 className={styles.sectionTitle}>Thông tin giao nhận</h2>
-
-                  <div className={styles.formGroup}>
-                    <label htmlFor="fullName" className={styles.formLabel}>
-                      Họ và tên người gửi
-                    </label>
-                    <input
-                      type="text"
-                      id="fullName"
-                      name="fullName"
-                      value={formData.fullName}
-                      onChange={handleInputChange}
-                      className={errors.fullName ? styles.errorInput : ""}
-                    />
-                    {errors.fullName && <span className={styles.errorMessage}>{errors.fullName}</span>}
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label htmlFor="phone" className={styles.formLabel}>
-                      Số điện thoại liên hệ
-                    </label>
-                    <input
-                      type="tel"
-                      id="phone"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      className={errors.phone ? styles.errorInput : ""}
-                    />
-                    {errors.phone && <span className={styles.errorMessage}>{errors.phone}</span>}
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label htmlFor="street" className={styles.formLabel}>
-                      Địa chỉ
-                    </label>
-                    <input
-                      type="text"
-                      id="street"
-                      name="street"
-                      value={formData.street}
-                      onChange={handleInputChange}
-                      className={errors.street ? styles.errorInput : ""}
-                    />
-                    {errors.street && <span className={styles.errorMessage}>{errors.street}</span>}
-                  </div>
-
-                  <div className={styles.formRow}>
-                    <div className={styles.formGroup}>
-                      <label htmlFor="city" className={styles.formLabel}>
-                        Thành phố
-                      </label>
-                      <input
-                        type="text"
-                        id="city"
-                        name="city"
-                        value={formData.city}
-                        onChange={handleInputChange}
-                        className={errors.city ? styles.errorInput : ""}
-                      />
-                      {errors.city && <span className={styles.errorMessage}>{errors.city}</span>}
-                    </div>
-
-                    <div className={styles.formGroup}>
-                      <label htmlFor="district" className={styles.formLabel}>
-                        Quận/Huyện
-                      </label>
-                      <input
-                        type="text"
-                        id="district"
-                        name="district"
-                        value={formData.district}
-                        onChange={handleInputChange}
-                        className={errors.district ? styles.errorInput : ""}
-                      />
-                      {errors.district && <span className={styles.errorMessage}>{errors.district}</span>}
-                    </div>
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label htmlFor="notes" className={styles.formLabel}>
-                      Ghi chú (không bắt buộc)
-                    </label>
-                    <textarea
-                      id="notes"
-                      name="notes"
-                      value={formData.notes}
-                      onChange={handleInputChange}
-                      className={styles.textArea}
-                      placeholder="Thông tin thêm về việc lấy sách..."
-                    />
-                  </div>
-                </div>
-              )}
-
+              {/* Notes */}
               <div className={styles.formSection}>
-                <h2 className={styles.sectionTitle}>Xác nhận trả sách</h2>
-                <div className={styles.confirmationNote}>
-                  <p>
-                    Bạn đang trả {sampleReturnData.items.length} cuốn sách. Vui lòng kiểm tra lại thông tin trước khi
-                    xác nhận.
-                  </p>
+                <h2>Ghi chú</h2>
+                <div className={styles.formGroup}>
+                  <label htmlFor="notes">Ghi chú (tùy chọn)</label>
+                  <textarea
+                    id="notes"
+                    name="notes"
+                    value={formData.notes}
+                    onChange={handleInputChange}
+                    rows={3}
+                    placeholder="Thêm ghi chú cho việc trả sách..."
+                    className={styles.orderNote}
+                  />
                 </div>
-
-                {errors.submit && <div className={styles.submitError}>{errors.submit}</div>}
-
-                <button type="submit" className={styles.submitButton} disabled={isSubmitting}>
-                  {isSubmitting ? "Đang xử lý..." : "Xác nhận trả sách"}
-                </button>
               </div>
+
+              {errors.submit && <div className={styles.submitError}>{errors.submit}</div>}
+              <button type="submit" className={styles.returnButton} disabled={isSubmitting}>
+                {isSubmitting ? "Đang xử lý..." : "Xác nhận trả sách"}
+              </button>
             </form>
           </div>
 
-          <div className={styles.returnSummary}>
-            <h2 className={styles.summaryTitle}>Thông tin sách trả</h2>
+          <div className={styles.returnSummaryContainer}>
+            <div className={styles.returnSummary}>
+              <h2 className={styles.summaryTitle}>Sách cần trả</h2>
 
-            <div className={styles.booksList}>
-              {sampleReturnData.items.map((item) => {
-                const status = getStatusDisplay(item.itemStatus)
-                return (
-                  <div key={item.id} className={styles.bookItem}>
-                    <img src={item.imageUrl || "/placeholder.svg"} alt={item.bookName} className={styles.bookImage} />
-                    <div className={styles.bookDetails}>
-                      <h3 className={styles.bookTitle}>{item.bookName}</h3>
-                      <div className={styles.bookDates}>
-                        <div className={styles.dateItem}>
-                          <span className={styles.dateLabel}>Ngày thuê:</span>
-                          <span className={styles.dateValue}>{formatDate(item.rentalDate)}</span>
+              <div className={styles.bookItems}>
+                {booksToReturn.map((item) => {
+                  const status = getStatusDisplay(item.status)
+                  return (
+                    <div key={item.id} className={styles.bookItem}>
+                      <div className={styles.itemImage}>
+                        <img
+                          src={item.imageUrl || "/placeholder.svg?height=280&width=200"}
+                          alt={item.bookName}
+                          className={styles.itemThumbnail}
+                        />
+                        {item.quantity > 1 && <span className={styles.itemQuantity}>{item.quantity}</span>}
+                      </div>
+                      <div className={styles.itemInfo}>
+                        <h3 className={styles.itemTitle}>{item.bookName}</h3>
+                        <div className={styles.itemDetails}>
+                          <span className={styles.itemRentDate}>Ngày thuê: {formatDate(item.rentalDate)}</span>
+                          <span className={styles.itemQuantityText}>Số lượng: {item.quantity}</span>
                         </div>
-                        <div className={styles.dateItem}>
-                          <span className={styles.dateLabel}>Số lượng:</span>
-                          <span className={styles.dateValue}>{item.quantity}</span>
+                        <div className={`${styles.itemStatus} ${status.className}`}>
+                          {status.icon}
+                          <span>{status.text}</span>
+                        </div>
+                        <div className={styles.itemPrice}>
+                          Tiền cọc: {(item.totalDeposit || item.depositPrice * item.quantity).toLocaleString("vi-VN")}đ
                         </div>
                       </div>
-                      <div className={`${styles.bookStatus} ${status.className}`}>
-                        {status.icon}
-                        <span>{status.text}</span>
-                      </div>
-                      {item.itemStatus === "overdue" && (
-                        <div className={styles.overdueFee}>
-                          <span>Phí phạt quá hạn:</span>
-                          <span>{(item.rentalPrice * 0.5).toLocaleString("vi-VN")}đ</span>
-                        </div>
-                      )}
                     </div>
-                  </div>
-                )
-              })}
-            </div>
-
-            <div className={styles.costSummary}>
-              <h3 className={styles.costTitle}>Tổng kết chi phí</h3>
-
-              <div className={styles.costItem}>
-                <span>Tổng tiền cọc:</span>
-                <span>{getTotalDeposit().toLocaleString("vi-VN")}đ</span>
+                  )
+                })}
               </div>
 
-              <div className={styles.costItem}>
-                <span>Tổng tiền thuê:</span>
-                <span>-{getTotalRental().toLocaleString("vi-VN")}đ</span>
-              </div>
-
-              {getTotalOverdueFee() > 0 && (
-                <div className={styles.costItem}>
-                  <span>Phí phạt quá hạn:</span>
-                  <span>-{getTotalOverdueFee().toLocaleString("vi-VN")}đ</span>
+              <div className={styles.summaryDetails}>
+                <div className={styles.summaryRow}>
+                  <span>Tổng số sách:</span>
+                  <span>{booksToReturn.reduce((total, item) => total + item.quantity, 0)}</span>
                 </div>
-              )}
+                <div className={styles.summaryRow}>
+                  <span>Tổng tiền cọc:</span>
+                  <span>{getTotalDeposit().toLocaleString("vi-VN")}đ</span>
+                </div>
+                <div className={styles.summaryRow}>
+                  <span>Tổng phí thuê:</span>
+                  <span>{getTotalRental().toLocaleString("vi-VN")}đ</span>
+                </div>
 
-              <div className={`${styles.costItem} ${styles.totalRefund}`}>
-                <span>Tổng tiền hoàn trả:</span>
-                <span>{getTotalRefund().toLocaleString("vi-VN")}đ</span>
+                <div className={styles.summaryRow}>
+                  <span>{formData.deliveryMethod === "Online" ? "Ngày lấy dự kiến:" : "Ngày trả sách:"}</span>
+                  <span className={styles.expectedDate}>{getExpectedDate()}</span>
+                </div>
+
+                <div className={`${styles.summaryRow} ${styles.summaryRowTotal}`}>
+                  <span>Tiền hoàn trả dự kiến:</span>
+                  <span>{(getTotalDeposit() - getTotalRental()).toLocaleString("vi-VN")}đ</span>
+                </div>
               </div>
 
-              <div className={styles.refundNote}>
+              <div className={styles.returnNote}>
                 <p>
-                  <strong>Lưu ý:</strong> Tiền hoàn trả sẽ được chuyển về tài khoản của bạn sau khi kiểm tra tình trạng
-                  sách.
+                  <strong>Lưu ý:</strong> <br />- Tiền cọc sẽ được hoàn trả sau khi kiểm tra tình trạng sách.
+                  <br />- Nếu sách bị hư hỏng, một phần tiền cọc sẽ được giữ lại để bồi thường.
+                  <br />- Thời gian hoàn tiền: 1-3 ngày làm việc.
                 </p>
               </div>
             </div>
@@ -587,4 +782,4 @@ const ReturnBooks = () => {
   )
 }
 
-export default ReturnBooks
+export default ReturnBooksPage

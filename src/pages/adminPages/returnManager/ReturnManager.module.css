@@ -244,25 +244,6 @@
   color: #374151;
 }
 
-/* Status badges */
-.statusPending,
-.statusConfirmed,
-.statusPickedUp,
-.statusCompleted,
-.statusCancelled {
-  background: var(--bg-color);
-  color: var(--text-color);
-  padding: 0.2rem 0.4rem; /* Giảm padding */
-  border-radius: 4px;
-  font-size: 0.7rem; /* Giảm từ 0.75rem */
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 0.2rem; /* Giảm gap */
-  width: fit-content;
-}
-
-/* Status Edit */
 .statusEditContainer {
   display: flex;
   align-items: center;
@@ -808,4 +789,83 @@
   .notesTextarea {
     min-height: 50px;
   }
+}
+
+/* Refresh Button */
+.refreshButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 40px;
+  padding: 0 0.75rem;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.refreshButton:hover:not(:disabled) {
+  background-color: #2563eb;
+}
+
+.refreshButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.statusProcessing {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.statusReceived {
+  background-color: #dbeafe;
+  color: #2563eb;
+}
+
+.statusConfirmed{
+  background-color: #dcfce7;
+  color: #059669;
+}
+
+.statusReceived,
+.statusProcessing,
+.statusConfirmed,
+.statusReceived{
+  padding: 6px;
+  border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+}
+
+
+
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: #6b7280;
+}
+
+.errorMessage {
+  background-color: #fee2e2;
+  color: #dc2626;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border: 1px solid #fecaca;
 }

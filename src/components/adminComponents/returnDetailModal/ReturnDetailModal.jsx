@@ -1,5 +1,5 @@
 import styles from "../../../pages/adminPages/returnManager/ReturnManager.module.css"
-import {Calendar, MapPin, CreditCard, User, BookOpen} from "lucide-react"
+import {Calendar, MapPin, CreditCard, User, BookOpen, Edit} from "lucide-react"
 
 const ReturnDetailModal = ({ returnItem, onClose }) => {
   const formatDate = (dateString) => {
@@ -81,7 +81,7 @@ const ReturnDetailModal = ({ returnItem, onClose }) => {
           <div className={styles.detailSection}>
             <h3 className={styles.sectionTitle}>
               <Edit size={18} />
-              Ghi chú của Admin
+              Ghi chú
             </h3>
             <div className={styles.notesSection}>
               {returnItem.notes ? (
@@ -117,15 +117,14 @@ const ReturnDetailModal = ({ returnItem, onClose }) => {
               {returnItem.books.map((book) => (
                 <div key={book.id} className={styles.returnItem}>
                   <div className={styles.itemImage}>
-                    <img src={book.cover_image || "/placeholder.svg"} alt={book.title} />
+                    <img src={book.imageUrl || "/placeholder.svg"} alt={book.title} />
                   </div>
                   <div className={styles.itemInfo}>
-                    <h4>{book.title}</h4>
-                    <p>{book.author}</p>
+                    <h4>{book.bookName}</h4>
                     <div className={styles.itemDetails}>
-                      <span>Thời gian thuê: {book.rental_period} ngày</span>
-                      <span>Ngày thuê: {formatDate(book.rental_date)}</span>
-                      <span>Ngày trả: {formatDate(book.due_date)}</span>
+                      <span>Thời gian thuê: {book.timeRental} ngày</span>
+                      <span>Ngày thuê: {formatDate(book.receiveDate)}</span>
+                      <span>Ngày trả: {formatDate(book.returnDate)}</span>
                     </div>
                     {book.status === "overdue" && (
                       <div className={styles.itemOverdue}>

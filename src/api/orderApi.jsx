@@ -42,3 +42,13 @@ export async function userAllReturnedOrderGet(userId, token){
   )
   return res.data.data.content
 }
+
+export async function updateOrderStatus(orderId, status, token){
+  await axios.put(`${BASEURL}/order/rental/update/status/order/${orderId}?newStatus=${status}`,
+      {
+        headers: {
+          Authorization: `${token}`
+        }
+      }
+    )
+}

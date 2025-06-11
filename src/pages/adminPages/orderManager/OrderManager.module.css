@@ -17,6 +17,41 @@
   align-items: center;
 }
 
+/* Refresh Button */
+.refreshButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 40px;
+  padding: 0 0.75rem;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.refreshButton:hover:not(:disabled) {
+  background-color: #2563eb;
+}
+
+.refreshButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 /* Search */
 .searchContainer {
   position: relative;
@@ -77,11 +112,23 @@
   transition: all 0.2s ease;
   font-size: 0.8rem;
   color: #374151;
+  position: relative;
 }
 
 .filterButton:hover {
   background-color: #f9fafb;
   border-color: #d1d5db;
+}
+
+.filterActive {
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.filterCount {
+  color: #3b82f6;
+  font-size: 0.6rem;
+  margin-left: -0.25rem;
 }
 
 .rotated {
@@ -162,6 +209,40 @@
 
 .filterApply:hover {
   background: #4338ca;
+}
+
+/* Loading and Error */
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.error {
+  background-color: #fee2e2;
+  color: #991b1b;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.errorClose {
+  background: none;
+  border: none;
+  color: #991b1b;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.errorClose:hover {
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 /* Table */
@@ -315,11 +396,13 @@
   width: fit-content;
 }
 
-/* Status Edit */
+/* Status Edit - Updated to display buttons vertically */
 .statusEditContainer {
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 0.5rem;
+  min-width: 140px;
 }
 
 .statusSelect {
@@ -328,7 +411,8 @@
   border-radius: 4px;
   font-size: 0.75rem;
   outline: none;
-  min-width: 120px;
+  width: 100%;
+  max-width: 130px;
 }
 
 .statusSelect:focus {
@@ -336,9 +420,18 @@
   box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
 }
 
+.statusSelect:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Changed from flex-direction: row to column */
 .statusEditActions {
   display: flex;
+  flex-direction: column;
   gap: 0.25rem;
+  width: 100%;
+  max-width: 130px;
 }
 
 .saveStatusButton,
@@ -346,12 +439,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  height: 28px;
   border-radius: 4px;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-size: 0.75rem;
+  font-weight: 500;
+  width: 100%;
 }
 
 .saveStatusButton {

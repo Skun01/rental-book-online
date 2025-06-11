@@ -1,8 +1,9 @@
 import styles from "./ReturnManager.module.css"
 import { Search, FilterIcon as Funnel, ChevronDown, Eye, CheckCircle, XCircle, Clock, Package, 
-  Truck, Edit, Home} from "lucide-react"
-import { useState } from "react"
+  Truck, Edit, Home, RefreshCw} from "lucide-react"
+import { useState, useMemo, useEffect } from "react"
 import ReturnDetailModal from "../../../components/adminComponents/returnDetailModal/ReturnDetailModal"
+import { allReturnOrderGet, updateOrderStatusPut } from "../../../api/returnApi"
 
 export default function ReturnManager() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -12,13 +13,93 @@ export default function ReturnManager() {
     sort: "created_desc",
   })
   const [selectedReturn, setSelectedReturn] = useState(null)
+  const [apiData, setApiData] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
 
-  // Filter returns based on search and filters
-  const filteredReturns = returns.filter((returnItem) => {
+  useEffect(() => {
+    fetchReturnData()
+  }, [])
+
+  const processedReturns = useMemo(() => {
+    if (!apiData.length) return []
+
+    return apiData.map(order => {
+      const totalBooks = order.items.reduce((sum, item) => sum + item.quantity, 0)
+      const totalRental = order.items.reduce((sum, item) => sum + item.totalRental, 0)
+      const totalDeposit = order.items.reduce((sum, item) => sum + item.totalDeposit, 0)
+      
+      // Tính refund amount dựa trên trạng thái
+      let refundAmount = 0
+      if (order.orderStatus === 'Received') {
+        // Đã nhận sách = hoàn tiền đặt cọc
+        refundAmount = totalDeposit
+      } else if (order.orderStatus === 'Cancelled') {
+        // Đã hủy = hoàn tiền đặt cọc
+        refundAmount = totalDeposit
+      } else {
+        // Processing, Confirmed = chưa hoàn tiền
+        refundAmount = 0
+      }
+
+      return {
+        id: order.id,
+        returnId: `${order.id}`,
+        customerName: order.fullName || `Khách hàng #${order.id}`,
+        customerEmail: `customer${order.id}@email.com`,
+        customerPhone: order.phone || '',
+        returnDate: order.returnDate || order.createAt,
+        estimatedPickupDate: order.returnDate,
+        status: order.orderStatus, // Sử dụng trực tiếp API status
+        returnMethod: order.deliveryMethod === 'Offline' ? 'library' : 'online',
+        address: `${order.street || ''} ${order.ward || ''} ${order.district || ''} ${order.city || ''}`.trim(),
+        notes: order.notes || '',
+        totalBooks: totalBooks,
+        totalDeposit: totalDeposit,
+        totalRental: totalRental,
+        totalOverdueFee: 0,
+        totalRefund: refundAmount,
+        paymentStatus: order.paymentStatus,
+        paymentMethod: order.paymentMethod,
+        userId: order.userId,
+        branchId: order.branchId,
+        books: order.items
+      }
+    })
+  }, [apiData])
+
+  const fetchReturnData = async () => {
+    setLoading(true)
+    setError("")
+    try {
+      const response = await allReturnOrderGet()
+      setApiData(response)
+    } catch (error) {
+      console.error('Error fetching return data:', error)
+      setError('Không thể tải dữ liệu. Vui lòng thử lại.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const updateOrderStatus = async (orderId, newStatus) => {
+    try {
+      await updateOrderStatusPut(orderId, newStatus)
+      await fetchReturnData()
+      return true
+    } catch (error) {
+      console.error('Error updating order status:', error)
+      setError('Không thể cập nhật trạng thái. Vui lòng thử lại.')
+      return false
+    }
+  }
+
+  const filteredReturns = processedReturns.filter((returnItem) => {
     const matchesSearch =
       returnItem.returnId.toLowerCase().includes(searchTerm.toLowerCase()) ||
       returnItem.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      returnItem.customerEmail.toLowerCase().includes(searchTerm.toLowerCase())
+      returnItem.customerEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      returnItem.customerPhone.includes(searchTerm)
 
     const matchesStatus = !filters.status || returnItem.status === filters.status
     const matchesMethod = !filters.returnMethod || returnItem.returnMethod === filters.returnMethod
@@ -26,16 +107,39 @@ export default function ReturnManager() {
     return matchesSearch && matchesStatus && matchesMethod
   })
 
+  const sortedReturns = useMemo(() => {
+    return [...filteredReturns].sort((a, b) => {
+      switch (filters.sort) {
+        case 'created_desc':
+          return new Date(b.returnDate) - new Date(a.returnDate)
+        case 'created_asc':
+          return new Date(a.returnDate) - new Date(b.returnDate)
+        case 'refund_desc':
+          return b.totalRefund - a.totalRefund
+        case 'refund_asc':
+          return a.totalRefund - b.totalRefund
+        default:
+          return 0
+      }
+    })
+  }, [filteredReturns, filters.sort])
+
   return (
     <div className="adminTabPage">
       <div className="adminPageTitle">Quản lý trả sách</div>
+
+      {error && (
+        <div className={styles.errorMessage}>
+          {error}
+        </div>
+      )}
 
       <div className={styles.manageTool}>
         <div className={styles.searchContainer}>
           <input
             type="text"
             className={styles.searchBar}
-            placeholder="Tìm kiếm theo mã trả, tên khách hàng..."
+            placeholder="Tìm kiếm theo mã trả, tên khách hàng, SĐT..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -45,15 +149,35 @@ export default function ReturnManager() {
         </div>
 
         <div className={styles.toolActions}>
+          <button 
+            className={styles.refreshButton} 
+            onClick={fetchReturnData}
+            disabled={loading}
+            title="Làm mới dữ liệu"
+          >
+            <RefreshCw size={16} className={loading ? styles.spinning : ""} />
+            Làm mới
+          </button>
           <Filter filters={filters} setFilters={setFilters} />
         </div>
       </div>
 
       <div className={styles.tableSection}>
-        <ReturnTable returns={filteredReturns} setSelectedReturn={setSelectedReturn} />
+        <ReturnTable 
+          returns={sortedReturns} 
+          setSelectedReturn={setSelectedReturn}
+          updateOrderStatus={updateOrderStatus}
+          loading={loading}
+        />
       </div>
 
-      {selectedReturn && <ReturnDetailModal returnItem={selectedReturn} onClose={() => setSelectedReturn(null)} />}
+      {selectedReturn && (
+        <ReturnDetailModal 
+          returnItem={selectedReturn} 
+          onClose={() => setSelectedReturn(null)}
+          updateOrderStatus={updateOrderStatus}
+        />
+      )}
     </div>
   )
 }
@@ -96,11 +220,10 @@ const Filter = ({ filters, setFilters }) => {
               onChange={(e) => handleFilterChange("status", e.target.value)}
             >
               <option value="">Tất cả trạng thái</option>
-              <option value="pending">Chờ xử lý</option>
-              <option value="confirmed">Đã xác nhận</option>
-              <option value="picked_up">Đã lấy sách</option>
-              <option value="completed">Hoàn thành</option>
-              <option value="cancelled">Đã hủy</option>
+              <option value="Processing">Chờ xử lý</option>
+              <option value="Confirmed">Đã xác nhận</option>
+              <option value="Received">Đã nhận sách</option>
+              <option value="Cancelled">Đã hủy</option>
             </select>
           </div>
 
@@ -145,21 +268,31 @@ const Filter = ({ filters, setFilters }) => {
   )
 }
 
-const ReturnTable = ({ returns, setSelectedReturn }) => {
+const ReturnTable = ({ returns, setSelectedReturn, updateOrderStatus, loading }) => {
   const [editingReturn, setEditingReturn] = useState(null)
   const [newStatus, setNewStatus] = useState("")
   const [editingNotes, setEditingNotes] = useState(null)
   const [newNotes, setNewNotes] = useState("")
+  const [updating, setUpdating] = useState(false)
 
   function handleEditReturn(returnItem) {
     setEditingReturn(returnItem.id)
     setNewStatus(returnItem.status)
   }
 
-  function handleSaveStatus(returnId) {
-    console.log(`Update return ${returnId} to status: ${newStatus}`)
-    // Thêm logic cập nhật trạng thái ở đây
-    setEditingReturn(null)
+  async function handleSaveStatus(returnId) {
+    setUpdating(true)
+    try {
+      const success = await updateOrderStatus(returnId, newStatus)
+      if (success) {
+        setEditingReturn(null)
+        setNewStatus("")
+      }
+    } catch (error) {
+      console.error('Error saving status:', error)
+    } finally {
+      setUpdating(false)
+    }
   }
 
   function handleCancelEdit() {
@@ -174,7 +307,6 @@ const ReturnTable = ({ returns, setSelectedReturn }) => {
 
   function handleSaveNotes(returnId) {
     console.log(`Update notes for return ${returnId}: ${newNotes}`)
-    // Thêm logic cập nhật ghi chú ở đây
     setEditingNotes(null)
   }
 
@@ -185,14 +317,29 @@ const ReturnTable = ({ returns, setSelectedReturn }) => {
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      pending: { label: "Chờ xử lý", class: styles.statusPending, icon: Clock },
-      confirmed: { label: "Đã xác nhận", class: styles.statusConfirmed, icon: CheckCircle },
-      picked_up: { label: "Đã lấy sách", class: styles.statusPickedUp, icon: Package },
-      completed: { label: "Hoàn thành", class: styles.statusCompleted, icon: CheckCircle },
-      cancelled: { label: "Đã hủy", class: styles.statusCancelled, icon: XCircle },
+      Processing: { 
+        label: "Chờ xử lý", 
+        class: styles.statusProcessing, 
+        icon: Clock 
+      },
+      Confirmed: { 
+        label: "Đã xác nhận", 
+        class: styles.statusConfirmed, 
+        icon: CheckCircle 
+      },
+      Received: { 
+        label: "Đã nhận sách", 
+        class: styles.statusReceived, 
+        icon: Package 
+      },
+      Cancelled: { 
+        label: "Đã hủy", 
+        class: styles.statusCancelled, 
+        icon: XCircle 
+      },
     }
 
-    const config = statusConfig[status] || statusConfig.pending
+    const config = statusConfig[status] || statusConfig.Processing
     const IconComponent = config.icon
 
     return (
@@ -215,6 +362,16 @@ const ReturnTable = ({ returns, setSelectedReturn }) => {
     return new Date(dateString).toLocaleDateString("vi-VN")
   }
 
+  if (loading) {
+    return (
+      <div className={styles.tableContainer}>
+        <div className={styles.loading}>
+          <p>Đang tải dữ liệu...</p>
+        </div>
+      </div>
+    )
+  }
+
   if (returns.length === 0) {
     return (
       <div className={styles.tableContainer}>
@@ -232,7 +389,7 @@ const ReturnTable = ({ returns, setSelectedReturn }) => {
           <tr>
             <th>Mã trả</th>
             <th>Khách hàng</th>
-            <th>Ngày đăng ký</th>
+            <th>Ngày tạo</th>
             <th>Số sách</th>
             <th>Tiền hoàn trả</th>
             <th>Phương thức</th>
@@ -250,7 +407,7 @@ const ReturnTable = ({ returns, setSelectedReturn }) => {
               <td>
                 <div className={styles.customerInfo}>
                   <h4>{returnItem.customerName}</h4>
-                  <p>{returnItem.customerEmail}</p>
+                  <p>{returnItem.customerPhone}</p>
                 </div>
               </td>
               <td>{formatDate(returnItem.returnDate)}</td>
@@ -258,7 +415,9 @@ const ReturnTable = ({ returns, setSelectedReturn }) => {
                 <span className={styles.bookCount}>{returnItem.totalBooks} cuốn</span>
               </td>
               <td>
-                <span className={styles.refundAmount}>{returnItem.totalRefund.toLocaleString("vi-VN")}đ</span>
+                <span className={styles.refundAmount}>
+                  {returnItem.totalRefund.toLocaleString("vi-VN")}đ
+                </span>
               </td>
               <td>
                 <div className={styles.methodBadge}>
@@ -279,7 +438,7 @@ const ReturnTable = ({ returns, setSelectedReturn }) => {
                     <div className={styles.notesEditActions}>
                       <button
                         className={styles.saveNotesButton}
-                        onClick={() => handleSaveNotes(returnItem.returnId)}
+                        onClick={() => handleSaveNotes(returnItem.id)}
                         title="Lưu ghi chú"
                       >
                         <CheckCircle size={14} />
@@ -308,22 +467,28 @@ const ReturnTable = ({ returns, setSelectedReturn }) => {
                       className={styles.statusSelect}
                       value={newStatus}
                       onChange={(e) => setNewStatus(e.target.value)}
+                      disabled={updating}
                     >
-                      <option value="pending">Chờ xử lý</option>
-                      <option value="confirmed">Đã xác nhận</option>
-                      <option value="picked_up">Đã lấy sách</option>
-                      <option value="completed">Hoàn thành</option>
-                      <option value="cancelled">Đã hủy</option>
+                      <option value="Processing">Chờ xử lý</option>
+                      <option value="Confirmed">Đã xác nhận</option>
+                      <option value="Received">Đã nhận sách</option>
+                      <option value="Cancelled">Đã hủy</option>
                     </select>
                     <div className={styles.statusEditActions}>
                       <button
                         className={styles.saveStatusButton}
-                        onClick={() => handleSaveStatus(returnItem.returnId)}
+                        onClick={() => handleSaveStatus(returnItem.id)}
+                        disabled={updating}
                         title="Lưu"
                       >
                         <CheckCircle size={14} />
                       </button>
-                      <button className={styles.cancelStatusButton} onClick={handleCancelEdit} title="Hủy">
+                      <button 
+                        className={styles.cancelStatusButton} 
+                        onClick={handleCancelEdit} 
+                        disabled={updating}
+                        title="Hủy"
+                      >
                         <XCircle size={14} />
                       </button>
                     </div>
@@ -345,6 +510,7 @@ const ReturnTable = ({ returns, setSelectedReturn }) => {
                     className={styles.editButton}
                     title="Chỉnh sửa đơn trả"
                     onClick={() => handleEditReturn(returnItem)}
+                    disabled={updating}
                   >
                     <Edit size={16} />
                   </button>
@@ -357,108 +523,3 @@ const ReturnTable = ({ returns, setSelectedReturn }) => {
     </div>
   )
 }
-
-
-
-// Mock data
-const returns = [
-  {
-    id: 1,
-    returnId: "RET1",
-    customerName: "Nguyễn Văn A",
-    customerEmail: "nguyen.van.a@gmail.com",
-    customerPhone: "0123456789",
-    returnDate: "2024-01-15T10:30:00",
-    estimatedPickupDate: "2024-01-17T00:00:00",
-    status: "pending",
-    returnMethod: "online",
-    address: "123 Đường ABC, Quận 1, Hồ Chí Minh",
-    notes: "Khách hàng yêu cầu lấy sách vào buổi chiều. Cần kiểm tra tình trạng sách cẩn thận.",
-    totalBooks: 2,
-    totalDeposit: 200000,
-    totalRental: 50000,
-    totalOverdueFee: 0,
-    totalRefund: 150000,
-    books: [
-      {
-        id: 1,
-        title: "Đắc Nhân Tâm",
-        author: "Dale Carnegie",
-        cover_image: "/Book.jpg",
-        rental_period: 14,
-        rental_date: "2024-01-01T00:00:00",
-        due_date: "2024-01-15T00:00:00",
-        status: "normal",
-      },
-      {
-        id: 2,
-        title: "Nhà Giả Kim",
-        author: "Paulo Coelho",
-        cover_image: "/Book.jpg",
-        rental_period: 10,
-        rental_date: "2024-01-05T00:00:00",
-        due_date: "2024-01-15T00:00:00",
-        status: "normal",
-      },
-    ],
-  },
-  {
-    id: 2,
-    returnId: "RET2",
-    customerName: "Trần Thị B",
-    customerEmail: "tran.thi.b@gmail.com",
-    customerPhone: "0987654321",
-    returnDate: "2024-01-16T14:20:00",
-    status: "confirmed",
-    returnMethod: "library",
-    notes: "Sách có dấu hiệu hư hỏng nhẹ ở trang 45. Đã thông báo với khách hàng về phí bồi thường.",
-    totalBooks: 1,
-    totalDeposit: 120000,
-    totalRental: 30000,
-    totalOverdueFee: 15000,
-    totalRefund: 75000,
-    books: [
-      {
-        id: 3,
-        title: "Sapiens",
-        author: "Yuval Noah Harari",
-        cover_image: "/Book.jpg",
-        rental_period: 14,
-        rental_date: "2024-01-01T00:00:00",
-        due_date: "2024-01-15T00:00:00",
-        status: "overdue",
-        overdue_days: 3,
-        overdue_fee: 15000,
-      },
-    ],
-  },
-  {
-    id: 3,
-    returnId: "RET3",
-    customerName: "Lê Văn C",
-    customerEmail: "le.van.c@gmail.com",
-    customerPhone: "0369852147",
-    returnDate: "2024-01-17T09:15:00",
-    status: "completed",
-    returnMethod: "online",
-    address: "456 Đường XYZ, Quận 3, Hồ Chí Minh",
-    notes: "Đã hoàn thành trả sách. Sách trong tình trạng tốt. Khách hàng hài lòng với dịch vụ.",
-    totalBooks: 1,
-    totalDeposit: 150000,
-    totalRental: 45000,
-    totalOverdueFee: 0,
-    totalRefund: 105000,
-    books: [
-      {
-        id: 4,
-        title: "Atomic Habits",
-        author: "James Clear",
-        cover_image: "/Book.jpg",
-        rental_period: 15,
-        rental_date: "2024-01-01T00:00:00",
-        due_date: "2024-01-16T00:00:00",
-        status: "normal",
-      },
-    ],
-  },
-]

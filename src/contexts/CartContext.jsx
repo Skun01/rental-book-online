@@ -94,7 +94,7 @@ export function CartProvider({ children }) {
     const postCartItems = cartItems.map((item) => ({
       bookId: item.book.id,
       quantity: item.quantity,
-      rentedDay: item.rentedDay,
+      tỉmeRental: item.rentedDay,
     }))
     return postCartItems;
   }
