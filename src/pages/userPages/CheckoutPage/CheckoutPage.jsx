@@ -258,6 +258,12 @@ const CheckoutPage = () => {
   //get all data necessary to send to backend
   const getCheckoutData = () => {
     const shippingFee = formData.deliveryMethod === "Online" ? (formData.shippingMethod === "Express" ? 10000 : 0) : 0
+    let orderItem = getPostCartItems().map(item=>({
+      bookId: item.bookId,
+      quantity: item.quantity,
+      timeRental: item.rentedDay
+    }))
+    console.log(orderItem, getPostCartItems)
     const basicData = {
       userId: currentUser.id,
       fullName: formData.fullName,
@@ -268,7 +274,7 @@ const CheckoutPage = () => {
       paymentStatus: "Unpaid",
       deliveryMethod: formData.deliveryMethod,
       paymentMethod: formData.paymentMethod,
-      items: getPostCartItems(),
+      items: orderItem
     }
     if(formData.deliveryMethod === "Offline"){
       return {...basicData, 
