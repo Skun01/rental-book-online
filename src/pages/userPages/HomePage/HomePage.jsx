@@ -7,22 +7,19 @@ import CategoryCard from "../../../components/userComponents/categoryCard/Catego
 import BookSlider from "./BookSlider"
 import styles from "./HomePage.module.css"
 import axios from "axios"
+import { useAuth } from "../../../contexts/AuthContext"
 
 const HomePage = () => {
   const [books, setBooks] = useState([])
   const [categories, setCategories] = useState([])
-  // const [newReleaseBooks, setNewReleaseBooks] = useState([])
-  // const [topRentedBooks, setTopRentedBooks] = useState([])
-  // const [teenBooks, setTeenBooks] = useState([])
-  // const [recommendedBooks, setRecommendedBooks] = useState([])
   const [email, setEmail] = useState("")
+  const {currentUser} = useAuth()
   const [isLoading, setIsLoading] = useState(true)
 
   // get book backend
   useEffect(()=>{
     const fetchData = async () => {
       try {
-        // Lấy sách mặc định
         const booksResponse = await axios.get("http://localhost:8080/api/v1/book/all?page=0&size=12")
         setBooks(booksResponse.data.data.result.content)
       } catch (error) {
@@ -56,10 +53,24 @@ const HomePage = () => {
     }
   }, [isLoading]) 
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    setEmail("")
-    alert("Đăng ký nhận thông báo thành công!")
+    try{
+      const res = await axios.post(`http://localhost:8080/api/v1/subscribe/create`,
+        {
+          fullName: currentUser.id,
+          email: email,
+          age: currentUser.age,
+          gender: currentUser.gender,
+        }
+      )
+      console.log(res)
+      setEmail("")
+      alert("Đăng ký nhận thông báo thành công!")
+    }catch(err){
+      console.error(`can't subcrise email: `, err)
+    }
+    
   }
 
   if (isLoading) {
@@ -107,7 +118,7 @@ const HomePage = () => {
             <h2 className={styles.sectionTitle}>Mới phát hành</h2>
           </div>
           <div className={styles.booksGrid}>
-            {books.map((book) => (
+            {books.slice(0, 10).map((book) => (
               <BookCard key={book.id} book={book} releaseYear={2025}/>
             ))}
           </div>
@@ -151,14 +162,13 @@ const HomePage = () => {
             <h2 className={styles.sectionTitle}>Gợi ý cho bạn</h2>
           </div>
           <div className={styles.booksGrid}>
-            {books.map((book) => (
+            {books.slice(0, 10).map((book) => (
               <BookCard key={book.id} book={book}/>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className={styles.ctaSection}>
         <div className={styles.container}>
           <div className={styles.ctaContent}>

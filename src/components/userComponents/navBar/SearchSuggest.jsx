@@ -10,7 +10,7 @@ function SearchSuggest({ searchTerm, setSearchTerm, setShowSuggest }) {
   const [filtered, setFiltered] = useState([]);
   useEffect(()=>{
     async function getSearchingByKeyword(){
-      await axios.get(`http://localhost:8080/api/v1/book/search?page=0&size=5&keyword=${searchTerm}`)
+      await axios.get(`http://localhost:8080/api/v1/book/all?page=0&size=5&keyword=${searchTerm}`)
         .then(response=>{
           const suggestList = response.data.data.result.content.map(item=>item.name)
           setFiltered(suggestList)

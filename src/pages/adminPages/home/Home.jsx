@@ -195,7 +195,12 @@ function ActivityNode() {
     setError(null);
     try {
       const response = await axios.get(
-        'http://localhost:8080/api/v1/notification/all?page=0&size=10&active=CREATE'
+        'http://localhost:8080/api/v1/notification/all?page=0&size=10&active=CREATE',
+        {
+          headers: {
+            Authorization: `${localStorage.getItem('token')}`
+          }
+        }
       );
       
       if (response.data && response.data.data && response.data.data.content) {

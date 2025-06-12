@@ -100,21 +100,21 @@ export function CartProvider({ children }) {
   }
 
   // xu ly add cart vao database
-  const handlePostCart = async() => {
-    try{
-      await axios.post(`http://localhost:8080/api/v1/cart/update`, {
-        userId: currentUser.id,
-        books: getPostCartItems()
-      }, {
-        headers: {
-          Authorization: `${localStorage.getItem('token')}`
-        }
-      })
-    }catch(err){
-      console.log('there is a error when handle post cart items: ', err)
-    }
-    
+const handlePostCart = async () => {
+  try {
+    await axios.post(`http://localhost:8080/api/v1/cart/update`, {
+      userId: currentUser.id,
+      books: getPostCartItems()
+    }, {
+      headers: {
+        Authorization: `${localStorage.getItem('token')}`
+      }
+    });
+  } catch (err) {
+    console.error('Có lỗi khi gửi dữ liệu giỏ hàng:', err.response?.data || err.message);
   }
+}
+
 
   // change cartItem temporarily
   const changeCartItemsTemporarily = (newCartItems) =>{
