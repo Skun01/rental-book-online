@@ -44,6 +44,16 @@ export async function userAllReturnedOrderGet(userId, token){
 }
 
 export async function updateOrderStatus(orderId, status, token){
+  if(status === 'Received'){
+    await axios.put(`${BASEURL}/order/rental/update/confirm/${orderId}`,
+      {
+        headers: {
+          Authorization: `${token}`
+        }
+      }
+    )
+    return 
+  }
   await axios.put(`${BASEURL}/order/rental/update/status/order/${orderId}?newStatus=${status}`,
       {
         headers: {

@@ -86,7 +86,7 @@ const ReturnBooksPage = () => {
   const [formData, setFormData] = useState({
     fullName: "",
     phone: "",
-    deliveryMethod: "Offline", // [Offline, Online]
+    deliveryMethod: "Offline",
     branchId: null,
     returnDate: "",
     city: "",
@@ -109,7 +109,6 @@ const ReturnBooksPage = () => {
   const location = useLocation()
 
   const navigationData = location.state?.booksToReturn || []
-  console.log(navigationData)
   useEffect(() => {
     const fetchBranches = async () => {
       try {
@@ -187,10 +186,9 @@ const ReturnBooksPage = () => {
     }
   }, [currentUser?.id])
 
-  // Get available return dates (next 7 days)
   const getAvailableReturnDates = () => {
     const dates = []
-    for (let i = 1; i <= 7; i++) {
+    for (let i = 1; i <= 3; i++) {
       const date = new Date()
       date.setDate(date.getDate() + i)
       dates.push({
@@ -321,7 +319,7 @@ const ReturnBooksPage = () => {
       return {
         ...basicData,
         branchId: +formData.branchId,
-        rentedDay: new Date(formData.returnDate).toISOString(),
+        returnDate: new Date(formData.returnDate).toISOString(),
       }
     } else {
       return {
@@ -331,7 +329,7 @@ const ReturnBooksPage = () => {
         ward: formData.ward,
         street: formData.street,
         shippingMethod: formData.shippingMethod,
-        rentedDay: new Date(
+        returnDate: new Date(
           Date.now() + (formData.shippingMethod === "Express" ? 24 : 72) * 60 * 60 * 1000,
         ).toISOString(),
       }
@@ -346,14 +344,14 @@ const ReturnBooksPage = () => {
         const returnData = getReturnData()
         const bearer = localStorage.getItem("token")
         console.log(returnData)
-        await axios.post("http://localhost:8080/api/v1/order/rented/create", returnData, {
+        const res = await axios.post("http://localhost:8080/api/v1/order/rented/create", returnData, {
           headers: {
             Authorization: `${bearer}`,
           },
         })
-
-        showToast({ type: "success", message: "Yêu cầu trả sách đã được gửi thành công!" })
-        navigate("/my-orders") // Navigate back to orders page
+        console.log(res)
+        // showToast({ type: "success", message: "Yêu cầu trả sách đã được gửi thành công!" })
+        // navigate("/my-orders")
       } catch (error) {
         console.error("Lỗi khi gửi yêu cầu trả sách:", error)
         showToast({ type: "error", message: "Có lỗi khi xử lý yêu cầu trả sách" })
@@ -364,13 +362,12 @@ const ReturnBooksPage = () => {
   }
 
   const getTotalDeposit = () => {
-    return booksToReturn.reduce((total, item) => total + (item.totalDeposit || item.depositPrice * item.quantity), 0)
+    return booksToReturn.reduce((total, item) => total + (item.totalDeposit), 0)
   }
 
   const getTotalRental = () => {
-    return booksToReturn.reduce((total, item) => total + (item.totalRental || item.rentalPrice * item.quantity), 0)
+    return booksToReturn.reduce((total, item) => total + (item.totalRental), 0)
   }
-
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("vi-VN", {
       day: "2-digit",
@@ -541,7 +538,7 @@ const ReturnBooksPage = () => {
 
                     <h3>Thời gian hẹn trả sách</h3>
                     <p className={styles.pickupNote}>
-                      Vui lòng chọn thời gian trong vòng 7 ngày kể từ hôm nay để đến trả sách tại thư viện.
+                      Vui lòng chọn thời gian trong vòng 3 ngày kể từ hôm nay để đến trả sách tại thư viện.
                     </p>
 
                     <div className={styles.formRow}>

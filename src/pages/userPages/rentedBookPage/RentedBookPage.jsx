@@ -18,16 +18,15 @@ const RentedBookPage = () => {
     window.scrollTo({top: 0, behavior: 'smooth'})
     async function getBookRented(){
       try{
-        // Sử dụng API mới với userId
         const response = await axios.get(`http://localhost:8080/api/v1/item/rental/all?page=0&size=1000&userId=${currentUser.id}`,
           {
             headers: {
               Authorization: localStorage.getItem('token')
             }
           })
-        console.log(response)
+        console.log(currentUser.id, response)
         const receivedBooks = response.data.data.content.filter(book => book.status === "Received")
-        setRentedBooks(transformItemsToRentedBooks(receivedBooks))
+        setRentedBooks(receivedBooks)
       }catch(err){
         console.log('loi khi lay data base:', err)
       }finally{
@@ -120,11 +119,8 @@ const RentedBookPage = () => {
   }
 
   const handleViewOrderDetail = (rentalOrderId) => {
-    // Điều hướng đến trang chi tiết đơn hàng
-    navigate(`/rental-orders/${rentalOrderId}`)
+    navigate(`/orders/${rentalOrderId}`)
   }
-
-  // Tính toán số sách quá hạn
   const overdueCount = rentedBooks.filter((book) => {
     if (!book.rentedDate) return false
     const now = new Date()
@@ -216,7 +212,6 @@ const RentedBookPage = () => {
             {rentedBooks.map((book) => {
               const statusInfo = getStatusInfo(book)
               const isSelected = selectedBooks.some(selectedBook => selectedBook.id === book.id)
-
               return (
                 <div key={book.id} className={`${styles.bookCard} ${isSelected ? styles.selected : ""}`}>
                   {/* Card Header */}
@@ -239,7 +234,7 @@ const RentedBookPage = () => {
                         alt={book.bookName}
                         className={styles.bookImage}
                       />
-                      {book.quantity > 1 && <span className={styles.quantityBadge}>{book.quantity}</span>}
+                      {book.quantity >= 1 && <span className={styles.quantityBadge}>{book.quantity}</span>}
                     </div>
 
                     {/* Book Details */}
@@ -250,11 +245,11 @@ const RentedBookPage = () => {
                       <div className={styles.rentalInfo}>
                         <div className={styles.infoRow}>
                           <Calendar size={14} />
-                          <span>Ngày thuê: {formatDate(book.rentalDate)}</span>
+                          <span>Ngày thuê: {formatDate(book.receiveDate)}</span>
                         </div>
                         <div className={styles.infoRow}>
                           <Clock size={14} />
-                          <span>Hạn trả: {formatDate(book.rentedDate)}</span>
+                          <span>Hạn trả: {formatDate(book.returnDate)}</span>
                         </div>
                         <div className={styles.infoRow}>
                           <DollarSign size={14} />
@@ -274,7 +269,7 @@ const RentedBookPage = () => {
 
                       <div className={styles.timeStatus}>
                         <span className={statusInfo.class === "overdue" ? styles.overdueText : styles.normalText}>
-                          {getDaysRemaining(book.rentedDate)}
+                          {getDaysRemaining(book.returnDate)}
                         </span>
                       </div>
                     </div>
@@ -356,28 +351,3 @@ const RentedBookPage = () => {
 }
 
 export default RentedBookPage
-
-const transformItemsToRentedBooks = (apiData) => {
-  if (!Array.isArray(apiData)) {
-    return [];
-  }
-  
-  return apiData.map(item => ({
-    id: item.id,
-    rentalOrderId: item.rentalOrderId,
-    bookName: item.bookName,
-    imageUrl: item.imageUrl,
-    quantity: item.quantity,
-    rentalDate: item.rentalDate,
-    rentedDate: item.rentedDate,
-    depositPrice: item.depositPrice,
-    rentalPrice: item.rentalPrice,
-    totalDeposit: item.totalDeposit,
-    totalRental: item.totalRental,
-    status: item.status,
-    createAt: item.createAt,
-    updateAt: item.updateAt,
-    createBy: item.createBy,
-    updateBy: item.updateBy
-  }));
-};
