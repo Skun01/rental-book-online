@@ -59,14 +59,14 @@ export default function Home() {
             <div className={styles.cardRow}>
               <BodyCard
                 title="Doanh thu"
-                value={revenue.totalRental || 0}
+                value={revenue?.totalRental || 0}
                 isMoney={true}
               >
                 <CircleDollarSign size={30} color='#2eca6a'/>
               </BodyCard>
               <BodyCard
                 title="Tiền đang cọc"
-                value={revenue.totalDeposit || 0}
+                value={revenue?.totalDeposit || 0}
                 isMoney={true}
               >
                 <Banknote size={30} color='#f59e0b'/>
