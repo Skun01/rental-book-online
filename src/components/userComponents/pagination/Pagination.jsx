@@ -1,20 +1,17 @@
-import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import styles from './Pagination.module.css';
 
-export default function Pagination({ totalPages = 2, initialPage = 1, setPage }) {
-  const [currentPage, setCurrentPage] = useState(initialPage)
+export default function Pagination({ totalPages = 1, currentPage = 1, setPage }) {
+  
   const handlePrevious = () => {
     if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-      setPage(currentPage - 1 - 1)
+      setPage(currentPage - 1); 
     }
   };
   
   const handleNext = () => {
     if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1)
-      setPage(currentPage)
+      setPage(currentPage + 1);
     }
   };
   

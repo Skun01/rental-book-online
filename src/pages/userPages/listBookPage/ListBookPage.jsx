@@ -1,155 +1,141 @@
+import { useEffect, useState, useCallback } from "react"
 import { useLocation, useParams } from "react-router-dom"
-import {TextSearch} from 'lucide-react'
+import axios from "axios"
+import { TextSearch } from "lucide-react"
+
 import FilterSection from "../../../components/userComponents/filter/FilterSection"
-import styles from "./ListBookPage.module.css"
 import GridList from "../../../components/userComponents/gridList/GridList"
 import Pagination from "../../../components/userComponents/pagination/Pagination"
-import { useEffect, useState } from "react"
-import axios from "axios"
+import styles from "./ListBookPage.module.css"
 
-const ListBookPage = ({pageTitle}) => {
+const ListBookPage = ({ pageTitle }) => {
+  const { id } = useParams()
+  const location = useLocation()
+
+  const [page, setPage] = useState(1)
   const [books, setBooks] = useState([])
-  const [page, setPage] = useState(0)
-  const [filterList, setFilterList] = useState(null)
   const [totalPage, setTotalPage] = useState(0)
-  const {id} = useParams()
-  const [title, setTitle] = useState('')
-  const location = useLocation();
+  const [loading, setLoading] = useState(false)
   
-  // get data from backend
-  useEffect(()=>{
-    const getBooksData = async () => {
-      try {
-        const queryParams = new URLSearchParams(location.search)
-        const search = queryParams.get("q") || ""
-        let api = ""
-        if(filterList){
-          api = search ? `http://localhost:8080/api/v1/book/all?page=0&size=5&keyword=${search}` :  `http://localhost:8080/api/v1/book/all?page=0&size=5`
-          if (filterList.categoryId) api += `&categoryId=${filterList.categoryId}`
-          if (filterList.authorId) api += `&authorId=${filterList.authorId}`
-          if (filterList.minPrice) api += `&minPrice=${filterList.minPrice}`
-          if (filterList.maxPrice) api += `&maxPrice=${filterList.maxPrice}`
-          if(filterList.sort) api += `&${filterList.sort}`
-        }else if(search){
-          api = `http://localhost:8080/api/v1/book/all?page=${page}&size=5&keyword=${search}`
-        }else {
-          api = `http://localhost:8080/api/v1/book/all?page=${page}&size=5`
-        }
-        const response = await axios.get(api);
-        if(!filterList && !search){
-          setBooks(response.data.data.result.content)
-          setTotalPage(response.data.data.totalPages)
-        }else{
-          setBooks(response.data.data.result.content)
-          setTotalPage(response.data.data.result.totalPages)
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
+  const [filterList, setFilterList] = useState({})
+  const [searchQuery, setSearchQuery] = useState("")
+  
+  const [dynamicTitle, setDynamicTitle] = useState("")
 
-    async function getSpecificData(){
-      try {
-        if(pageTitle === "category") {
-          await axios.get(`http://localhost:8080/api/v1/category/by/${id}`)
-            .then(response=>{
-              setTitle(response.data.data.name)
-            })
-          await axios.get(`http://localhost:8080/api/v1/book/all?page=${page}&size=5&categoryId=${id}`)
-            .then(response=>{
-              setBooks(response.data.data.result.content)
-              setTotalPage(response.data.data.result.totalPages)
-            })
-        } else if(pageTitle === "author") {
-          await axios.get(`http://localhost:8080/api/v1/author/by/${id}`)
-            .then(response=>{
-              setTitle(response.data.data.name)
-            })
-          await axios.get(`http://localhost:8080/api/v1/book/all?page=${page}&size=5&authorId=${id}`)
-            .then(response=>{
-              setBooks(response.data.data.result.content)
-              setTotalPage(response.data.data.result.totalPages)
-            })
-        }
-      } catch (error) {
-        console.error("Error fetching specific data:", error);
-      }
-    }
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search)
+    const q = queryParams.get("q") || ""
+    setSearchQuery(q)
+    setPage(1) 
+  }, [location.search])
 
-    if(!pageTitle) {
-      getBooksData();
-    } else {
-      getSpecificData()
-    }
-  }, [page, filterList, location, pageTitle, id]);
-
-  const [searchQuery, setSearchQuery] = useState("");
-  useEffect(()=>{
-    const queryParams = new URLSearchParams(location.search);
-    const search = queryParams.get("q") || "";
-    setSearchQuery(search);
-  }, [location])
-
-  // scroll lên đầu:
-  useEffect(()=>{
+  useEffect(() => {
+    setPage(1)
+  }, [filterList, pageTitle, id])
+  useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" })
-  }, [])
+  }, [page])
+
+  useEffect(() => {
+    const fetchTitleInfo = async () => {
+      try {
+        if (pageTitle === "category") {
+          const res = await axios.get(`http://localhost:8080/api/v1/category/by/${id}`)
+          setDynamicTitle(res.data.data.name)
+        } else if (pageTitle === "author") {
+          const res = await axios.get(`http://localhost:8080/api/v1/author/by/${id}`)
+          setDynamicTitle(res.data.data.name)
+        }
+      } catch (error) {
+        console.error("Error fetching info:", error)
+      }
+    }
+
+    if (pageTitle && id) fetchTitleInfo()
+  }, [pageTitle, id])
+
+  useEffect(() => {
+    const fetchBooks = async () => {
+      setLoading(true)
+      try {
+        const params = {
+          page: page - 1,
+          size: 5,
+          ...filterList,
+        }
+
+        if (searchQuery) params.keyword = searchQuery
+        if (pageTitle === "category") params.categoryId = id
+        if (pageTitle === "author") params.authorId = id
+
+        const response = await axios.get(`http://localhost:8080/api/v1/book/all`, { params })
+
+        const dataSource = response.data.data.result || response.data.data
+        
+        if (dataSource) {
+          setBooks(dataSource.content || [])
+          setTotalPage(dataSource.totalPages || 0)
+        }
+      } catch (error) {
+        console.error("Error fetching books:", error)
+        setBooks([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchBooks()
+  }, [page, filterList, searchQuery, pageTitle, id])
 
   const getHeaderTitle = () => {
-    if (location.pathname === "/books") {
-      return "Tất cả sách"
-    } else if (location.pathname === "/search") {
+    if (pageTitle === "category") return <span>Thể loại: {dynamicTitle}</span>
+    if (pageTitle === "author") return <span>Tác giả: {dynamicTitle}</span>
+    if (searchQuery) {
       return (
         <>
           <TextSearch />
-          <span>Kết quả tìm kiếm của {`"${searchQuery}"`}</span>
+          <span>Kết quả tìm kiếm của "{searchQuery}"</span>
         </>
       )
-    } else if (pageTitle === "category") {
-      return <span>Thể loại: {title}</span>
-    } else if (pageTitle === "author") {
-      return <span>Các sách của tác giả: {title}</span>
     }
-    return (
-      <>
-        <TextSearch />
-        <span>Kết quả tìm kiếm của {`"${searchQuery}"`}</span>
-      </>
-    )
+    return "Tất cả sách"
   }
 
- return(
-  <div className={styles.listBookPage}>
-    <div className={styles.header}>
-      <h2 className={styles.seartTitle}>
-        {getHeaderTitle()}
-      </h2>
-    </div>
-
-    {/* filter */}
-    {(!pageTitle || location.pathname === "/search") && (
-      <div className={styles.filterSection}>
-        <FilterSection setFilterList={setFilterList}/>
-      </div>)}
-
-    {/* list books */}
-    {books.length !== 0 ? (
-      <div className={styles.bookGrid}>
-        <GridList data={books} listData = {"books"}/>
+  return (
+    <div className={styles.listBookPage}>
+      <div className={styles.header}>
+        <h2 className={styles.seartTitle}>{getHeaderTitle()}</h2>
       </div>
-    ) : (
-      <div className={styles.notFoundBook}>
-        Không tìm thấy sách nào
-      </div>
-    )}
-    
 
-    {/* phân trang */}
-    <div className={styles.pagination}>
-      <Pagination totalPages={totalPage} initialPage={page + 1} setPage={setPage}/> 
+      {(!pageTitle || location.pathname === "/search") && (
+        <div className={styles.filterSection}>
+          <FilterSection setFilterList={setFilterList} />
+        </div>
+      )}
+
+      {loading ? (
+        <div style={{textAlign: "center", padding: "20px"}}>Đang tải sách...</div>
+      ) : books.length > 0 ? (
+        <div className={styles.bookGrid}>
+          <div key={page} className={styles.contentFadeIn}> 
+             <GridList data={books} listData={"books"} />
+          </div>
+        </div>
+      ) : (
+        <div className={styles.notFoundBook}>Không tìm thấy sách nào</div>
+      )}
+
+      {totalPage > 1 && (
+        <div className={styles.pagination}>
+          <Pagination 
+            totalPages={totalPage} 
+            currentPage={page}
+            setPage={setPage} 
+          />
+        </div>
+      )}
     </div>
-  </div>
- )
+  )
 }
 
-export default ListBookPage;
+export default ListBookPage

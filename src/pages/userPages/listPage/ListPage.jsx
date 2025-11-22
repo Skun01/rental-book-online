@@ -55,13 +55,16 @@ const ListPage = ({ pageData }) => {
         {loading ? (
           <div>Đang tải...</div>
         ) : (
-          <div className={styles.list}>
+          <div 
+            className={`${styles.list} ${styles.contentFadeIn}`} 
+            key={currentPage} 
+          >
             <GridList data={dataList} listData={"authors"} />
           </div>
         )}
 
         <div className={styles.pagination}>
-          <Pagination totalPages={totalPage} initialPage={currentPage} setPage={handlePageChange} />
+           <Pagination totalPages={totalPage} currentPage={currentPage} setPage={handlePageChange} />
         </div>
       </div>
     )
@@ -73,18 +76,20 @@ const ListPage = ({ pageData }) => {
         {loading ? (
           <div>Đang tải...</div>
         ) : (
-          <div className={styles.list}>
+          <div 
+            className={`${styles.list} ${styles.contentFadeIn}`} 
+            key={currentPage} 
+          >
             <GridList data={dataList} listData={"categories"} />
           </div>
         )}
 
-        <div className={styles.pagination}>
-          <Pagination totalPages={totalPage} initialPage={currentPage} setPage={handlePageChange} />
+         <div className={styles.pagination}>
+           <Pagination totalPages={totalPage} currentPage={currentPage} setPage={handlePageChange} />
         </div>
       </div>
     )
   }
-
   return null
 }
 

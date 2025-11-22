@@ -17,3 +17,18 @@
   justify-content: center;
   margin-top: 60px;
 }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.contentFadeIn {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
