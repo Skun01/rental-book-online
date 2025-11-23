@@ -12,81 +12,37 @@ import ListPage from "../pages/userPages/listPage/ListPage"
 import RentedBooksPage from "../pages/userPages/rentedBookPage/RentedBookPage"
 import ReturnBooksPage from "../pages/userPages/returnBooksPage/ReturnBooksPage"
 import ReturnSuccessPage from "../pages/userPages/returnSuccessPage/ReturnSuccessPage"
+import { RequireRole } from "../components/RouteGuards";
+
 const userRoutes = [
   {
     path: "/",
     element: <UserApp />,
     children: [
+      { index: true, element: <HomePage /> },
+      { path: "search", element: <ListBookPage /> },
+      { path: "cart", element: <CartPage /> },
+      { path: "books", element: <ListBookPage /> },
+      { path: "books/:id", element: <BookDetailsPage/> },
+      
+      { path: "authors", element: <ListPage pageData={"authors"} /> },
+      { path: "authors/:id", element: <ListBookPage pageTitle={'author'} /> },
+      { path: "categories", element: <ListPage pageData={"categories"} /> },
+      { path: "categories/:id", element: <ListBookPage pageTitle={'category'} /> },
       {
-        index: true,
-        element: <HomePage />,
-      },
-      {
-        path: "/search",
-        element: <ListBookPage />,
-      },
-      {
-        path: "cart",
-        element: <CartPage />,
-      },
-      {
-        path: "books",
-        element: <ListBookPage />,
-      },
-      {
-        path: "authors",
-        element: <ListPage pageData={"authors"} />,
-      },
-      {
-        path: "authors/:id",
-        element: <ListBookPage pageTitle={'author'} />
-      },
-      {
-        path: "categories",
-        element: <ListPage pageData={"categories"} />,
-      },
-      {
-        path: "categories/:id",
-        element: <ListBookPage pageTitle={'category'} />
-      },
-      {
-        path: "books/:id",
-        element: <BookDetailsPage/>,
-      },
-      {
-        path: "checkout",
-        element: <CheckoutPage />,
-      },
-      {
-        path: 'checkout/:orderId/success',
-        element: <OrderSuccessPage />
-      },
-      {
-        path: "/profile",
-        element: <ProfilePage />,
-      },
-      {
-        path: "/orders",
-        element: <OrdersPage />,
-      },
-      {
-        path: "/orders/:orderId",
-        element: <OrderSuccessPage />,
-      },
-      {
-        path: '/rented-books',
-        element: <RentedBooksPage/>
-      },
-      {
-        path: '/return-books',
-        element: <ReturnBooksPage/>
-      },
-      {
-        path: '/return-success',
-        element: <ReturnSuccessPage/>
+        element: <RequireRole allowedRoles={["USER"]}><div/></RequireRole>, // Wrapper ảo để check quyền
+        children: [
+          { path: "checkout", element: <CheckoutPage /> },
+          { path: 'checkout/:orderId/success', element: <OrderSuccessPage /> },
+          { path: "profile", element: <ProfilePage /> },
+          { path: "orders", element: <OrdersPage /> },
+          { path: "orders/:orderId", element: <OrderSuccessPage /> },
+          { path: 'rented-books', element: <RentedBooksPage/> },
+          { path: 'return-books', element: <ReturnBooksPage/> },
+          { path: 'return-success', element: <ReturnSuccessPage/> }
+        ]
       }
     ],
   },
-]
-
+];
 export default userRoutes

@@ -8,48 +8,27 @@ import OrderManager from "../pages/adminPages/orderManager/OrderManager";
 import ReturnManager from "../pages/adminPages/returnManager/ReturnManager";
 import RentalBookManager from "../pages/adminPages/rentalBookManager/RentalBookManager";
 import BranchManager from "../pages/adminPages/branchManager/BranchManager";
-const routes= [
+import { RequireRole } from "../components/RouteGuards";
+
+const adminRoutes = [
   {
-    path:"/admin",
-    element: <AdminApp />,
+    path: "/admin",
+    element: (
+      <RequireRole allowedRoles={["SUPER_ADMIN"]}>
+        <AdminApp />
+      </RequireRole>
+    ),
     children: [
-      {
-        index: true,
-        element: <Home />,
-      },
-      {
-        path: 'books-manage',
-        element: <BookManager />,
-      },
-      {
-        path: 'categories-manage',
-        element: <CategoryManager/>
-      },
-      {
-        path: 'authors-manage',
-        element: <AuthorManager/>
-      },
-      {
-        path: 'users-manage',
-        element: <UserManager/>
-      },
-      {
-        path: 'orders-manage',
-        element: <OrderManager/>  
-      },
-      {
-        path: 'returns-manage',
-        element: <ReturnManager/>
-      },
-      {
-        path: 'rentals-manage', 
-        element: <RentalBookManager/>
-      },
-      {
-        path: 'branchs-manage',
-        element: <BranchManager/>
-      }
+      { index: true, element: <Home /> },
+      { path: 'books-manage', element: <BookManager /> },
+      { path: 'categories-manage', element: <CategoryManager/> },
+      { path: 'authors-manage', element: <AuthorManager/> },
+      { path: 'users-manage', element: <UserManager/> },
+      { path: 'orders-manage', element: <OrderManager/> },
+      { path: 'returns-manage', element: <ReturnManager/> },
+      { path: 'rentals-manage', element: <RentalBookManager/> },
+      { path: 'branchs-manage', element: <BranchManager/> }
     ]
   }
-]
-export default routes;
+];
+export default adminRoutes;

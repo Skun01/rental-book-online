@@ -72,11 +72,19 @@ function Login({ onClose, switchToRegister }) {
       })
       .then(res => {
         const { accessToken, user } = res.data.data;
+        
+        console.log("User Data:", user);
+        console.log("Role Name:", user?.role?.name); 
+
         login(user, accessToken);
-        if(user.role.name === "SUPER_ADMIN"){
-          navigate('/admin/')
+
+        if(user?.role?.name === "SUPER_ADMIN"){
+          setTimeout(() => {
+            navigate('/admin');
+          }, 100);
+        } else {
+          onClose();
         }
-        onClose();
       });
       
     } catch (err) {

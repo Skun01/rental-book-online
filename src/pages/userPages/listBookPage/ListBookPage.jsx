@@ -69,7 +69,6 @@ const ListBookPage = ({ pageTitle }) => {
         if (pageTitle === "author") params.authorId = id
 
         const response = await axios.get(`http://localhost:8080/api/v1/book/all`, { params })
-
         const dataSource = response.data.data.result || response.data.data
         
         if (dataSource) {
