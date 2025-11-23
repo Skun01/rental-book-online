@@ -3,13 +3,18 @@ import {Calendar, MapPin, CreditCard, User, BookOpen} from "lucide-react"
 
 const OrderDetailModal = ({ order, onClose }) => {
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("vi-VN", {
-      day: "2-digit",
-      month: "2-digit", 
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    })
+    if (!dateString) return "Chưa cập nhật"
+    try {
+      return new Date(dateString).toLocaleDateString("vi-VN", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    } catch (e) {
+      return "Ngày không hợp lệ";
+    }
   }
 
   const getPaymentMethodText = (method) => {
@@ -54,9 +59,10 @@ const OrderDetailModal = ({ order, onClose }) => {
     return addressParts.length > 0 ? addressParts.join(", ") : "Không có thông tin địa chỉ"
   }
 
-  const calculateRentalDays = (rentalDate, rentedDate) => {
+  const calculateRentalDays = (rentalDate, returnDate) => {
+    if (!rentalDate || !returnDate) return 0;
     const start = new Date(rentalDate)
-    const end = new Date(rentedDate)
+    const end = new Date(returnDate)
     const diffTime = Math.abs(end - start)
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
     return diffDays
@@ -159,12 +165,14 @@ const OrderDetailModal = ({ order, onClose }) => {
                     <h4>{item.bookName}</h4>
                     <div className={styles.itemDetails}>
                       <span>Ngày thuê: {formatDate(item.rentalDate)}</span>
-                      <span>Ngày trả: {formatDate(item.rentedDate)}</span>
-                      <span>Thời gian thuê: {calculateRentalDays(item.rentalDate, item.rentedDate)} ngày</span>
+                      <span>Ngày trả: {formatDate(item.returnDate)}</span>
+                      <span>
+                        Thời gian thuê: {calculateRentalDays(item.rentalDate, item.returnDate)} ngày
+                      </span>
                       <span>Giá thuê: {item.rentalPrice.toLocaleString("vi-VN")}đ</span>
                       <span>Tiền cọc: {item.depositPrice.toLocaleString("vi-VN")}đ</span>
                       <span>Số lượng: {item.quantity}</span>
-                      <span>Trạng thái: {item.itemStatus === 'Rented' ? 'Đang chờ' : 'Đang thuê'}</span>
+                      <span>Trạng thái: {item.status === 'Rented' ? 'Đang thuê' : 'Đang xử lý'}</span>
                     </div>
                   </div>
                   <div className={styles.itemTotal}>

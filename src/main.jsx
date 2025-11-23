@@ -1,11 +1,10 @@
-// src/main.jsx
 import React from "react"
 import ReactDOM from "react-dom/client"
 import { createBrowserRouter, RouterProvider } from "react-router-dom"
 import "./index.css"
 import adminRoutes from "./routes/adminRoutes"
 import userRoutes from "./routes/userRoutes"
-import RootLayout from "./layouts/RootLayout" // Import layout vừa tạo
+import RootLayout from "./layouts/RootLayout"
 
 const router = createBrowserRouter([
   {

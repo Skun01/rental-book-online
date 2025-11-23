@@ -30,7 +30,7 @@ const userRoutes = [
       { path: "categories", element: <ListPage pageData={"categories"} /> },
       { path: "categories/:id", element: <ListBookPage pageTitle={'category'} /> },
       {
-        element: <RequireRole allowedRoles={["USER"]}><div/></RequireRole>, // Wrapper ảo để check quyền
+        element: <RequireRole allowedRoles={["USER"]}><div/></RequireRole>,
         children: [
           { path: "checkout", element: <CheckoutPage /> },
           { path: 'checkout/:orderId/success', element: <OrderSuccessPage /> },
