@@ -2,8 +2,11 @@ import axios from 'axios'
 
 const BASEURL = 'http://localhost:8080/api/v1'
 
-export async function getAllOrderGet(){
-  const res = await axios.get(`${BASEURL}/order/rental/all?page=0&size=1000`)
+export async function getAllOrderGet(params) {
+  const res = await axios.get(`${BASEURL}/order/rental/all`, {
+    params: params 
+  })
+  
   return res.data.data.content
 }
 

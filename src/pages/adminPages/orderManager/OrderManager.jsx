@@ -26,26 +26,42 @@ export default function OrderManager() {
   const fetchOrders = async () => {
     setLoading(true)
     setError(null)
-    
-    try {
-      const params = new URLSearchParams({
-        page: 0,
-        size: 1000,
-        sortDir: 'desc',
-        ...(filters.orderStatus && { orderStatus: filters.orderStatus }),
-        ...(filters.paymentMethod && { paymentMethod: filters.paymentMethod }),
-        ...(filters.paymentStatus && { paymentStatus: filters.paymentStatus }),
-      })
 
-      const rentalOrder = await getAllOrderGet()
-      setOrders(rentalOrder || [])
+    try {
+        const apiParams = {
+            page: 0,
+            size: 1000,
+            sortDir: filters.sort === 'created_desc' ? 'desc' : 'asc',
+            ...(filters.orderStatus && { orderStatus: filters.orderStatus }),
+        }
+
+        let fetchedData = await getAllOrderGet(apiParams)
+        
+        if (!fetchedData) fetchedData = []
+
+        const finalData = fetchedData.filter(order => {
+            if (filters.paymentMethod && order.paymentMethod !== filters.paymentMethod) {
+                return false
+            }
+            if (filters.paymentStatus && order.paymentStatus !== filters.paymentStatus) {
+                return false
+            }
+            if (filters.deliveryMethod && order.deliveryMethod !== filters.deliveryMethod) {
+                return false
+            }
+            return true
+        })
+
+        setOrders(finalData)
+
     } catch (err) {
-      setError(err.message)
-      console.error('Error fetching orders:', err)
+        setError(err.message)
+        console.error('Error fetching orders:', err)
+        setOrders([])
     } finally {
-      setLoading(false)
+        setLoading(false)
     }
-  }
+}
 
   useEffect(() => {
     fetchOrders()
@@ -152,23 +168,32 @@ export default function OrderManager() {
 
 const Filter = ({ filters, setFilters }) => {
   const [isOpen, setIsOpen] = useState(false)
+  const [localFilters, setLocalFilters] = useState(filters)
+  useEffect(() => {
+    if (isOpen) {
+      setLocalFilters(filters)
+    }
+  }, [isOpen, filters])
 
   const handleFilterChange = (key, value) => {
-    setFilters((prev) => ({ ...prev, [key]: value }))
+    setLocalFilters((prev) => ({ ...prev, [key]: value }))
   }
 
   const handleApplyFilter = () => {
+    setFilters(localFilters)
     setIsOpen(false)
   }
 
   const handleResetFilter = () => {
-    setFilters({
+    const defaultFilters = {
       orderStatus: "",
       paymentMethod: "",
       paymentStatus: "",
       deliveryMethod: "",
       sort: "created_desc",
-    })
+    }
+    setLocalFilters(defaultFilters)
+    setFilters(defaultFilters)
     setIsOpen(false)
   }
 
@@ -194,7 +219,7 @@ const Filter = ({ filters, setFilters }) => {
             <label className={styles.filterLabel}>Trạng thái đơn hàng</label>
             <select
               className={styles.filterSelect}
-              value={filters.orderStatus}
+              value={localFilters.orderStatus}
               onChange={(e) => handleFilterChange("orderStatus", e.target.value)}
             >
               <option value="">Tất cả trạng thái</option>
@@ -210,7 +235,7 @@ const Filter = ({ filters, setFilters }) => {
             <label className={styles.filterLabel}>Thanh toán</label>
             <select
               className={styles.filterSelect}
-              value={filters.paymentMethod}
+              value={localFilters.paymentMethod}
               onChange={(e) => handleFilterChange("paymentMethod", e.target.value)}
             >
               <option value="">Tất cả phương thức</option>
@@ -223,7 +248,7 @@ const Filter = ({ filters, setFilters }) => {
             <label className={styles.filterLabel}>Trạng thái thanh toán</label>
             <select
               className={styles.filterSelect}
-              value={filters.paymentStatus}
+              value={localFilters.paymentStatus}
               onChange={(e) => handleFilterChange("paymentStatus", e.target.value)}
             >
               <option value="">Tất cả trạng thái</option>
@@ -236,7 +261,7 @@ const Filter = ({ filters, setFilters }) => {
             <label className={styles.filterLabel}>Giao hàng</label>
             <select
               className={styles.filterSelect}
-              value={filters.deliveryMethod}
+              value={localFilters.deliveryMethod}
               onChange={(e) => handleFilterChange("deliveryMethod", e.target.value)}
             >
               <option value="">Tất cả phương thức</option>
