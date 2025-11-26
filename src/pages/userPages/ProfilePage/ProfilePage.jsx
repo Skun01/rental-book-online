@@ -17,7 +17,6 @@ const ProfilePage = () => {
     age: "",
     password: ""
   })
-
   
   const [message, setMessage] = useState({ type: "", text: "" })
   const navigate = useNavigate();

@@ -128,7 +128,6 @@ const CheckoutPage = () => {
 
     fetchBranches()
   }, [showToast])
-
   // Tạo lịch chọn 3 ngày liên tục để đến nhận sách khi nhận tại thư viện
   const getAvailablePickupDates = () => {
     const dates = []
@@ -263,7 +262,6 @@ const CheckoutPage = () => {
       quantity: item.quantity,
       timeRental: item.rentedDay
     }))
-    console.log(orderItem, getPostCartItems)
     const basicData = {
       userId: currentUser.id,
       fullName: formData.fullName,
@@ -597,10 +595,10 @@ const CheckoutPage = () => {
                       <h3 className={styles.itemTitle}>{item && item.book.name}</h3>
                       <p className={styles.itemAuthor}>{item.author && item.book.author.name}</p>
                       <div className={styles.itemRentDetails}>
-                        <span className={styles.itemRentDays}>Thời gian thuê: {item.tỉmeRental} ngày</span>
+                        <span className={styles.itemRentDays}>Thời gian thuê: {item.rentedDay} ngày</span>
                       </div>
                       <div className={styles.itemPrice}>
-                        {(item.book.rentalPrice * item.quantity * Math.floor(item.tỉmeRental/7)).toLocaleString("vi-VN")}đ
+                        {(item.book.rentalPrice * item.quantity * Math.floor(item.rentedDay/7)).toLocaleString("vi-VN")}đ
                         <span className={styles.depositAmount}>
                           {" "}
                           (Tiền cọc: {(item.book.depositPrice*item.quantity).toLocaleString("vi-VN")}đ)

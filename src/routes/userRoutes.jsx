@@ -29,19 +29,14 @@ const userRoutes = [
       { path: "authors/:id", element: <ListBookPage pageTitle={'author'} /> },
       { path: "categories", element: <ListPage pageData={"categories"} /> },
       { path: "categories/:id", element: <ListBookPage pageTitle={'category'} /> },
-      {
-        element: <RequireRole allowedRoles={["USER"]}><div/></RequireRole>,
-        children: [
-          { path: "checkout", element: <CheckoutPage /> },
-          { path: 'checkout/:orderId/success', element: <OrderSuccessPage /> },
-          { path: "profile", element: <ProfilePage /> },
-          { path: "orders", element: <OrdersPage /> },
-          { path: "orders/:orderId", element: <OrderSuccessPage /> },
-          { path: 'rented-books', element: <RentedBooksPage/> },
-          { path: 'return-books', element: <ReturnBooksPage/> },
-          { path: 'return-success', element: <ReturnSuccessPage/> }
-        ]
-      }
+      { path: "checkout", element: <CheckoutPage /> },
+      { path: 'checkout/:orderId/success', element: <OrderSuccessPage /> },
+      { path: "profile", element: <ProfilePage /> },
+      { path: "orders", element: <OrdersPage /> },
+      { path: "orders/:orderId", element: <OrderSuccessPage /> },
+      { path: 'rented-books', element: <RentedBooksPage/> },
+      { path: 'return-books', element: <ReturnBooksPage/> },
+      { path: 'return-success', element: <ReturnSuccessPage/> }
     ],
   },
 ];
