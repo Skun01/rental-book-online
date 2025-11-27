@@ -71,6 +71,7 @@ export function AuthProvider({ children }) {
     login,
     logout,
     updateProfile,
+    loading
   }
 
   return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>

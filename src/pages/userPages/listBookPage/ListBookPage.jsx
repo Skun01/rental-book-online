@@ -124,7 +124,7 @@ const ListBookPage = ({ pageTitle }) => {
         <div className={styles.notFoundBook}>Không tìm thấy sách nào</div>
       )}
 
-      {totalPage > 1 && (
+      {totalPage > 0 && (
         <div className={styles.pagination}>
           <Pagination 
             totalPages={totalPage} 

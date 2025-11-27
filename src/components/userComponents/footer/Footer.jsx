@@ -20,11 +20,11 @@ const Footer = () => {
             <div className={styles.contactInfo}>
               <div className={styles.contactItem}>
                 <Phone size={16} />
-                <span>0374963082</span>
+                <span>0973402957</span>
               </div>
               <div className={styles.contactItem}>
                 <Mail size={16} />
-                <span>truongg9655@gmail.com</span>
+                <span>hoainam0660@gmail.com</span>
               </div>
               <div className={styles.contactItem}>
                 <MapPin size={16} />
@@ -76,29 +76,17 @@ const Footer = () => {
           </div>
 
           <div className={styles.footerSection}>
-            <h3 className={styles.footerTitle}>Các thành viên trong nhóm</h3>
+            <h3 className={styles.footerTitle}>Tác giả</h3>
             <ul className={styles.footerLinks}>
               <li>
-                <Link to="/">Thái Văn Trường</Link>
-              </li>
-              <li>
-                <Link to="/">Trần Đức Trưởng</Link>
-              </li>
-              <li>
-                <Link to="/">Nguyễn Văn Thưởng</Link>
+                <Link to="/">Đỗ Hoài Nam</Link>
               </li>
             </ul>
-            
-            <div className={styles.socialLinks}>
-              <a href="https://github.com/Skun01/Do_An_Chuyen_Nganh_nhom_3" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-                <Github size={20} />
-              </a>
-            </div>
           </div>
         </div>
 
         <div className={styles.footerBottom}>
-          <p>Sản phẩm bài tập lớn của nhóm 3</p>
+          <p>Sản phẩm đồ án</p>
         </div>
       </div>
     </footer>

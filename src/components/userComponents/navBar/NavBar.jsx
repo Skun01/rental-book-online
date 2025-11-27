@@ -9,7 +9,6 @@ import SearchSuggest from "./SearchSuggest"
 import Login from "../../../pages/Login"
 import Register from "../../../pages/Register"
 import axios from "axios"
-import NotificationDropdown from "./NotificationDropdown"
 
 
 function NavBar(){
@@ -133,7 +132,7 @@ function NavBar(){
       <div className={`${styles.navBar} ${isScorred ? styles.navBarScorred : ""}`}>
         <div className={styles.navBarTitle}>
           <Link to="/">
-            <p>Thuê sách</p>
+            <p>Hoài Nam</p>
           </Link>
         </div>
 
@@ -184,9 +183,6 @@ function NavBar(){
             <Link to="/rented-books">Sách đang thuê</Link>
           </li>
         </ul>
-
-        {/* notification */}
-        <NotificationDropdown />
 
         {/* authentication */}
         <div className={styles.mainUser}>

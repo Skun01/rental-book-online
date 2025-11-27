@@ -17,7 +17,7 @@ export default function Header() {
           <img src="/author.jpg" alt="admin avatar" />
         </div>
         <div className={styles.adminName} onClick={() => setIsOpen(!isOpen)}>
-          <span>{user.name || 'Thái Trường'}</span>
+          <span>{user.name || 'Hoài Nam'}</span>
           <ChevronDown size={16} />
         </div>
 
@@ -25,7 +25,7 @@ export default function Header() {
         {isOpen && (
           <div className={styles.userMenu}>
             <div className={styles.rowInfor}>
-              <div className={styles.name}>{user.name || 'Thái Trường'}</div>
+              <div className={styles.name}>{user.name || 'Hoài Nam'}</div>
               <div className={styles.role}>Admin</div>
             </div>
             <div className={styles.rowFunc} onClick={()=>logout()}>

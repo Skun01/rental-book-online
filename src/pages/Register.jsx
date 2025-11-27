@@ -145,7 +145,7 @@ function Register({ onClose, switchToLogin }) {
                 <BookOpen size={40} strokeWidth={2} />
               </div>
               <div className="logo-text">
-                <span>Thuê sách</span>
+                <span>Hoài Nam</span>
                 <span className="logo-subtitle">Chào mừng tham gia!</span>
               </div>
             </div>
